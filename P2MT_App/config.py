@@ -2,7 +2,7 @@ import os
 
 
 class Config:
-    SECRET_KEY = "1f9c17c87d50c86558bff9c2517253c9"
+    SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = "sqlite:///p2mt.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
