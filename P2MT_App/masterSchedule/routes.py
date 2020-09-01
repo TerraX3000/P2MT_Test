@@ -28,9 +28,9 @@ def download_MasterSchedule():
 @masterSchedule_bp.route("/masterschedule")
 def displayMasterSchedule():
     printLogEntry("Running displayMasterSchedule()")
-    ClassSchedules = ClassSchedule.query.order_by(
-        ClassSchedule.chattStateANumber.desc()
-    )
+    ClassSchedules = ClassSchedule.query.filter(
+        ClassSchedule.learningLab == False
+    ).order_by(ClassSchedule.chattStateANumber.desc())
     return render_template(
         "masterschedule.html", title="Master Schedule", ClassSchedules=ClassSchedules,
     )

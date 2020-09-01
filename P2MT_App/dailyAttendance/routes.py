@@ -15,7 +15,7 @@ def displayDailyAttendanceLogs():
     )
     return render_template(
         "dailyattendancelog.html",
-        title="Daily Attendance Log",
+        title="Absence Log",
         DailyAttendanceLogs=DailyAttendanceLogs,
     )
 

@@ -12,7 +12,7 @@
     {% endfor %}
   </div>
   {% else %}
-  {{ formfield(class="w3-select  w3-section") }}
+  {{ formfield(class="w3-select  w3-section", id=False) }}
   {% endif %}
 </div>
 {% endmacro %}
@@ -40,15 +40,19 @@
 </div>
 
 <div class="w3-bar w3-blue">
-  <button class="w3-bar-item w3-button tablink w3-black" onclick="openTab(event, 'BasicTab')">Basic Functions</button>
-  <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'AdvancedTab')">Advanced Functions</button>
+  <button id='button_BasicTab' class="w3-bar-item w3-button tablink w3-black"
+    onclick="openTab(event, 'BasicTab', 'ScheduleAdmin')">Basic
+    Functions</button>
+  <button id='button_AdvancedTab' class="w3-bar-item w3-button tablink"
+    onclick="openTab(event, 'AdvancedTab', 'ScheduleAdmin')">Advanced
+    Functions</button>
 </div>
 
 <div class="infoTab" id="BasicTab">
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ downloadClassAttendanceForm.hidden_tag() }}
+      {{ downloadClassAttendanceForm.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge">Download Class Attendance Roster</legend>
         <div class="w3-row-padding">
@@ -72,7 +76,7 @@
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ downloadClassScheduleForm.hidden_tag() }}
+      {{ downloadClassScheduleForm.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge">Download Entire Semester Class Schedule</legend>
         <div class="w3-row-padding">
@@ -91,7 +95,7 @@
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ uploadClassScheduleForm.hidden_tag() }}
+      {{ uploadClassScheduleForm.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge">Upload Class Schedule</legend>
         <div class="w3-row-padding">
@@ -112,7 +116,7 @@
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ propagateClassAttendanceLogsForm.hidden_tag() }}
+      {{ propagateClassAttendanceLogsForm.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge">Propagate Class Attendance Logs</legend>
         <div class="w3-row-padding">
@@ -131,7 +135,7 @@
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ addSingleClassSchedule.hidden_tag() }}
+      {{ addSingleClassSchedule.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge">Add Class Schedule for Single Student</legend>
         <div class="w3-row-padding">
@@ -181,7 +185,7 @@
   <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST"
       action="{{ url_for('scheduleAdmin_bp.displayScheduleAdmin') }}" enctype="multipart/form-data">
-      {{ deleteClassScheduleForm.hidden_tag() }}
+      {{ deleteClassScheduleForm.csrf_token(id = False) }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-red">
         <legend class="w3-xlarge">Delete Entire Semester Class Schedule</legend>
         <div class="w3-row-padding">
@@ -199,5 +203,16 @@
 </div>
 
 <script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
-
+<!-- Reload page to last loaded tab -->
+<script type='text/javascript'>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    selected_tab = 'ScheduleAdmin_selected_tab';
+    var selectedTab = sessionStorage.getItem(selected_tab);
+    if (selectedTab) {
+      document.getElementById("button_" + selectedTab).click();
+    } else {
+      document.getElementById("button_BasicTab").click();
+    }
+  });
+</script>
 {% endblock content %}

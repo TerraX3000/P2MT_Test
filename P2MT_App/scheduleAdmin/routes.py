@@ -159,6 +159,8 @@ def displayScheduleAdmin():
             )
             campus = "STEM School"
             staffID = None
+            interventionLog_id = None
+            learningLab = False
 
             print(
                 schoolYear,
@@ -173,6 +175,8 @@ def displayScheduleAdmin():
                 indStudy,
                 comment,
                 googleCalendarEventID,
+                interventionLog_id,
+                learningLab,
             )
             addClassSchedule(
                 schoolYear,
@@ -189,6 +193,8 @@ def displayScheduleAdmin():
                 endTime,
                 comment,
                 googleCalendarEventID,
+                interventionLog_id,
+                learningLab,
             )
             return redirect(url_for("scheduleAdmin_bp.displayScheduleAdmin"))
 

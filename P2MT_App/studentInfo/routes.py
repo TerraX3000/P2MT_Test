@@ -45,7 +45,7 @@ def displayStudents():
     if "submitIntervention" in request.form:
         if interventionForm.validate_on_submit():
             printLogEntry("Running interventionForm")
-            add_InterventionLog(
+            interventionLog = add_InterventionLog(
                 interventionForm.chattStateANumber.data,
                 int(interventionForm.interventionType.data),
                 int(interventionForm.interventionLevel.data),
@@ -54,6 +54,7 @@ def displayStudents():
                 interventionForm.comment.data,
             )
             db.session.commit()
+            print("new intervention log ID:", interventionLog.id)
             flash("Intervention log has been added!", "success")
             printLogEntry("Completed add_InterventionLog.  Redirecting to students")
             return redirect(url_for("studentInfo_bp.displayStudents"))

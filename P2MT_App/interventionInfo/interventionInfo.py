@@ -29,7 +29,7 @@ def add_InterventionLog(
         tmiMinutes=tmiMinutes,
     )
     db.session.add(interventionLog)
-    return
+    return interventionLog
 
 
 def downloadInterventionLog():

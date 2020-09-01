@@ -27,6 +27,17 @@
   </div>
 </div>
 
+<div class="w3-bar w3-blue">
+  <button id='button_ClassAttendance' class="w3-bar-item w3-button tablink"
+    onclick="openTable(event, 'ClassAttendance', 'Attendance')">Class
+    Attendance</button>
+  <button id='button_LearningLabAttendance' class="w3-bar-item w3-button tablink"
+    onclick="openTable(event, 'LearningLabAttendance', 'Attendance')">Learning Lab
+    Attendance</button>
+</div>
+
+
+
 <form class="w3-container w3-padding-large" method="POST"
   action="{{ url_for('classAttendance_bp.displayClassAttendanceLog') }}" enctype="multipart/form-data">
   {{ classAttendanceForm.hidden_tag() }}
@@ -35,7 +46,8 @@
     {{ macro_display_formfield(classAttendanceForm.className) }}
     {{ macro_display_formfield(classAttendanceForm.classDate) }}
   </div>
-  <table class="w3-table-all w3-hoverable">
+
+  <table class="w3-table w3-table-border w3-table-bordered w3-hoverable">
     <thead>
       <tr class="w3-blue">
         <th scope="col">Class Name</th>
@@ -47,10 +59,11 @@
         <th scope="col">Comment</th>
       </tr>
     </thead>
-    <tbody id="filteredTable">
+    <tbody>
       {% for studentAttendanceForm, studentFixedFields in zip(classAttendanceForm.classMembers, classAttendanceFixedFields) %}
       {{ studentAttendanceForm.hidden_tag() }}
-      <tr>
+      {% if studentFixedFields.ClassSchedule.learningLab == False %}
+      <tr data-rowType="infoTab" data-tabName="ClassAttendance">
         <td> {{ studentFixedFields.ClassSchedule.className }}</td>
         <td> {{ studentFixedFields.ClassSchedule.startTime.strftime('%-I:%M') }}</td>
         <td> {{ studentFixedFields.ClassSchedule.endTime.strftime('%-I:%M') }}</td>
@@ -66,10 +79,39 @@
           {{ studentAttendanceForm.comment(class="w3-input", size="30") }}
         </td>
       </tr>
+      {% endif %}
+      {% endfor %}
+      {% for studentAttendanceForm, studentFixedFields in zip(classAttendanceForm.classMembers, classAttendanceFixedFields) %}
+
+      {% if studentFixedFields.ClassSchedule.learningLab == True %}
+      <tr data-rowType="infoTab" data-tabName="LearningLabAttendance" style="visibility:collapse">
+        <td> {{ studentFixedFields.ClassSchedule.className }}</td>
+        <td> {{ studentFixedFields.ClassSchedule.startTime.strftime('%-I:%M') }}</td>
+        <td> {{ studentFixedFields.ClassSchedule.endTime.strftime('%-I:%M') }}</td>
+        <td> {{ studentFixedFields.ClassSchedule.Student.firstName }}</td>
+        <td> {{ studentFixedFields.ClassSchedule.Student.lastName }} </td>
+        <td>
+          {% for subfield in studentAttendanceForm.attendanceCode %}
+          {{ subfield(class="w3-radio") }}
+          {{ subfield.label }}
+          {% endfor %}
+        </td>
+        <td>
+          {{ studentAttendanceForm.comment(class="w3-input", size="30") }}
+        </td>
+      </tr>
+      {% endif %}
       {% endfor %}
     </tbody>
   </table>
+
 </form>
+
+
+
+<!-- Script for page tabs -->
+<script type="text/javascript" src="{{ url_for('static', filename="js/pageTables.js") }}"></script>
+
 
 <!-- Search Filter -->
 <script type="text/javascript" src="{{ url_for('static', filename="js/searchFilters.js") }}"></script>
@@ -80,6 +122,21 @@
   searchFilter.lastNameCellPosition = 4;
   searchFilter.addEventListener('keyup', filterFirstLastNames);
 </script>
+
+
+<!-- Reload page to last loaded tab -->
+<script type='text/javascript'>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    selected_tab = 'Attendance_selected_tab';
+    var selectedTab = sessionStorage.getItem(selected_tab);
+    if (selectedTab) {
+      document.getElementById("button_" + selectedTab).click();
+    } else {
+      document.getElementById("button_ClassAttendance").click();
+    }
+  });
+</script>
+
 
 <script>
   // Keep track of the scroll position so the page reloads to the same position 

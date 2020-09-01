@@ -90,20 +90,24 @@ def displayClassAttendanceLog():
             print(len(classAttendanceForm.classMembers.data))
             for studentForm in classAttendanceForm.classMembers.data:
                 if studentForm["updateFlag"] == "updated":
+                    # Record updated attendance for student
                     log_id = studentForm["log_id"]
                     print("log_id = ", log_id)
                     classAttendanceLog = ClassAttendanceLog.query.get_or_404(log_id)
                     classAttendanceLog.attendanceCode = studentForm["attendanceCode"]
                     classAttendanceLog.comment = studentForm["comment"]
-                    if classAttendanceLog.attendanceCode == "P":
+
+                    # Don't mark assignTmi for missed learning labs
+                    learningLab = classAttendanceLog.ClassSchedule.learningLab
+                    if classAttendanceLog.attendanceCode == "P" and not learningLab:
                         classAttendanceLog.assignTmi = False
-                    if classAttendanceLog.attendanceCode == "E":
+                    if classAttendanceLog.attendanceCode == "E" and not learningLab:
                         classAttendanceLog.assignTmi = False
                     # if classAttendanceLog.attendanceCode == "T":
                     #     classAttendanceLog.assignTmi = False
-                    if classAttendanceLog.attendanceCode == "U":
+                    if classAttendanceLog.attendanceCode == "U" and not learningLab:
                         classAttendanceLog.assignTmi = True
-                    if classAttendanceLog.attendanceCode == "Q":
+                    if classAttendanceLog.attendanceCode == "Q" and not learningLab:
                         classAttendanceLog.assignTmi = True
                     db.session.commit()
 
@@ -181,7 +185,7 @@ def displayClassAttendanceLog():
     )
     return render_template(
         "classattendancelog.html",
-        title="Class Attendance Log",
+        title="Attendance Log",
         classAttendanceForm=classAttendanceForm,
         classAttendanceFixedFields=classAttendanceFixedFields,
     )

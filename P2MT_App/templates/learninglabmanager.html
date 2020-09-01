@@ -1,0 +1,273 @@
+{% extends 'layout.html'%}
+{% block content %}
+
+{% macro macro_display_formfield(formfield, w3ResponsiveGridClass) %}
+<div class="{{w3ResponsiveGridClass}}">
+  {{ formfield.label(class="w3-text-green w3-large") }}
+  {% if formfield.errors %}
+  {{ formfield(class="w3-select is-invalid") }}
+  <div class="invalid-feedback">
+    {% for error in formfield.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ formfield(class="w3-select  w3-section") }}
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro macro_display_formfield_cellrow(formfield) %}
+<div class='w3-cell'>
+  {{ formfield.label(class="w3-text-green") }}
+  {% if formfield.errors %}
+  {{ formfield(class="w3-select is-invalid") }}
+  <div class="invalid-feedback">
+    {% for error in formfield.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ formfield() }}
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro macro_display_checkbox(formfield, w3ResponsiveGridClass) %}
+<div class="{{w3ResponsiveGridClass}}">
+  {{ formfield.label(class="w3-text-green") }}
+  {% if formfield.errors %}
+  {{ formfield(class="w3-select is-invalid") }}
+  <div class="invalid-feedback">
+    {% for error in formfield.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ formfield(class="w3-check") }}
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro macro_addTimeAndDays(addTime,startTime,endTime,classDays) %}
+<fieldset class="w3-container w3-hover-border-green">
+  <legend class="w3-medium">Add Time and Days</legend>
+  <div class="w3-cell-row w3-padding-small">
+    {{ macro_display_checkbox(addTime, "w3-cell") }}
+    {{ macro_display_formfield_cellrow(startTime) }}
+    {{ macro_display_formfield_cellrow(endTime) }}
+    <div class="w3-cell">
+      <div class="w3-cell">
+        {{ classDays.label(class="w3-text-green") }}
+        {% if classDays.errors %}
+        {{ classDays(class="w3-check is-invalid") }}
+        <div class="invalid-feedback">
+          {% for error in classDays.errors %}
+          <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        {% for choice in classDays %}
+        {{ choice(class="w3-check") }}
+        {{ choice.label(class="w3-text-black w3-medium") }}
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</fieldset>
+
+{% endmacro %}
+
+<div class="w3-container w3-green w3-row">
+  <div class="w3-third">
+    <h2>{{title}}</h2>
+  </div>
+  <div>
+    <input type="text" class="w3-third w3-margin w3-padding" size="25" id="searchFilter"
+      placeholder="Search by student name...">
+  </div>
+</div>
+
+<div class="w3-bar w3-blue">
+  <button id='button_LearningLabCreator' class="w3-bar-item w3-button tablink w3-black"
+    onclick="openTab(event, 'LearningLabCreator', 'Attendance')">Learning Lab
+    Creator</button>
+  <button id='button_LearningLabManager' class="w3-bar-item w3-button tablink"
+    onclick="openTab(event, 'LearningLabManager', 'Attendance')">Learning Lab
+    Manager</button>
+</div>
+
+<div class="infoTab" id="LearningLabCreator">
+  <div class="w3-container">
+    <form class="w3-container w3-padding-large" method="POST"
+      action="{{ url_for('learningLab_bp.displayLearningLab') }}" enctype="multipart/form-data">
+      {{ addSingleClassSchedule.hidden_tag() }}
+      <fieldset class="w3-container w3-padding-large w3-hover-border-green">
+        <legend class="w3-xlarge">Add Learning Lab</legend>
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(addSingleClassSchedule.teacherName, "w3-third") }}
+          {{ macro_display_formfield(addSingleClassSchedule.studentName, "w3-third") }}
+          {{ macro_display_formfield(addSingleClassSchedule.className, "w3-third") }}
+          {{ macro_display_formfield(addSingleClassSchedule.startDate, "w3-quarter") }}
+          {{ macro_display_formfield(addSingleClassSchedule.endDate, "w3-quarter") }}
+          {{ macro_display_formfield(addSingleClassSchedule.comment, "w3-half") }}
+        </div>
+
+        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays,addSingleClassSchedule.startTime,addSingleClassSchedule.endTime,addSingleClassSchedule.classDays) }}
+        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays2,addSingleClassSchedule.startTime2,addSingleClassSchedule.endTime2,addSingleClassSchedule.classDays2) }}
+        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays3,addSingleClassSchedule.startTime3,addSingleClassSchedule.endTime3,addSingleClassSchedule.classDays3) }}
+        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays4,addSingleClassSchedule.startTime4,addSingleClassSchedule.endTime4,addSingleClassSchedule.classDays4) }}
+        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays5,addSingleClassSchedule.startTime5,addSingleClassSchedule.endTime5,addSingleClassSchedule.classDays5) }}
+
+        <div class="w3-row w3-padding-large">
+          {{ addSingleClassSchedule.submitAddSingleClassSchedule(class="w3-btn w3-blue w3-large") }}
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
+
+<!-- Tab for LearningLab Manager -->
+
+<div class="infoTab" id="LearningLabManager" style="display:none">
+  <div class="w3-panel w3-light-grey"></div>
+  <table class="w3-table w3-bordered w3-striped w3-hoverable">
+    <thead>
+      <tr class="w3-blue">
+        <th scope="col">First Name</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">Class Name</th>
+        <th scope="col">Teacher</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Days</th>
+        <th scope="col">Start Time</th>
+        <th scope="col">End Time</th>
+        <th scope="col">Comment</th>
+        <!-- <th scope="col">Actions</th>
+        <th scope="col"></th> -->
+      </tr>
+    </thead>
+    <tbody id="filteredTable">
+      {% for ClassSchedule in ClassSchedules %}
+      <tr>
+        <td>{{ ClassSchedule.Student.firstName }}</td>
+        <td>{{ ClassSchedule.Student.lastName }}</td>
+        <td>{{ ClassSchedule.className }}</td>
+        <td>{{ ClassSchedule.teacherLastName}}</td>
+        <td>{{ ClassSchedule.InterventionLog.startDate.strftime('%-m/%-d/%Y') }}</td>
+        <td>{{ ClassSchedule.InterventionLog.endDate.strftime('%-m/%-d/%Y') }}</td>
+        <td>{{ ClassSchedule.classDays }}</td>
+        <td>{{ ClassSchedule.startTime.strftime('%-I:%M') }}</td>
+        <td>{{ ClassSchedule.endTime.strftime('%-I:%M') }}</td>
+        <td>{{ ClassSchedule.comment }}</td>
+        <!-- <td>
+          <form action="{{ url_for('masterSchedule_bp.edit_ClassSchedule', log_id=ClassSchedule.id) }}" method="POST">
+            <input class="w3-button w3-green" type="submit" value="Edit">
+          </form>
+        </td>
+        <td><button type="button" class="w3-btn w3-red"
+            onclick="document.getElementById('deleteModal{{ClassSchedule.id}}').style.display='block'">Delete</button>
+        </td> -->
+      </tr>
+
+
+      <!-- Modal -->
+      <div class="w3-modal" id="deleteModal{{ClassSchedule.id}}">
+        <div class="w3-container">
+          <div class="w3-modal-content" style="width:50%">
+            <header class="w3-container w3-red">
+              <span onclick="document.getElementById('deleteModal{{ClassSchedule.id}}').style.display='none'"
+                class="w3-button w3-display-topright">&times;</span>
+              <h2>Delete This Class Schedule Item?</h2>
+            </header>
+            <footer class="w3-container w3-margin-top w3-white w3-center">
+              <div class="w3-bar">
+                <form action="{{ url_for('masterSchedule_bp.delete_ClassSchedule', log_id=ClassSchedule.id) }}"
+                  method="POST">
+                  <button type="button" class="w3-button w3-large"
+                    onclick="document.getElementById('deleteModal{{ClassSchedule.id}}').style.display='none'">Cancel</button>
+                  <input class="w3-button w3-red w3-large" type="submit" value="Delete">
+                </form>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
+
+<script type='text/javascript'>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    selected_tab = 'Attendance_selected_tab';
+    var selectedTab = sessionStorage.getItem(selected_tab);
+    if (selectedTab) {
+      document.getElementById("button_" + selectedTab).click();
+    } else {
+      document.getElementById("button_LearningLabCreator").click();
+    }
+  });
+</script>
+
+<!-- Search Filter -->
+<script type="text/javascript" src="{{ url_for('static', filename="js/searchFilters.js") }}"></script>
+<script>
+  // Note: the table does not include the header rows
+  var tableBody = document.getElementById('filteredTable');
+  var searchFilter = document.getElementById('searchFilter');
+  searchFilter.firstNameCellPosition = 0;
+  searchFilter.lastNameCellPosition = 1;
+  searchFilter.addEventListener('keyup', filterFirstLastNames);
+</script>
+
+<script type='text/javascript'>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    var addTimeCheckBoxes = document.querySelectorAll("input[id^=addTimeAndDays]");
+    console.log('addTimeCheckBoxes.length = ' + addTimeCheckBoxes.length);
+    for (i = 0; i < addTimeCheckBoxes.length; i++) {
+      console.log('Clicking ' + addTimeCheckBoxes[i].id + ' on click # ' + i);
+      // addTimeCheckBoxes[i].click();
+    }
+  });
+</script>
+
+<script type='text/javascript'>
+  var addTimeCheckBoxes = document.querySelectorAll("input[id^=addTimeAndDays]");
+  for (i = 0; i < addTimeCheckBoxes.length; i++) {
+    addTimeCheckBoxes[i].addEventListener("change", function () { toggleAddTimeAndDays(event); });
+  }
+
+  function toggleAddTimeAndDays(evt) {
+    addTimeAndDayCheckBox = evt.target;
+    // console.log('addTimeAndDayCheckBox = ' + addTimeAndDayCheckBox.id);
+    // console.log('checkbox parent = ' + addTimeAndDayCheckBox.parentNode.nodeName);
+    child = addTimeAndDayCheckBox;
+    parent = child.parentNode;
+    // Traverse the DOM to find the fieldset parent of the checkbox
+    while (parent.nodeName != 'FIELDSET') {
+      parent = parent.parentNode;
+    }
+    addTimeAndDayFieldset = parent;
+    // fieldSetChildNodes = addTimeAndDayFieldset.childNodes;
+    fieldSetChildNodes = addTimeAndDayFieldset.querySelectorAll("*")
+    // console.log('fieldSetChildNodes = ' + fieldSetChildNodes.length);
+    for (i = 0; i < fieldSetChildNodes.length; i++) {
+      // console.log('fieldSetChildNodes = ' + fieldSetChildNodes[i].id);
+      if (fieldSetChildNodes[i] != addTimeAndDayCheckBox) {
+        if (addTimeAndDayCheckBox.checked) {
+          fieldSetChildNodes[i].disabled = false;
+        } else {
+          fieldSetChildNodes[i].disabled = true;
+        }
+      }
+    }
+  }
+</script>
+
+{% endblock content %}

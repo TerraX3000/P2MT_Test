@@ -103,7 +103,8 @@ def displayTmiTeacherReview():
         .join(ClassSchedule)
         .join(ClassSchedule.Student)
         .filter(
-            ClassSchedule.teacherLastName == tmiTeacherReviewForm.teacherName.default
+            ClassSchedule.teacherLastName == tmiTeacherReviewForm.teacherName.default,
+            ClassSchedule.learningLab == False,
         )
         .order_by(ClassAttendanceLog.classDate)
         .order_by(Student.lastName)

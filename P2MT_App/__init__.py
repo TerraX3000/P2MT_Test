@@ -86,6 +86,7 @@ def create_app(config_class):
     from P2MT_App.tmiFinalApproval.routes import tmiFinalApproval_bp
     from P2MT_App.googleAPI.routes import googleAPI_bp
     from P2MT_App.errors.handlers import errors_bp
+    from P2MT_App.learningLab.routes import learningLab_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(classAttendance_bp)
@@ -102,5 +103,6 @@ def create_app(config_class):
     app.register_blueprint(tmiFinalApproval_bp)
     app.register_blueprint(googleAPI_bp)
     app.register_blueprint(errors_bp)
+    app.register_blueprint(learningLab_bp)
 
     return app

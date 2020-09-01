@@ -158,6 +158,17 @@ def getSemester():
     return semesterValueLabelTupleList
 
 
+def getClassDayChoices():
+    classDayChoices = [
+        ("M", "M"),
+        ("T", "T"),
+        ("W", "W"),
+        ("R", "R"),
+        ("F", "F"),
+    ]
+    return classDayChoices
+
+
 def getHouseNames():
     houseValueLableTupleList = [
         ("", ""),

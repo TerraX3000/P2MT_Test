@@ -55,6 +55,8 @@ def addClassSchedule(
     endTime,
     comment,
     googleCalendarEventID,
+    interventionLog_id,
+    learningLab,
 ):
     classSchedule1 = ClassSchedule(
         schoolYear=schoolYear,
@@ -71,11 +73,15 @@ def addClassSchedule(
         endTime=endTime,
         comment=comment,
         googleCalendarEventID=googleCalendarEventID,
+        interventionLog_id=interventionLog_id,
+        learningLab=learningLab,
     )
     printLogEntry("addClassSchedule() function called")
     print(classSchedule1)
+    print("Learning Lab =", learningLab)
     db.session.add(classSchedule1)
     db.session.commit()
+    return classSchedule1
 
 
 def uploadSchedules(fname):
@@ -110,6 +116,8 @@ def uploadSchedules(fname):
         endTime = datetime.strptime(column[17].strip(), "%I:%M %p").time()
         comment = column[18].strip()
         googleCalendarEventID = ""
+        interventionLog_id = None
+        learningLab = False
         addClassSchedule(
             schoolYear,
             semester,
@@ -125,6 +133,8 @@ def uploadSchedules(fname):
             endTime,
             comment,
             googleCalendarEventID,
+            interventionLog_id,
+            learningLab,
         )
 
 
@@ -184,7 +194,9 @@ def downloadClassSchedule(schoolYear, semester):
     csvOutputFileRowCount = 0
     # Query the ClassSchedule with a join to include student information
     ClassSchedules = ClassSchedule.query.filter(
-        ClassSchedule.schoolYear == schoolYear, ClassSchedule.semester == semester
+        ClassSchedule.schoolYear == schoolYear,
+        ClassSchedule.semester == semester,
+        ClassSchedule.learningLab == False,
     ).order_by(ClassSchedule.chattStateANumber.desc())
     # Process each record in the query and write to the output file
     for classSchedule in ClassSchedules:

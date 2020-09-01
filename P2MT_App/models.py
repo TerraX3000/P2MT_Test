@@ -83,6 +83,12 @@ class ClassSchedule(db.Model):
     endTime = db.Column(db.Time, nullable=True)
     comment = db.Column(db.String(250), nullable=True)
     googleCalendarEventID = db.Column(db.String(250), nullable=True)
+    interventionLog_id = db.Column(
+        db.Integer,
+        db.ForeignKey("InterventionLog.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    learningLab = db.Column(db.Boolean, nullable=False, default=False)
     ClassAttendanceLog = db.relationship(
         "ClassAttendanceLog", backref="ClassSchedule", passive_deletes=True, lazy=True,
     )
@@ -174,6 +180,9 @@ class InterventionLog(db.Model):
     classAttendanceLog_id = db.relationship(
         "ClassAttendanceLog", backref="InterventionLog", lazy=True
     )
+    classSchedule_id = db.relationship(
+        "ClassSchedule", backref="InterventionLog", passive_deletes=True, lazy=True
+    )
 
     def __repr__(self):
         return f"InterventionLog('{self.id}','{self.intervention_id}','{self.startDate}','{self.endDate}')"
@@ -226,3 +235,53 @@ class SchoolCalendar(db.Model):
     juniorUpDay = db.Column(db.Boolean, nullable=True)
     startTmiPeriod = db.Column(db.Boolean, nullable=True)
     tmiDay = db.Column(db.Boolean, nullable=True)
+
+
+# class LearningLabLog(db.Model):
+#     __tablename__ = "LearningLabLog"
+#     id = db.Column(db.Integer, primary_key=True)
+#     interventionLog_id = db.Column(
+#         db.Integer, db.ForeignKey("InterventionLog.id"), nullable=True,
+#     )
+#     chattStateANumber = db.Column(
+#         db.String(20),
+#         db.ForeignKey("Student.chattStateANumber", ondelete="CASCADE"),
+#         nullable=False,
+#     )
+#     className = db.Column(db.String(50), nullable=False)
+#     staffID = db.Column(db.Integer, db.ForeignKey("FacultyAndStaff.id"), nullable=True)
+#     classDays = db.Column(db.String(10), nullable=False)
+#     startTime = db.Column(db.Time, nullable=True)
+#     endTime = db.Column(db.Time, nullable=True)
+#     comment = db.Column(db.String(250), nullable=True)
+#     googleCalendarEventID = db.Column(db.String(250), nullable=True)
+#     LearningLabAttendanceLog = db.relationship(
+#         "LearningLabAttendanceLog",
+#         backref="LearningLabLog",
+#         passive_deletes=True,
+#         lazy=True,
+#     )
+
+#     def __repr__(self):
+#         return f"LearningLabLog('{self.className}','{self.startDate}','{self.endDate}','{self.startTime}','{self.endTime}','{self.classDays}')"
+
+
+# class LearningLabAttendanceLog(db.Model):
+#     __tablename__ = "LearningLabAttendanceLog"
+#     id = db.Column(db.Integer, primary_key=True)
+#     learningLabLog_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey("LearningLabLog.id", ondelete="CASCADE"),
+#         nullable=False,
+#     )
+#     # classDate = db.Column(db.DateTime, nullable=False)
+#     classDate = db.Column(db.Date, nullable=False)
+#     attendanceCode = db.Column(db.String(2), nullable=True)
+#     comment = db.Column(db.Text, nullable=True)
+#     assignTmi = db.Column(db.Boolean, nullable=False, default=False)
+#     interventionLog_id = db.Column(
+#         db.Integer, db.ForeignKey("InterventionLog.id"), nullable=True,
+#     )
+
+#     def __repr__(self):
+#         return f"LearningLabAttendanceLog('{self.id}','{self.classSchedule_id}','{self.classDate}','{self.attendanceCode}','{self.assignTmi}')"

@@ -46,11 +46,16 @@
 </div>
 
 <div class="w3-bar w3-blue">
-    <button class="w3-bar-item w3-button tablink w3-black" onclick="openTab(event, 'StudentInfoTab')">Student
+    <button id='button_StudentInfoTab' class="w3-bar-item w3-button tablink"
+        onclick="openTab(event, 'StudentInfoTab')">Student
         Info</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'ParentInfoTab')">Parent Info</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'StaffInfoTab')">Staff Info</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'P2MTSetupTab')">P2MT Setup</button>
+    <button id='button_ParentInfoTab' class="w3-bar-item w3-button tablink"
+        onclick="openTab(event, 'ParentInfoTab','P2MTAdmin')">Parent Info</button>
+    <button id='button_StaffInfoTab' class="w3-bar-item w3-button tablink"
+        onclick="openTab(event, 'StaffInfoTab','P2MTAdmin')">Staff Info</button>
+    <button id='button_P2MTSetupTab' class="w3-bar-item w3-button tablink"
+        onclick="openTab(event, 'P2MTSetupTab','P2MTAdmin')">P2MT
+        Setup</button>
 </div>
 
 <div class="infoTab" id="StudentInfoTab">
@@ -373,5 +378,16 @@
 
 
 <script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
-
+<!-- Reload page to last loaded tab -->
+<script type='text/javascript'>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        selected_tab = 'P2MTAdmin_selected_tab';
+        var selectedTab = sessionStorage.getItem(selected_tab);
+        if (selectedTab) {
+            document.getElementById("button_" + selectedTab).click();
+        } else {
+            document.getElementById("button_StudentInfoTab").click();
+        }
+    });
+</script>
 {% endblock content %}
