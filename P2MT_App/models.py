@@ -145,6 +145,9 @@ class InterventionType(db.Model):
     interventionLog = db.relationship(
         "InterventionLog", backref="InterventionType", lazy=True
     )
+    p2mtTemplates = db.relationship(
+        "p2mtTemplates", backref="InterventionType", lazy=True
+    )
 
     def __repr__(self):
         return (
@@ -235,6 +238,21 @@ class SchoolCalendar(db.Model):
     juniorUpDay = db.Column(db.Boolean, nullable=True)
     startTmiPeriod = db.Column(db.Boolean, nullable=True)
     tmiDay = db.Column(db.Boolean, nullable=True)
+
+
+class p2mtTemplates(db.Model):
+    __tablename__ = "p2mtTemplates"
+    id = db.Column(db.Integer, primary_key=True)
+    templateTitle = db.Column(db.String(255), nullable=True)
+    emailSubject = db.Column(db.String(255), nullable=True)
+    templateContent = db.Column(db.Text, nullable=True)
+    sendToStudent = db.Column(db.Boolean, nullable=True)
+    sendToParent = db.Column(db.Boolean, nullable=True)
+    sendToTeacher = db.Column(db.Boolean, nullable=True)
+    intervention_id = db.Column(
+        db.Integer, db.ForeignKey("InterventionType.id"), nullable=True
+    )
+    interventionLevel = db.Column(db.Integer, nullable=True)
 
 
 # class LearningLabLog(db.Model):

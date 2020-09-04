@@ -1,0 +1,202 @@
+{% extends 'layout.html'%}
+{% block content %}
+
+{% macro macro_display_formfield(formfield, w3ResponsiveGridClass) %}
+<div class="{{w3ResponsiveGridClass}}">
+  {{ formfield.label(class="w3-text-green w3-large") }}
+  {% if formfield.errors %}
+  {{ formfield(class="w3-select is-invalid") }}
+  <div class="invalid-feedback">
+    {% for error in formfield.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ formfield(class="w3-select w3-section", id=False) }}
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro macro_display_checkbox(formfield, w3ResponsiveGridClass) %}
+<div class="{{w3ResponsiveGridClass}}">
+  {{ formfield.label(class="w3-text-green w3-large") }}
+  {% if formfield.errors %}
+  {{ formfield(class="w3-select is-invalid") }}
+  <div class="invalid-feedback">
+    {% for error in formfield.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ formfield(class="w3-check  w3-section") }}
+  {% endif %}
+</div>
+{% endmacro %}
+
+<div class="w3-container w3-green w3-row">
+  <div class="w3-third">
+    <h2>{{title}}</h2>
+  </div>
+</div>
+
+<div class="w3-bar w3-blue">
+  <button id='button_editTemplate' class="w3-bar-item w3-button tablink w3-black"
+    onclick="openTab(event, 'editTemplate', 'EmailTemplates')">Edit Template</button>
+  <button id='button_newTemplate' class="w3-bar-item w3-button tablink"
+    onclick="openTab(event, 'newTemplate', 'EmailTemplates')">New Template</button>
+  <button id='button_instructions' class="w3-bar-item w3-button tablink"
+    onclick="openTab(event, 'Instructions', 'EmailTemplates')">Instructions</button>
+</div>
+
+<div class="infoTab" id="editTemplate">
+  <form class="w3-container w3-padding-large" method="POST" action="{{ url_for('p2mtTemplates_bp.displayTemplates') }}"
+    enctype="multipart/form-data">
+    {{ chooseTemplateToEdit.csrf_token(id = False) }}
+    <div class="w3-row-padding">
+      {{ macro_display_formfield(chooseTemplateToEdit.templateTitle, "w3-half") }}
+    </div>
+    <div class="w3-row w3-padding-large">
+      {{ chooseTemplateToEdit.chooseTemplateToEdit(class="w3-btn w3-blue w3-large") }}
+    </div>
+  </form>
+
+  <a href='/printtemplate' class='w3-button'>Print template</a>
+
+  {% if editTemplateForm %}
+  <div class="w3-container">
+    <form class="w3-container w3-padding-large" method="POST"
+      action="{{ url_for('p2mtTemplates_bp.displayTemplates') }}" enctype="multipart/form-data">
+      {{ editTemplateForm.hidden_tag() }}
+      <fieldset class="w3-container w3-padding-large w3-hover-border-green">
+        <legend class="w3-xlarge"> Edit Template </legend>
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(editTemplateForm.templateTitle, "w3-half") }}
+          {{ macro_display_formfield(editTemplateForm.interventionType, "w3-quarter") }}
+          {{ macro_display_formfield(editTemplateForm.interventionLevel, "w3-quarter") }}
+          {{ macro_display_formfield(editTemplateForm.emailSubject, "w3-threequarter") }}
+          {{ macro_display_formfield(editTemplateForm.templateContent, "w3-threequarter") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(editTemplateForm.sendToStudent, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(editTemplateForm.sendToParent, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(editTemplateForm.sendToTeacher, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row w3-padding-large">
+          {{ editTemplateForm.submitUpdatedTemplate(class="w3-btn w3-blue w3-large") }}
+
+          <button type="button" class="w3-btn w3-red w3-large"
+            onclick="document.getElementById('deleteModal').style.display='block'">Delete Template</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+
+
+
+  <!-- Modal -->
+  <div class="w3-modal" id="deleteModal">
+    <div class="w3-container">
+      <div class="w3-modal-content" style="width:50%">
+        <header class="w3-container w3-red">
+          <span onclick="document.getElementById('deleteModal').style.display='none'"
+            class="w3-button w3-display-topright">&times;</span>
+          <h2>Delete Template?</h2>
+        </header>
+        <footer class="w3-container w3-margin-top w3-white w3-center">
+          <div class="w3-bar">
+            <form
+              action="{{ url_for('p2mtTemplates_bp.delete_p2mtTemplate', log_id=editTemplateForm.template_id.data|int) }}"
+              method="POST">
+              <button type="button" class="w3-button w3-large"
+                onclick="document.getElementById('deleteModal}').style.display='none'">Cancel</button>
+              <input class="w3-button w3-red w3-large" type="submit" value="Delete">
+            </form>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="infoTab" id="newTemplate" style="display:none">
+  <form class="w3-container w3-padding-large" method="POST" action="{{ url_for('p2mtTemplates_bp.displayTemplates') }}"
+    enctype="multipart/form-data">
+    {{ templateForm.csrf_token(id = False) }}
+    <div class="w3-container">
+      <fieldset class="w3-container w3-padding-large w3-hover-border-green">
+        <legend class="w3-xlarge"> New Template </legend>
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(templateForm.templateTitle, "w3-half") }}
+          {{ macro_display_formfield(templateForm.interventionType, "w3-quarter") }}
+          {{ macro_display_formfield(templateForm.interventionLevel, "w3-quarter") }}
+          {{ macro_display_formfield(templateForm.emailSubject, "w3-threequarter") }}
+          {{ macro_display_formfield(templateForm.templateContent, "w3-threequarter") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(templateForm.sendToStudent, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(templateForm.sendToParent, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_checkbox(templateForm.sendToTeacher, "w3-col l2 w3-right-align") }}
+        </div>
+        <div class="w3-row w3-padding-large">
+          {{ templateForm.submitNewTemplate(class="w3-btn w3-blue w3-large") }}
+        </div>
+      </fieldset>
+    </div>
+  </form>
+</div>
+
+<div class="infoTab" id="Instructions" style="display:none">
+  <div class="w3-panel"></div>
+  <div class="w3-container">
+    {% raw %}
+    <p> Email templates are selected based on intervention type and intervention level unless noted
+      below. </p>
+    <br>
+    <p> The following interventions must be named exactly as listed to work properly:</p>
+    <p> Attendance Level I Parent Notification </p>
+    <p> Attendance Level I Student Notification </p>
+    <br>
+    <p> Templates use template variables which are enclosed in double curly braces {{}}</p>
+    <br>
+    <p> Standard template variables: </p>
+    <p> {{ studentFirstName }} </p>
+    <p> {{ studentLastName }} </p>
+    <p> {{ startDate }} </p>
+    <p> {{ endDate }} </p>
+    <p> {{ tmiDate }} </p>
+    <p> {{ tmiMinutes }} </p>
+    <p> {{ classDate }} </p>
+    <p> {{ className }} </p>
+    <p> {{ attendanceType }} </p>
+    <p> {{ teacherName }} </p>
+    <br>
+    <p> In addition to these variables, templates can use Jinja templating controls to achieve the desired outcome.
+      Refer to the <a href='https://jinja.palletsprojects.com/en/2.11.x/templates/'>Jinja documentation for details.</a>
+    </p>
+    {% endraw %}
+  </div>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
+<!-- Reload page to last loaded tab -->
+<script type='text/javascript'>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    selected_tab = 'EmailTemplates_selected_tab';
+    var selectedTab = sessionStorage.getItem(selected_tab);
+    if (selectedTab) {
+      document.getElementById("button_" + selectedTab).click();
+    } else {
+      document.getElementById("button_BasicTab").click();
+    }
+  });
+</script>
+{% endblock content %}

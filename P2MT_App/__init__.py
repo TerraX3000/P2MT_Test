@@ -87,6 +87,7 @@ def create_app(config_class):
     from P2MT_App.googleAPI.routes import googleAPI_bp
     from P2MT_App.errors.handlers import errors_bp
     from P2MT_App.learningLab.routes import learningLab_bp
+    from P2MT_App.p2mtTemplates.routes import p2mtTemplates_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(classAttendance_bp)
@@ -104,5 +105,6 @@ def create_app(config_class):
     app.register_blueprint(googleAPI_bp)
     app.register_blueprint(errors_bp)
     app.register_blueprint(learningLab_bp)
+    app.register_blueprint(p2mtTemplates_bp)
 
     return app

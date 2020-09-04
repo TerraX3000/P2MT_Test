@@ -4,6 +4,7 @@ from P2MT_App.models import (
     ClassSchedule,
     Student,
     SchoolCalendar,
+    p2mtTemplates,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -15,7 +16,10 @@ def getInterventionTypes():
     interventionValueLabelTupleList = db.session.query(
         InterventionType.id, InterventionType.interventionType
     ).all()
-    return interventionValueLabelTupleList
+    # Update intervention types to include blank choice as default
+    interventionChoices = list(interventionValueLabelTupleList)
+    interventionChoices.insert(0, (0, ""))
+    return tuple(interventionChoices)
 
 
 def getStaffFromFacultyAndStaff():
@@ -265,3 +269,11 @@ def getCurrent_Start_End_Tmi_Dates():
             )
             break
     return startTmiPeriod, endTmiPeriod, nextTmiDay
+
+
+def getP2mtTemplatesToEdit():
+    p2mtTemplatesValueLabelTupleList = db.session.query(
+        p2mtTemplates.id, p2mtTemplates.templateTitle
+    ).all()
+    p2mtTemplatesValueLabelTupleList.insert(0, ("", ""))
+    return p2mtTemplatesValueLabelTupleList
