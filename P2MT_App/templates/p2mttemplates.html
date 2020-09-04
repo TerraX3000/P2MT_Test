@@ -33,6 +33,14 @@
 </div>
 {% endmacro %}
 
+{% macro macro_colorCode_tdField(formfield) %}
+{% if not formfield %}
+<td class="w3-center w3-pale-red">{{ formfield }}</td>
+{% else %}
+<td class="w3-center w3-pale-green">{{ formfield }}</td>
+{% endif %}
+{% endmacro %}
+
 <div class="w3-container w3-green w3-row">
   <div class="w3-third">
     <h2>{{title}}</h2>
@@ -51,6 +59,34 @@
 </div>
 
 <div class="infoTab" id="editTemplate">
+  <div class="w3-container w3-padding-large w3-margin-right w3-margin-left w3-section">
+    <table class="w3-padding-large w3-table w3-bordered w3-striped">
+      <thead>
+        <tr class="w3-blue">
+          <th>Template Title</th>
+          <th>Send to Student</th>
+          <th>Send to Parent</th>
+          <th>Send to Teacher</th>
+          <th>Intervention Type</th>
+          <th>Intervention Level</th>
+
+        </tr>
+      </thead>
+      <tbody class="w3-main">
+        {% for p2mtTemplate in p2mtTemplates %}
+        <tr class="w3-hover-grey">
+          <td>{{ p2mtTemplate.templateTitle }}</td>
+          {{ macro_colorCode_tdField(p2mtTemplate.sendToStudent) }}
+          {{ macro_colorCode_tdField(p2mtTemplate.sendToParent) }}
+          {{ macro_colorCode_tdField(p2mtTemplate.sendToTeacher) }}
+          <td>{{ p2mtTemplate.interventionType }}</td>
+          <td class="w3-center">{{ p2mtTemplate.interventionLevel }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
   <form class="w3-container w3-padding-large" method="POST" action="{{ url_for('p2mtTemplates_bp.displayTemplates') }}"
     enctype="multipart/form-data">
     {{ chooseTemplateToEdit.csrf_token(id = False) }}
@@ -69,25 +105,49 @@
       {{ editTemplateForm.hidden_tag() }}
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge"> Edit Template </legend>
+        <!-- Title, Intervention Type, Intervention Level -->
         <div class="w3-row-padding">
           {{ macro_display_formfield(editTemplateForm.templateTitle, "w3-half") }}
           {{ macro_display_formfield(editTemplateForm.interventionType, "w3-quarter") }}
           {{ macro_display_formfield(editTemplateForm.interventionLevel, "w3-quarter") }}
-          {{ macro_display_formfield(editTemplateForm.emailSubject, "w3-threequarter") }}
-          {{ macro_display_formfield(editTemplateForm.templateContent, "w3-threequarter") }}
         </div>
+        <!-- Email Subject -->
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(editTemplateForm.emailSubject, "w3-half") }}
+          {% if rendered_emailSubject %}
+          <div class="w3-half">
+            <label class="w3-text-green w3-large" for="Rendered Email Subject">Example of Rendered Email
+              Subject:</label>
+            <input id="Rendered Email Subject" class="w3-padding-small w3-select w3-section" type="text"
+              value="{{rendered_emailSubject}}">
+          </div>
+          {% endif %}
+        </div>
+        <!-- Template Content -->
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(editTemplateForm.templateContent, "w3-half") }}
+          {% if rendered_templateContent %}
+          <div class="w3-half">
+            <label class="w3-text-green w3-large" for="Rendered Content">Example of Rendered Content:</label>
+            <textarea id="Rendered Content" class="w3-padding-small w3-select w3-section"
+              rows="20">{{rendered_templateContent}}</textarea>
+          </div>
+          {% endif %}
+        </div>
+        <!-- Send to Student, Send to Parent, Send to Teacher -->
         <div class="w3-row-padding">
           {{ macro_display_checkbox(editTemplateForm.sendToStudent, "w3-col l2 w3-right-align") }}
         </div>
+
         <div class="w3-row-padding">
           {{ macro_display_checkbox(editTemplateForm.sendToParent, "w3-col l2 w3-right-align") }}
         </div>
         <div class="w3-row-padding">
           {{ macro_display_checkbox(editTemplateForm.sendToTeacher, "w3-col l2 w3-right-align") }}
         </div>
+        <!-- Submit or Delete -->
         <div class="w3-row w3-padding-large">
           {{ editTemplateForm.submitUpdatedTemplate(class="w3-btn w3-blue w3-large") }}
-
           <button type="button" class="w3-btn w3-red w3-large"
             onclick="document.getElementById('deleteModal').style.display='block'">Delete Template</button>
         </div>
@@ -158,12 +218,71 @@
   <div class="w3-panel"></div>
   <div class="w3-container w3-panel w3-margin">
     {% raw %}
-    <h1>Naming Convention</h1>
-    <p> Email templates are selected based on intervention type and intervention level unless noted
-      below. </p>
-    <p> The following interventions must be named exactly as listed to work properly:</p>
-    <p> Attendance Level I Parent Notification </p>
-    <p> Attendance Level I Student Notification </p>
+    <h1>Template Attributes and Naming Conventions</h1>
+    <p> Email templates are selected based on various criteria such as intervention type, intervention level, recipient,
+      and template title. The table below identfies how these criteria are used for different cases.</p>
+    <p> Important: Email templates should be defined carefully so there is exactly one template for any specific
+      criteria. If the wrong template is selected, it is most likely because more than one template met the selection
+      criteria.
+    </p>
+    <p> In most cases, emails should go to students and parents. However, TMI-related emails will use recipient to
+      determine the appropriate template as
+      described in this table.</p>
+    <p>It is not necessary nor appropriate to define an email template for every intervention type and level. For
+      example, emails for
+      more serious interventions should be written for the unique circumstances involved in that intervention. By not
+      including an email template for these situations, you can still record the intervention in the intervention log
+      while not generating an automatic email notification.</p>
+
+    <table class="w3-padding-large w3-table w3-striped">
+      <thead>
+        <tr class="w3-blue">
+          <th></th>
+          <th colspan=5 class="w3-center">Selection Criteria</th>
+        </tr>
+        <tr class="w3-blue">
+          <th class="w3-center">Purpose</th>
+          <th>Naming Convention</th>
+          <th>Send to Student</th>
+          <th>Send to Parent</th>
+          <th>Intervention Type</th>
+          <th>Intervention Level</th>
+        </tr>
+      </thead>
+      <tbody class="w3-main">
+        <tr>
+          <td>The email templates for dress code and academic behavior will be selected based only on intervention type
+            and
+            intervention level</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>The email template for sending the inital TMI notification to only the student will be based on recipient,
+            intervention type,
+            and intervention level as shown here</td>
+          <td>N/A</td>
+          <td>Must be True</td>
+          <td>Must be False</td>
+          <td>Attendance</td>
+          <td>Level 1</td>
+        </tr>
+        <tr>
+          <td>The email template for sending the final TMI notification to both the student and parent will be based on
+            recipient,
+            intervention type, and
+            intervention level as shown here</td>
+          <td>N/A</td>
+          <td>Must be True</td>
+          <td>Must be True</td>
+          <td>Attendance</td>
+          <td>Level 1</td>
+        </tr>
+      </tbody>
+    </table>
     <br>
     <h1>Template Variables</h1>
     <p> Templates use template variables which are enclosed in double curly braces {{}}</p>
@@ -224,7 +343,7 @@
           {% if rendered_emailSubject %}
           <div class="w3-half">
             <label class="w3-text-green w3-large" for="Rendered Email Subject">Rendered Email Subject:</label>
-            <input id="Rendered Email Subject" class="w3-select w3-section" type="text"
+            <input id="Rendered Email Subject" class="w3-padding-small w3-select w3-section" type="text"
               value="{{rendered_emailSubject}}">
           </div>
           {% endif %}
@@ -234,7 +353,7 @@
           {% if rendered_templateContent %}
           <div class="w3-half">
             <label class="w3-text-green w3-large" for="Rendered Content">Rendered Content:</label>
-            <textarea id="Rendered Content" class="w3-select w3-section"
+            <textarea id="Rendered Content" class="w3-padding-small w3-select w3-section"
               rows="20">{{rendered_templateContent}}</textarea>
           </div>
           {% endif %}

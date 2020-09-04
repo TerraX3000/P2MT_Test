@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request
 from jinja2 import Template
 from P2MT_App import db
-from P2MT_App.models import p2mtTemplates
+from P2MT_App.models import p2mtTemplates, InterventionType
 from P2MT_App.main.utilityfunctions import printLogEntry
 from P2MT_App.p2mtTemplates.forms import (
     submitNewTemplateForm,
@@ -31,6 +31,23 @@ def displayTemplates():
     editTemplateFormDetails.interventionType.choices = getInterventionTypes()
 
     testTemplateFormDetails = testTemplateForm()
+
+    jinja2Rendered_emailSubject = None
+    jinja2Rendered_templateContent = None
+
+    p2mtTemplatesFromDB = (
+        db.session.query(
+            p2mtTemplates.templateTitle,
+            p2mtTemplates.sendToStudent,
+            p2mtTemplates.sendToParent,
+            p2mtTemplates.sendToTeacher,
+            InterventionType.interventionType,
+            p2mtTemplates.interventionLevel,
+        )
+        .select_from(p2mtTemplates)
+        .join(InterventionType)
+        .all()
+    )
 
     if "submitNewTemplate" in request.form:
         if newTemplateFormDetails.validate_on_submit():
@@ -89,6 +106,15 @@ def displayTemplates():
             editTemplateFormDetails.sendToStudent.data = emailTemplate.sendToStudent
             editTemplateFormDetails.sendToParent.data = emailTemplate.sendToParent
             editTemplateFormDetails.sendToTeacher.data = emailTemplate.sendToTeacher
+            (
+                jinja2Rendered_emailSubject,
+                jinja2Rendered_templateContent,
+            ) = preview_p2mtTemplate(
+                editTemplateFormDetails.emailSubject.data,
+                editTemplateFormDetails.templateContent.data,
+            )
+            testTemplateFormDetails.emailSubject.data = emailTemplate.emailSubject
+            testTemplateFormDetails.templateContent.data = emailTemplate.templateContent
     else:
         editTemplateFormDetails = None
 
@@ -96,51 +122,18 @@ def displayTemplates():
         if testTemplateFormDetails.validate_on_submit():
             printLogEntry("Test Template Submitted")
             print("templateFormDetails=", request.form)
-            # Template variables
-            templateParams = {
-                "studentFirstName": "Smarty",
-                "studentLastName": "Tester",
-                "startDate": date(2020, 9, 1),
-                "endDate": date(2020, 9, 8),
-                "tmiDate": date(2020, 9, 4),
-                "tmiMinutes": 120,
-                "classDate": date(2020, 8, 31),
-                "className": "English IV",
-                "attendanceType": "Unexcused",
-                "teacherName": "Stanley",
-            }
-            try:
-                jinja2Template_emailSubject = Template(
-                    testTemplateFormDetails.emailSubject.data
-                )
-                jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(
-                    templateParams
-                )
-                print(jinja2Rendered_emailSubject)
-            except:
-                jinja2Rendered_emailSubject = (
-                    "Rendering error.  Fix your template and try again."
-                )
-            try:
-                jinja2Template_templateContent = Template(
-                    testTemplateFormDetails.templateContent.data
-                )
-                jinja2Rendered_templateContent = jinja2Template_templateContent.render(
-                    templateParams
-                )
-                print(jinja2Rendered_templateContent)
-            except:
-                jinja2Rendered_templateContent = (
-                    "Rendering error.  Fix your template and try again."
-                )
-            flash("Test template rendered!", "success")
-    else:
-        jinja2Rendered_emailSubject = None
-        jinja2Rendered_templateContent = None
+            (
+                jinja2Rendered_emailSubject,
+                jinja2Rendered_templateContent,
+            ) = preview_p2mtTemplate(
+                testTemplateFormDetails.emailSubject.data,
+                testTemplateFormDetails.templateContent.data,
+            )
 
     return render_template(
         "p2mttemplates.html",
         title="Email Templates",
+        p2mtTemplates=p2mtTemplatesFromDB,
         templateForm=newTemplateFormDetails,
         chooseTemplateToEdit=chooseTemplateToEdit,
         editTemplateForm=editTemplateFormDetails,
@@ -148,6 +141,42 @@ def displayTemplates():
         rendered_emailSubject=jinja2Rendered_emailSubject,
         rendered_templateContent=jinja2Rendered_templateContent,
     )
+
+
+def preview_p2mtTemplate(emailSubject, templateContent):
+    # Template variables
+    templateParams = {
+        "studentFirstName": "Smarty",
+        "studentLastName": "Tester",
+        "startDate": date(2020, 9, 1),
+        "endDate": date(2020, 9, 8),
+        "tmiDate": date(2020, 9, 4),
+        "tmiMinutes": 120,
+        "classDate": date(2020, 8, 31),
+        "className": "English IV",
+        "attendanceType": "Unexcused",
+        "teacherName": "Stanley",
+    }
+    try:
+        jinja2Template_emailSubject = Template(emailSubject)
+        jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
+        print(jinja2Rendered_emailSubject)
+    except:
+        jinja2Rendered_emailSubject = (
+            "Rendering error.  Fix your template and try again."
+        )
+    try:
+        jinja2Template_templateContent = Template(templateContent)
+        jinja2Rendered_templateContent = jinja2Template_templateContent.render(
+            templateParams
+        )
+        print(jinja2Rendered_templateContent)
+    except:
+        jinja2Rendered_templateContent = (
+            "Rendering error.  Fix your template and try again."
+        )
+    flash("Test template rendered!", "success")
+    return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
 
 
 @p2mtTemplates_bp.route("/p2mttemplates/<int:log_id>/delete", methods=["POST"])
