@@ -46,3 +46,9 @@ class editTemplateForm(FlaskForm):
     sendToParent = BooleanField("Send to Parents")
     sendToTeacher = BooleanField("Send to Teacher")
     submitUpdatedTemplate = SubmitField("Submit Updated Template")
+
+
+class testTemplateForm(FlaskForm):
+    emailSubject = StringField("Test Email Subject")
+    templateContent = TextAreaField("Test Template Content", render_kw={"rows": "20"})
+    submitTestTemplate = SubmitField("Test Template")

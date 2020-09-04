@@ -46,6 +46,8 @@
     onclick="openTab(event, 'newTemplate', 'EmailTemplates')">New Template</button>
   <button id='button_instructions' class="w3-bar-item w3-button tablink"
     onclick="openTab(event, 'Instructions', 'EmailTemplates')">Instructions</button>
+  <button id='button_testTemplate' class="w3-bar-item w3-button tablink"
+    onclick="openTab(event, 'testTemplate', 'EmailTemplates')">Template Testing</button>
 </div>
 
 <div class="infoTab" id="editTemplate">
@@ -59,8 +61,6 @@
       {{ chooseTemplateToEdit.chooseTemplateToEdit(class="w3-btn w3-blue w3-large") }}
     </div>
   </form>
-
-  <a href='/printtemplate' class='w3-button'>Print template</a>
 
   {% if editTemplateForm %}
   <div class="w3-container">
@@ -156,15 +156,16 @@
 
 <div class="infoTab" id="Instructions" style="display:none">
   <div class="w3-panel"></div>
-  <div class="w3-container">
+  <div class="w3-container w3-panel w3-margin">
     {% raw %}
+    <h1>Naming Convention</h1>
     <p> Email templates are selected based on intervention type and intervention level unless noted
       below. </p>
-    <br>
     <p> The following interventions must be named exactly as listed to work properly:</p>
     <p> Attendance Level I Parent Notification </p>
     <p> Attendance Level I Student Notification </p>
     <br>
+    <h1>Template Variables</h1>
     <p> Templates use template variables which are enclosed in double curly braces {{}}</p>
     <br>
     <p> Standard template variables: </p>
@@ -179,12 +180,73 @@
     <p> {{ attendanceType }} </p>
     <p> {{ teacherName }} </p>
     <br>
+    <h1>Date and Time Formatting</h1>
+    <p> Variables representing dates and times can be formatted by appending special formatting codes as shown in these
+      examples.</p>
+    <p> {{ endDate.strftime('%A, %B %-d, %Y') }} = Tuesday, September 8, 2020</p>
+    <p> {{ endDate.strftime('%-m/%-d/%y') }} = 9/8/20</p>
+    <p> {{ endDate.strftime('%a %b %-d') }} = Tue Sep 8</p>
+    <p> {{ startTime.strftime('%-I:%M') }}= 9:30</p>
+    <p> Refer to this <a href="https://www.programiz.com/python-programming/datetime/strftime">Python time format
+        guide</a> for more examples.</p>
+    <h1>Advanced Template Controls</h1>
     <p> In addition to these variables, templates can use Jinja templating controls to achieve the desired outcome.
       Refer to the <a href='https://jinja.palletsprojects.com/en/2.11.x/templates/'>Jinja documentation for details.</a>
     </p>
     {% endraw %}
   </div>
 </div>
+
+<div class="infoTab" id="testTemplate" style="display:none">
+  <form class="w3-container w3-padding-large" method="POST" action="{{ url_for('p2mtTemplates_bp.displayTemplates') }}"
+    enctype="multipart/form-data">
+    {{ testTemplateForm.csrf_token(id = False) }}
+    <div class="w3-container">
+      <fieldset class="w3-container w3-padding-large w3-hover-border-green">
+        <legend class="w3-xlarge"> Test Template </legend>
+        <div class="w3-panel w3-dark-grey">
+          {% raw %}
+          Test your template using any of these pre-defined variables:
+          <p> {{ studentFirstName }} = Smarty</p>
+          <p> {{ studentLastName }} Tester</p>
+          <p> {{ startDate }} = Tuesday, September 1, 2020</p>
+          <p> {{ endDate }} = Tuesday, September 8, 2020</p>
+          <p> {{ tmiDate }} = Friday, September 4, 2020</p>
+          <p> {{ tmiMinutes }} = 120</p>
+          <p> {{ classDate }} = Monday, August 31, 2020</p>
+          <p> {{ className }} = English IV</p>
+          <p> {{ attendanceType }} = Unexcused</p>
+          <p> {{ teacherName }} = Stanley</p>
+          {% endraw %}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(testTemplateForm.emailSubject, "w3-half") }}
+          {% if rendered_emailSubject %}
+          <div class="w3-half">
+            <label class="w3-text-green w3-large" for="Rendered Email Subject">Rendered Email Subject:</label>
+            <input id="Rendered Email Subject" class="w3-select w3-section" type="text"
+              value="{{rendered_emailSubject}}">
+          </div>
+          {% endif %}
+        </div>
+        <div class="w3-row-padding">
+          {{ macro_display_formfield(testTemplateForm.templateContent, "w3-half") }}
+          {% if rendered_templateContent %}
+          <div class="w3-half">
+            <label class="w3-text-green w3-large" for="Rendered Content">Rendered Content:</label>
+            <textarea id="Rendered Content" class="w3-select w3-section"
+              rows="20">{{rendered_templateContent}}</textarea>
+          </div>
+          {% endif %}
+        </div>
+        <div class="w3-row w3-padding-large">
+          {{ testTemplateForm.submitTestTemplate(class="w3-btn w3-blue w3-large") }}
+        </div>
+      </fieldset>
+    </div>
+  </form>
+</div>
+
 
 <script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
 <!-- Reload page to last loaded tab -->

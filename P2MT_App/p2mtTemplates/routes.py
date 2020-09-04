@@ -7,6 +7,7 @@ from P2MT_App.p2mtTemplates.forms import (
     submitNewTemplateForm,
     chooseTemplateToEditForm,
     editTemplateForm,
+    testTemplateForm,
 )
 from P2MT_App.p2mtTemplates.p2mtTemplates import add_Template, update_Template
 from P2MT_App.main.referenceData import getInterventionTypes, getP2mtTemplatesToEdit
@@ -28,6 +29,8 @@ def displayTemplates():
 
     editTemplateFormDetails = editTemplateForm()
     editTemplateFormDetails.interventionType.choices = getInterventionTypes()
+
+    testTemplateFormDetails = testTemplateForm()
 
     if "submitNewTemplate" in request.form:
         if newTemplateFormDetails.validate_on_submit():
@@ -89,12 +92,61 @@ def displayTemplates():
     else:
         editTemplateFormDetails = None
 
+    if "submitTestTemplate" in request.form:
+        if testTemplateFormDetails.validate_on_submit():
+            printLogEntry("Test Template Submitted")
+            print("templateFormDetails=", request.form)
+            # Template variables
+            templateParams = {
+                "studentFirstName": "Smarty",
+                "studentLastName": "Tester",
+                "startDate": date(2020, 9, 1),
+                "endDate": date(2020, 9, 8),
+                "tmiDate": date(2020, 9, 4),
+                "tmiMinutes": 120,
+                "classDate": date(2020, 8, 31),
+                "className": "English IV",
+                "attendanceType": "Unexcused",
+                "teacherName": "Stanley",
+            }
+            try:
+                jinja2Template_emailSubject = Template(
+                    testTemplateFormDetails.emailSubject.data
+                )
+                jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(
+                    templateParams
+                )
+                print(jinja2Rendered_emailSubject)
+            except:
+                jinja2Rendered_emailSubject = (
+                    "Rendering error.  Fix your template and try again."
+                )
+            try:
+                jinja2Template_templateContent = Template(
+                    testTemplateFormDetails.templateContent.data
+                )
+                jinja2Rendered_templateContent = jinja2Template_templateContent.render(
+                    templateParams
+                )
+                print(jinja2Rendered_templateContent)
+            except:
+                jinja2Rendered_templateContent = (
+                    "Rendering error.  Fix your template and try again."
+                )
+            flash("Test template rendered!", "success")
+    else:
+        jinja2Rendered_emailSubject = None
+        jinja2Rendered_templateContent = None
+
     return render_template(
         "p2mttemplates.html",
         title="Email Templates",
         templateForm=newTemplateFormDetails,
         chooseTemplateToEdit=chooseTemplateToEdit,
         editTemplateForm=editTemplateFormDetails,
+        testTemplateForm=testTemplateFormDetails,
+        rendered_emailSubject=jinja2Rendered_emailSubject,
+        rendered_templateContent=jinja2Rendered_templateContent,
     )
 
 
