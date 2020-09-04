@@ -52,7 +52,7 @@
     onclick="openTab(event, 'editTemplate', 'EmailTemplates')">Edit Template</button>
   <button id='button_newTemplate' class="w3-bar-item w3-button tablink"
     onclick="openTab(event, 'newTemplate', 'EmailTemplates')">New Template</button>
-  <button id='button_instructions' class="w3-bar-item w3-button tablink"
+  <button id='button_Instructions' class="w3-bar-item w3-button tablink"
     onclick="openTab(event, 'Instructions', 'EmailTemplates')">Instructions</button>
   <button id='button_testTemplate' class="w3-bar-item w3-button tablink"
     onclick="openTab(event, 'testTemplate', 'EmailTemplates')">Template Testing</button>
@@ -376,7 +376,7 @@
     if (selectedTab) {
       document.getElementById("button_" + selectedTab).click();
     } else {
-      document.getElementById("button_BasicTab").click();
+      document.getElementById("button_editTemplate").click();
     }
   });
 </script>

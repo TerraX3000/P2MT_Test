@@ -91,10 +91,10 @@
 
 <div class="w3-bar w3-blue">
   <button id='button_LearningLabCreator' class="w3-bar-item w3-button tablink w3-black"
-    onclick="openTab(event, 'LearningLabCreator', 'Attendance')">Learning Lab
+    onclick="openTab(event, 'LearningLabCreator', 'LearningLab')">Learning Lab
     Creator</button>
   <button id='button_LearningLabManager' class="w3-bar-item w3-button tablink"
-    onclick="openTab(event, 'LearningLabManager', 'Attendance')">Learning Lab
+    onclick="openTab(event, 'LearningLabManager', 'LearningLab')">Learning Lab
     Manager</button>
 </div>
 
@@ -205,7 +205,7 @@
 
 <script type='text/javascript'>
   document.addEventListener("DOMContentLoaded", function (event) {
-    selected_tab = 'Attendance_selected_tab';
+    selected_tab = 'LearningLab_selected_tab';
     var selectedTab = sessionStorage.getItem(selected_tab);
     if (selectedTab) {
       document.getElementById("button_" + selectedTab).click();
