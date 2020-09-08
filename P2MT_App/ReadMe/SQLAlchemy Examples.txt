@@ -178,3 +178,37 @@ SELECT "Student"."chattStateANumber" AS "Student_chattStateANumber", count("Stud
 FROM "Student" JOIN "ClassSchedule" ON "Student"."chattStateANumber" = "ClassSchedule"."chattStateANumber" JOIN "ClassAttendanceLog" ON "ClassSchedule".id = "ClassAttendanceLog"."classSchedule_id" 
 WHERE "ClassAttendanceLog"."classDate" >= ? AND "ClassAttendanceLog"."classDate" <= ? AND "ClassAttendanceLog"."attendanceCode" = ? GROUP BY "Student"."chattStateANumber"
 
+######################
+Example 6:
+######################
+
+
+Overview:
+This example selects specific columns including a column from a joined table. The join criteria only lists the table since the model already defines the relationship between the tables.
+
+
+Code:
+
+p2mtTemplatesFromDB = (
+        db.session.query(
+            p2mtTemplates.templateTitle,
+            p2mtTemplates.sendToStudent,
+            p2mtTemplates.sendToParent,
+            p2mtTemplates.sendToTeacher,
+            InterventionType.interventionType,
+            p2mtTemplates.interventionLevel,
+        )
+        .select_from(p2mtTemplates)
+        .join(InterventionType)
+        .order_by(
+            InterventionType.interventionType,
+            p2mtTemplates.interventionLevel,
+            p2mtTemplates.templateTitle,
+        )
+        .all()
+    )
+
+SQL Output:
+
+SELECT "p2mtTemplates"."templateTitle" AS "p2mtTemplates_templateTitle", "p2mtTemplates"."sendToStudent" AS "p2mtTemplates_sendToStudent", "p2mtTemplates"."sendToParent" AS "p2mtTemplates_sendToParent", "p2mtTemplates"."sendToTeacher" AS "p2mtTemplates_sendToTeacher", "InterventionType"."interventionType" AS "InterventionType_interventionType", "p2mtTemplates"."interventionLevel" AS "p2mtTemplates_interventionLevel" 
+FROM "p2mtTemplates" JOIN "InterventionType" ON "InterventionType".id = "p2mtTemplates".intervention_id ORDER BY "InterventionType"."interventionType", "p2mtTemplates"."interventionLevel", "p2mtTemplates"."templateTitle"
