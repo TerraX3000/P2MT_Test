@@ -46,6 +46,11 @@ def displayTemplates():
         )
         .select_from(p2mtTemplates)
         .join(InterventionType)
+        .order_by(
+            InterventionType.interventionType,
+            p2mtTemplates.interventionLevel,
+            p2mtTemplates.templateTitle,
+        )
         .all()
     )
 
@@ -144,19 +149,60 @@ def displayTemplates():
 
 
 def preview_p2mtTemplate(emailSubject, templateContent):
-    # Template variables
+    # Sample template variables
+    # Define five examples for TMI message testing
+    classAttendanceLogList = []
+    tmiClassAttendanceLog_1 = {
+        "classDate": date(2020, 8, 25),
+        "className": "English IV",
+        "attendanceType": "Unexcused Absence",
+        "teacherName": "Stanley",
+    }
+    tmiClassAttendanceLog_2 = {
+        "classDate": date(2020, 8, 26),
+        "className": "Scientific Research",
+        "attendanceType": "Excused Absence (But Missing Work)",
+        "teacherName": "Seigle",
+    }
+    tmiClassAttendanceLog_3 = {
+        "classDate": date(2020, 8, 27),
+        "className": "SAILS",
+        "attendanceType": "Tardy",
+        "teacherName": "Christopher",
+    }
+    tmiClassAttendanceLog_4 = {
+        "classDate": date(2020, 8, 28),
+        "className": "Multimedia",
+        "attendanceType": "Tardy",
+        "teacherName": "McCoy",
+    }
+    tmiClassAttendanceLog_5 = {
+        "classDate": date(2020, 8, 31),
+        "className": "STEM IV",
+        "attendanceType": "Tardy",
+        "teacherName": "Lowry",
+    }
+
+    classAttendanceLogList.append(tmiClassAttendanceLog_1)
+    classAttendanceLogList.append(tmiClassAttendanceLog_2)
+    classAttendanceLogList.append(tmiClassAttendanceLog_3)
+    classAttendanceLogList.append(tmiClassAttendanceLog_4)
+    classAttendanceLogList.append(tmiClassAttendanceLog_5)
+    # Create templateParams dictionary used for rendering email templates
     templateParams = {
         "studentFirstName": "Smarty",
         "studentLastName": "Tester",
         "startDate": date(2020, 9, 1),
         "endDate": date(2020, 9, 8),
         "tmiDate": date(2020, 9, 4),
-        "tmiMinutes": 120,
+        "tmiMinutes": 330,
         "classDate": date(2020, 8, 31),
         "className": "English IV",
-        "attendanceType": "Unexcused",
+        "attendanceType": "Unexcused Absence",
         "teacherName": "Stanley",
+        "classAttendanceLogList": classAttendanceLogList,
     }
+    # Try to render the template but provide a nice message if it fails to render
     try:
         jinja2Template_emailSubject = Template(emailSubject)
         jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)

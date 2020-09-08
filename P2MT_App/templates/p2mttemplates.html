@@ -286,7 +286,6 @@
     <br>
     <h1>Template Variables</h1>
     <p> Templates use template variables which are enclosed in double curly braces {{}}</p>
-    <br>
     <p> Standard template variables: </p>
     <p> {{ studentFirstName }} </p>
     <p> {{ studentLastName }} </p>
@@ -298,6 +297,13 @@
     <p> {{ className }} </p>
     <p> {{ attendanceType }} </p>
     <p> {{ teacherName }} </p>
+    <p> {{ classAttendanceLogList }} = list of entries for TMI message testing. Each entry contains data
+      for the
+      following items: </p>
+    <p> {{ classDate }} </p>
+    <p> {{ className }} </p>
+    <p> {{ attendanceType }} </p>
+    <p> {{ teacherName }}</p>
     <br>
     <h1>Date and Time Formatting</h1>
     <p> Variables representing dates and times can be formatted by appending special formatting codes as shown in these
@@ -312,7 +318,12 @@
     <p> In addition to these variables, templates can use Jinja templating controls to achieve the desired outcome.
       Refer to the <a href='https://jinja.palletsprojects.com/en/2.11.x/templates/'>Jinja documentation for details.</a>
     </p>
-    {% endraw %}
+    <p> This example uses a for loop to iterate over class information:</p>
+    <p>{% for log in classAttendanceLogList %}</p>
+    <p>{{ log.classDate.strftime('%A, %B %-d, %Y') }} - {{ log.className }} - {{ log.attendanceType }} -
+      {{ log.teacherName }}</p>
+    <p>{% endfor %}</p>
+    <p>{% endraw %}</p>
   </div>
 </div>
 
@@ -323,21 +334,37 @@
     <div class="w3-container">
       <fieldset class="w3-container w3-padding-large w3-hover-border-green">
         <legend class="w3-xlarge"> Test Template </legend>
-        <div class="w3-panel w3-dark-grey">
-          {% raw %}
-          Test your template using any of these pre-defined variables:
-          <p> {{ studentFirstName }} = Smarty</p>
-          <p> {{ studentLastName }} Tester</p>
-          <p> {{ startDate }} = Tuesday, September 1, 2020</p>
-          <p> {{ endDate }} = Tuesday, September 8, 2020</p>
-          <p> {{ tmiDate }} = Friday, September 4, 2020</p>
-          <p> {{ tmiMinutes }} = 120</p>
-          <p> {{ classDate }} = Monday, August 31, 2020</p>
-          <p> {{ className }} = English IV</p>
-          <p> {{ attendanceType }} = Unexcused</p>
-          <p> {{ teacherName }} = Stanley</p>
-          {% endraw %}
+        {% raw %}
+        <div class="w3-cell-row">
+          <div class="w3-panel w3-cell w3-dark-grey">
+            Test your template using any of these pre-defined variables:
+            <p> {{ studentFirstName }} = Smarty</p>
+            <p> {{ studentLastName }} Tester</p>
+            <p> {{ startDate }} = Tuesday, September 1, 2020</p>
+            <p> {{ endDate }} = Tuesday, September 8, 2020</p>
+            <p> {{ tmiDate }} = Friday, September 4, 2020</p>
+            <p> {{ tmiMinutes }} = 120</p>
+            <p> {{ classDate }} = Monday, August 31, 2020</p>
+            <p> {{ className }} = English IV</p>
+            <p> {{ attendanceType }} = Unexcused</p>
+            <p> {{ teacherName }} = Stanley</p>
+          </div>
+          <div class="w3-panel w3-cell w3-dark-grey">
+            <p> {{ classAttendanceLogList }} = list of five entries for TMI message testing. Each entry contains data
+              for the
+              following items: </p>
+            <p> {{ classDate }} </p>
+            <p> {{ className }} </p>
+            <p> {{ attendanceType }} </p>
+            <p> {{ teacherName }}</p>
+            <p> The best way to access this list is by using a for loop as in this example:</p>
+            <p>{% for log in classAttendanceLogList %}</p>
+            <p>{{ log.classDate.strftime('%A, %B %-d, %Y') }} - {{ log.className }} - {{ log.attendanceType }} -
+              {{ log.teacherName }}</p>
+            <p>{% endfor %}</p>
+          </div>
         </div>
+        {% endraw %}
         <div class="w3-row-padding">
           {{ macro_display_formfield(testTemplateForm.emailSubject, "w3-half") }}
           {% if rendered_emailSubject %}
