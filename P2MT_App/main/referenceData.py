@@ -5,6 +5,7 @@ from P2MT_App.models import (
     Student,
     SchoolCalendar,
     p2mtTemplates,
+    Parents,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -37,6 +38,15 @@ def getStaffFromFacultyAndStaff():
         (item[0], item[1] + " " + item[2]) for item in teacherTupleList
     ]
     return teacherValueLabelTupleList
+
+
+def getSystemAccountEmail():
+    systemAccountEmail = (
+        db.session.query(FacultyAndStaff.email)
+        .filter(FacultyAndStaff.lastName == "System")
+        .first()
+    )
+    return systemAccountEmail[0]
 
 
 def getTeachers():
@@ -130,6 +140,22 @@ def getStudentsById():
         (item[0], item[1] + " " + item[2]) for item in studentTupleList
     ]
     return studentValueLabelTupleList
+
+
+def getParentEmails(chattStateANumber):
+    parentEmails = (
+        db.session.query(
+            Parents.motherEmail, Parents.fatherEmail, Parents.guardianEmail
+        )
+        .filter(Parents.chattStateANumber == chattStateANumber)
+        .first()
+    )
+    parentEmailList = []
+    for email in parentEmails:
+        if len(email) == 0 or email == None:
+            continue
+        parentEmailList.append(email)
+    return parentEmailList
 
 
 def getSchoolYear():

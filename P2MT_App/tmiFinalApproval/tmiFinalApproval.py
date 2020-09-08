@@ -1,9 +1,20 @@
 from P2MT_App import db
 from datetime import date
 from sqlalchemy import func
-from P2MT_App.models import ClassAttendanceLog, InterventionLog, ClassSchedule, Student
+from flask_login import current_user
+from P2MT_App.models import (
+    ClassAttendanceLog,
+    InterventionLog,
+    ClassSchedule,
+    Student,
+    p2mtTemplates,
+    InterventionType,
+)
 from P2MT_App.main.utilityfunctions import printLogEntry
+from P2MT_App.main.referenceData import getParentEmails
 from P2MT_App.interventionInfo.interventionInfo import add_InterventionLog
+from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
+from P2MT_App.googleAPI.googleMail import sendEmail
 
 
 def findTardyClassesForStudent(startPeriod, endPeriod, chattStateANumber):
@@ -84,7 +95,13 @@ def getStudentsWithAssignTmi(startPeriod, endPeriod):
     # Get list of chattStateAnumbers for students where assignTmi is true
     studentsWithAssignTmi = (
         (
-            db.session.query(Student.id, ClassSchedule.chattStateANumber)
+            db.session.query(
+                Student.id,
+                ClassSchedule.chattStateANumber,
+                Student.firstName,
+                Student.lastName,
+                Student.email,
+            )
             .select_from(Student)
             .join(ClassSchedule)
             .join(ClassSchedule.ClassAttendanceLog)
@@ -149,7 +166,13 @@ def updateInterventionLogForTmi(
     return
 
 
-def calculateTmi(startTmiPeriod, endTmiPeriod, tmiDate):
+def calculateTmi(
+    startTmiPeriod,
+    endTmiPeriod,
+    tmiDate,
+    sendStudentTmiNotification,
+    sendParentTmiNotification,
+):
     printLogEntry("calculateTMI() function called")
 
     studentsWithAssignTmi = getStudentsWithAssignTmi(startTmiPeriod, endTmiPeriod)
@@ -157,12 +180,15 @@ def calculateTmi(startTmiPeriod, endTmiPeriod, tmiDate):
     for student in studentsWithAssignTmi:
         student_id = student[0]
         chattStateANumber = student[1]
+        studentFirstName = student[2]
+        studentLastName = student[3]
+        studentEmail = student[4]
         tmiClasses = findTmiClassesForStudent(
             startTmiPeriod, endTmiPeriod, chattStateANumber
         )
         tmiMinutes = 0
         tardyFlag = False
-        classAttendanceLogIDList = []
+        classAttendanceLogList = []
 
         for log in tmiClasses:
             attendanceCode = log.attendanceCode
@@ -174,43 +200,43 @@ def calculateTmi(startTmiPeriod, endTmiPeriod, tmiDate):
 
             if attendanceCode == "T" and tardyFlag == True:
                 classAttendanceArrayItem = {
-                    "Date": classDate,
-                    "Class": className,
-                    "AttendanceType": "Tardy",
-                    "Teacher": teacherLastName,
+                    "classDate": classDate,
+                    "className": className,
+                    "attendanceType": "Tardy",
+                    "teacherName": teacherLastName,
                 }
-                classAttendanceLogIDList.append(classAttendanceArrayItem)
+                classAttendanceLogList.append(classAttendanceArrayItem)
 
             elif attendanceCode == "T" and tardyFlag == False:
                 tmiMinutes = tmiMinutes + 90
                 tardyFlag = True
                 classAttendanceArrayItem = {
-                    "Date": classDate,
-                    "Class": className,
-                    "AttendanceType": "Tardy",
-                    "Teacher": teacherLastName,
+                    "classDate": classDate,
+                    "className": className,
+                    "attendanceType": "Tardy",
+                    "teacherName": teacherLastName,
                 }
-                classAttendanceLogIDList.append(classAttendanceArrayItem)
+                classAttendanceLogList.append(classAttendanceArrayItem)
 
             elif attendanceCode == "E":
                 tmiMinutes = tmiMinutes + 120
                 classAttendanceArrayItem = {
-                    "Date": classDate,
-                    "Class": className,
-                    "AttendanceType": "Excused Absence (But Missing Work)",
-                    "Teacher": teacherLastName,
+                    "classDate": classDate,
+                    "className": className,
+                    "attendanceType": "Excused Absence (But Missing Work)",
+                    "teacherName": teacherLastName,
                 }
-                classAttendanceLogIDList.append(classAttendanceArrayItem)
+                classAttendanceLogList.append(classAttendanceArrayItem)
 
             elif attendanceCode == "U":
                 tmiMinutes = tmiMinutes + 120
                 classAttendanceArrayItem = {
-                    "Date": classDate,
-                    "Class": className,
-                    "AttendanceType": "Unexcused Absence",
-                    "Teacher": teacherLastName,
+                    "classDate": classDate,
+                    "className": className,
+                    "attendanceType": "Unexcused Absence",
+                    "teacherName": teacherLastName,
                 }
-                classAttendanceLogIDList.append(classAttendanceArrayItem)
+                classAttendanceLogList.append(classAttendanceArrayItem)
 
         maxTmiMinutes = 420
         if tmiMinutes > maxTmiMinutes:
@@ -220,7 +246,58 @@ def calculateTmi(startTmiPeriod, endTmiPeriod, tmiDate):
         updateInterventionLogForTmi(
             chattStateANumber, tmiDate, tmiMinutes, interventionStatus
         )
-        print(chattStateANumber, classAttendanceLogIDList, tmiMinutes)
+        # print(chattStateANumber, classAttendanceLogList, tmiMinutes)
 
+        # Prepare and send TMI notification emails
+        # If sendStudentNotification == True, then get email recipient and appropriate email template
+        if sendStudentTmiNotification:
+            email_to = studentEmail
+            try:
+                template = (
+                    p2mtTemplates.query.filter(
+                        InterventionType.interventionType == "Attendance",
+                        p2mtTemplates.interventionLevel == 1,
+                        p2mtTemplates.sendToParent == False,
+                        p2mtTemplates.sendToStudent == True,
+                    )
+                    .join(InterventionType)
+                    .first()
+                )
+            except:
+                template = None
+        # If sendParentTmiNotification == True, then get email recipient and appropriate email template
+        if sendParentTmiNotification:
+            email_to = [studentEmail] + getParentEmails(chattStateANumber)
+            try:
+                template = (
+                    p2mtTemplates.query.filter(
+                        InterventionType.interventionType == "Attendance",
+                        p2mtTemplates.interventionLevel == 1,
+                        p2mtTemplates.sendToParent == True,
+                        p2mtTemplates.sendToStudent == True,
+                    )
+                    .join(InterventionType)
+                    .first()
+                )
+            except:
+                template = None
+        # Render email template with data and send the email
+        if sendStudentTmiNotification or sendParentTmiNotification:
+            templateParams = {
+                "chattStateANumber": chattStateANumber,
+                "studentFirstName": studentFirstName,
+                "studentLastName": studentLastName,
+                "tmiDate": tmiDate,
+                "tmiMinutes": tmiMinutes,
+                "classAttendanceLogList": classAttendanceLogList,
+            }
+            emailSubject, emailContent = renderEmailTemplate(
+                template.emailSubject, template.templateContent, templateParams
+            )
+            try:
+                email_cc = current_user.email
+            except:
+                email_cc = ""
+            sendEmail(email_to, email_cc, emailSubject, emailContent)
     return
 

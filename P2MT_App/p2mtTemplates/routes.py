@@ -9,7 +9,11 @@ from P2MT_App.p2mtTemplates.forms import (
     editTemplateForm,
     testTemplateForm,
 )
-from P2MT_App.p2mtTemplates.p2mtTemplates import add_Template, update_Template
+from P2MT_App.p2mtTemplates.p2mtTemplates import (
+    add_Template,
+    update_Template,
+    renderEmailTemplate,
+)
 from P2MT_App.main.referenceData import getInterventionTypes, getP2mtTemplatesToEdit
 from datetime import date
 
@@ -202,25 +206,9 @@ def preview_p2mtTemplate(emailSubject, templateContent):
         "teacherName": "Stanley",
         "classAttendanceLogList": classAttendanceLogList,
     }
-    # Try to render the template but provide a nice message if it fails to render
-    try:
-        jinja2Template_emailSubject = Template(emailSubject)
-        jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
-        print(jinja2Rendered_emailSubject)
-    except:
-        jinja2Rendered_emailSubject = (
-            "Rendering error.  Fix your template and try again."
-        )
-    try:
-        jinja2Template_templateContent = Template(templateContent)
-        jinja2Rendered_templateContent = jinja2Template_templateContent.render(
-            templateParams
-        )
-        print(jinja2Rendered_templateContent)
-    except:
-        jinja2Rendered_templateContent = (
-            "Rendering error.  Fix your template and try again."
-        )
+    jinja2Rendered_emailSubject, jinja2Rendered_templateContent = renderEmailTemplate(
+        emailSubject, templateContent, templateParams
+    )
     flash("Test template rendered!", "success")
     return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
 

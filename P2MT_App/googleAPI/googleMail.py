@@ -7,6 +7,7 @@ from httplib2 import Http
 from email.mime.text import MIMEText
 import base64
 from google.oauth2 import service_account
+from P2MT_App.main.referenceData import getSystemAccountEmail
 
 # Email variables. Modify this!
 EMAIL_FROM = "phase2team@students.hcde.org"
@@ -57,9 +58,7 @@ def send_message(service, user_id, message):
 
 def service_account_login():
     SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-    SERVICE_ACCOUNT_FILE = (
-        "../../google_credentials/verdant-root-256217-566d3ff37798.json"
-    )
+    SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
 
     credentials = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES
@@ -70,8 +69,18 @@ def service_account_login():
     return service
 
 
-service = service_account_login()
-# Call the Gmail API
-message = create_message(EMAIL_FROM, EMAIL_TO, EMAIL_SUBJECT, EMAIL_CONTENT)
-print("message =", message)
-sent = send_message(service, "me", message)
+# service = service_account_login()
+# # Call the Gmail API
+# message = create_message(EMAIL_FROM, EMAIL_TO, EMAIL_SUBJECT, EMAIL_CONTENT)
+# print("message =", message)
+# sent = send_message(service, "me", message)
+
+
+def sendEmail(email_to, email_cc, emailSubject, emailContent):
+    # include the system account as a bcc recipient on all emails
+    email_bcc = getSystemAccountEmail()
+    # if the email recipient is a list, then use commas to seperate the email addresses
+    if isinstance(email_to, list):
+        email_to = ",".join(email_to)
+    print(email_to, email_cc, email_bcc, emailSubject, emailContent)
+

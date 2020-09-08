@@ -42,12 +42,68 @@
 <div class="w3-container">
 
   <div class="w3-row-padding">
-    <div class="w3-third">
+    <div class="w3-col l3">
       <p>Start Date for TMI Period: {{ startTmiPeriod.strftime('%a %b %-d') }}</p>
       <p>End Date for TMI Period: {{ endTmiPeriod.strftime('%a %b %-d') }}</p>
       <p>TMI Date: {{ tmiDay.strftime('%a %b %-d') }}</p>
     </div>
+
+    <div class="w3-col l3 w3-margin-top"><button type="button" class="w3-btn w3-blue"
+        onclick="document.getElementById('sendStudentEmailModal').style.display='block'">Send Student
+        Notifications</button>
+    </div>
+    <div class="w3-col l3 w3-margin-top"><button type="button" class="w3-btn w3-blue"
+        onclick="document.getElementById('sendParentEmailModal').style.display='block'">Send Parent
+        Notifications</button>
+    </div>
   </div>
+
+  <!-- Modal -->
+  <div class="w3-modal" id="sendStudentEmailModal">
+    <div class="w3-container">
+      <div class="w3-modal-content" style="width:50%">
+        <header class="w3-container w3-red">
+          <span onclick="document.getElementById('sendStudentEmailModal').style.display='none'"
+            class="w3-button w3-display-topright">&times;</span>
+          <h2>Send student notifications?</h2>
+        </header>
+        <footer class="w3-container w3-margin-top w3-white w3-center">
+          <div class="w3-bar">
+            <form action="{{ url_for('tmiFinalApproval_bp.displayTmiFinalApproval') }}" method="POST">
+              <button type="button" class="w3-button w3-large"
+                onclick="document.getElementById('sendStudentEmailModal').style.display='none'">Cancel</button>
+              <input class="w3-button w3-red w3-large" name="submit_button" type="submit"
+                value="Send Student Notifications">
+            </form>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="w3-modal" id="sendParentEmailModal">
+    <div class="w3-container">
+      <div class="w3-modal-content" style="width:50%">
+        <header class="w3-container w3-red">
+          <span onclick="document.getElementById('sendParentEmailModal').style.display='none'"
+            class="w3-button w3-display-topright">&times;</span>
+          <h2>Send parent notifications?</h2>
+        </header>
+        <footer class="w3-container w3-margin-top w3-white w3-center">
+          <div class="w3-bar">
+            <form action="{{ url_for('tmiFinalApproval_bp.displayTmiFinalApproval') }}" method="POST">
+              <button type="button" class="w3-button w3-large"
+                onclick="document.getElementById('sendParentEmailModal').style.display='none'">Cancel</button>
+              <input class="w3-button w3-red w3-large" name="submit_button" type="submit"
+                value="Send Parent Notifications">
+            </form>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
 
   <table class="w3-table w3-border w3-bordered w3-hoverable">
     <thead>

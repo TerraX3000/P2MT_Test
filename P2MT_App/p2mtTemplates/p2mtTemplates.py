@@ -1,4 +1,5 @@
 from flask import flash, current_app, send_file
+from jinja2 import Template
 from P2MT_App import db
 from P2MT_App.models import p2mtTemplates
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -63,3 +64,27 @@ def update_Template(
     templateFromDB.sendToParent = sendToParent
     templateFromDB.sendToTeacher = sendToTeacher
     return
+
+
+def renderEmailTemplate(emailSubject, templateContent, templateParams):
+    # Try to render the template but provide a nice message if it fails to render
+    # print(emailSubject, templateContent, templateParams)
+    try:
+        jinja2Template_emailSubject = Template(emailSubject)
+        jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
+    except:
+        jinja2Rendered_emailSubject = (
+            "Rendering error.  Fix your template and try again."
+        )
+    try:
+        jinja2Template_templateContent = Template(templateContent)
+        jinja2Rendered_templateContent = jinja2Template_templateContent.render(
+            templateParams
+        )
+    except:
+        jinja2Rendered_templateContent = (
+            "Rendering error.  Fix your template and try again."
+        )
+    print(jinja2Rendered_emailSubject)
+    print(jinja2Rendered_templateContent)
+    return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
