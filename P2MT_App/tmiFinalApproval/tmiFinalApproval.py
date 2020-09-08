@@ -243,15 +243,14 @@ def calculateTmi(
             tmiMinutes = maxTmiMinutes
 
         interventionStatus = "Pending"
-        updateInterventionLogForTmi(
-            chattStateANumber, tmiDate, tmiMinutes, interventionStatus
-        )
         # print(chattStateANumber, classAttendanceLogList, tmiMinutes)
 
         # Prepare and send TMI notification emails
+        # Ignore cases where tmiMinutes = 0 (e.g., attendanceType is Q for question)
         # If sendStudentNotification == True, then get email recipient and appropriate email template
-        if sendStudentTmiNotification:
+        if sendStudentTmiNotification and tmiMinutes > 0:
             email_to = studentEmail
+            interventionStatus = "Student notification sent"
             try:
                 template = (
                     p2mtTemplates.query.filter(
@@ -266,8 +265,9 @@ def calculateTmi(
             except:
                 template = None
         # If sendParentTmiNotification == True, then get email recipient and appropriate email template
-        if sendParentTmiNotification:
+        if sendParentTmiNotification and tmiMinutes > 0:
             email_to = [studentEmail] + getParentEmails(chattStateANumber)
+            interventionStatus = "Parent notification sent"
             try:
                 template = (
                     p2mtTemplates.query.filter(
@@ -282,7 +282,7 @@ def calculateTmi(
             except:
                 template = None
         # Render email template with data and send the email
-        if sendStudentTmiNotification or sendParentTmiNotification:
+        if sendStudentTmiNotification or sendParentTmiNotification and tmiMinutes > 0:
             templateParams = {
                 "chattStateANumber": chattStateANumber,
                 "studentFirstName": studentFirstName,
@@ -298,6 +298,14 @@ def calculateTmi(
                 email_cc = current_user.email
             except:
                 email_cc = ""
-            sendEmail(email_to, email_cc, emailSubject, emailContent)
+            try:
+                sendEmail(email_to, email_cc, emailSubject, emailContent)
+            except:
+                interventionStatus = "Error sending email"
+
+        # Update intervention log
+        updateInterventionLogForTmi(
+            chattStateANumber, tmiDate, tmiMinutes, interventionStatus
+        )
     return
 
