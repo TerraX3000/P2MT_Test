@@ -262,8 +262,14 @@ def calculateTmi(
                     .join(InterventionType)
                     .first()
                 )
+                print("Using template:", template.templateTitle)
             except:
-                template = None
+                print(
+                    "No template exists for interventionType =",
+                    interventionType,
+                    "and interventionLevel =",
+                    interventionLevel,
+                )
         # If sendParentTmiNotification == True, then get email recipient and appropriate email template
         if sendParentTmiNotification and tmiMinutes > 0:
             email_to = [studentEmail] + getParentEmails(chattStateANumber)
@@ -279,8 +285,14 @@ def calculateTmi(
                     .join(InterventionType)
                     .first()
                 )
+                print("Using template:", template.templateTitle)
             except:
-                template = None
+                print(
+                    "No template exists for interventionType =",
+                    interventionType,
+                    "and interventionLevel =",
+                    interventionLevel,
+                )
         # Render email template with data and send the email
         if sendStudentTmiNotification or sendParentTmiNotification and tmiMinutes > 0:
             templateParams = {

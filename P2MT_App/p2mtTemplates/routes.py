@@ -205,6 +205,7 @@ def preview_p2mtTemplate(emailSubject, templateContent):
         "attendanceType": "Unexcused Absence",
         "teacherName": "Stanley",
         "classAttendanceLogList": classAttendanceLogList,
+        "comment": "random comment for testing",
     }
     jinja2Rendered_emailSubject, jinja2Rendered_templateContent = renderEmailTemplate(
         emailSubject, templateContent, templateParams

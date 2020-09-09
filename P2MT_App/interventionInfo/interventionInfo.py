@@ -1,7 +1,22 @@
 from flask import flash, current_app, send_file
+from flask_login import current_user
 from P2MT_App import db
-from P2MT_App.models import InterventionLog, Student, FacultyAndStaff, InterventionType
+from P2MT_App.models import (
+    InterventionLog,
+    Student,
+    FacultyAndStaff,
+    InterventionType,
+    p2mtTemplates,
+)
 from P2MT_App.main.utilityfunctions import printLogEntry
+from P2MT_App.main.referenceData import (
+    getStudentFirstNameAndLastName,
+    getStudentEmail,
+    getParentEmails,
+    getInterventionType,
+)
+from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
+from P2MT_App.googleAPI.googleMail import sendEmail
 import os
 import csv
 from datetime import datetime
@@ -30,6 +45,69 @@ def add_InterventionLog(
     )
     db.session.add(interventionLog)
     return interventionLog
+
+
+def sendInterventionEmail(
+    chattStateANumber, intervention_id, interventionLevel, startDate, endDate, comment
+):
+    # Prepare and send intervention notification emails
+    interventionType = getInterventionType(intervention_id)
+    try:
+        template = (
+            p2mtTemplates.query.filter(
+                InterventionType.interventionType == interventionType,
+                p2mtTemplates.interventionLevel == interventionLevel,
+            )
+            .join(InterventionType)
+            .first()
+        )
+        print("Using template:", template.templateTitle)
+    except:
+        print(
+            "No template exists for interventionType =",
+            interventionType,
+            "and interventionLevel =",
+            interventionLevel,
+        )
+        return
+
+    studentFirstName, studentLastName = getStudentFirstNameAndLastName(
+        chattStateANumber
+    )
+
+    # Set email_to based on template parameters
+    studentEmail = getStudentEmail(chattStateANumber)
+    parentEmailList = getParentEmails(chattStateANumber)
+    if template.sendToStudent and not template.sendToParent:
+        email_to = studentEmail
+    if template.sendToStudent and template.sendToParent:
+        email_to = [studentEmail] + parentEmailList
+    if not template.sendToStudent and template.sendToParent:
+        email_to = parentEmailList
+    if not template.sendToStudent and not template.sendToParent:
+        email_to = current_user.email
+
+    templateParams = {
+        "chattStateANumber": chattStateANumber,
+        "studentFirstName": studentFirstName,
+        "studentLastName": studentLastName,
+        "startDate": startDate,
+        "endDate": endDate,
+        "comment": comment,
+    }
+    emailSubject, emailContent = renderEmailTemplate(
+        template.emailSubject, template.templateContent, templateParams
+    )
+    try:
+        email_cc = current_user.email
+    except:
+        email_cc = ""
+    try:
+        sendEmail(email_to, email_cc, emailSubject, emailContent)
+        interventionStatus = "Intervention notification sent"
+    except:
+        interventionStatus = "Error sending email"
+    return interventionStatus
 
 
 def downloadInterventionLog():

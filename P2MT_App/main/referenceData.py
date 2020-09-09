@@ -24,6 +24,15 @@ def getInterventionTypes():
     return tuple(interventionChoices)
 
 
+def getInterventionType(intervention_id):
+    interventionType = (
+        db.session.query(InterventionType.interventionType)
+        .filter(InterventionType.id == intervention_id)
+        .first()
+    )
+    return interventionType[0]
+
+
 def getStaffFromFacultyAndStaff():
     # Get list of staff to display as dropdown choices but exclude system account
     teacherTupleList = (
@@ -133,6 +142,17 @@ def getStudentName(chattStateANumber):
     return studentName
 
 
+def getStudentFirstNameAndLastName(chattStateANumber):
+    studentTupleList = (
+        db.session.query(Student.firstName, Student.lastName)
+        .filter(Student.chattStateANumber == chattStateANumber)
+        .first()
+    )
+    studentFirstName = studentTupleList[0]
+    studentLastName = studentTupleList[1]
+    return studentFirstName, studentLastName
+
+
 def getStudents():
     studentTupleList = (
         db.session.query(Student.chattStateANumber, Student.firstName, Student.lastName)
@@ -157,6 +177,15 @@ def getStudentsById():
         (item[0], item[1] + " " + item[2]) for item in studentTupleList
     ]
     return studentValueLabelTupleList
+
+
+def getStudentEmail(chattStateANumber):
+    studentEmail = (
+        db.session.query(Student.email)
+        .filter(Student.chattStateANumber == chattStateANumber)
+        .first()
+    )
+    return studentEmail[0]
 
 
 def getParentEmails(chattStateANumber):
@@ -315,8 +344,15 @@ def getCurrent_Start_End_Tmi_Dates():
 
 
 def getP2mtTemplatesToEdit():
-    p2mtTemplatesValueLabelTupleList = db.session.query(
-        p2mtTemplates.id, p2mtTemplates.templateTitle
-    ).all()
+    p2mtTemplatesValueLabelTupleList = (
+        db.session.query(p2mtTemplates.id, p2mtTemplates.templateTitle)
+        .join(InterventionType)
+        .order_by(
+            InterventionType.interventionType,
+            p2mtTemplates.interventionLevel,
+            p2mtTemplates.templateTitle,
+        )
+        .all()
+    )
     p2mtTemplatesValueLabelTupleList.insert(0, ("", ""))
     return p2mtTemplatesValueLabelTupleList

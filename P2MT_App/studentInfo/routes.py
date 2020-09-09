@@ -2,7 +2,10 @@ from flask import render_template, redirect, request, url_for, flash, Blueprint
 from P2MT_App import db
 from P2MT_App.models import Student
 from P2MT_App.dailyAttendance.dailyAttendance import add_DailyAttendanceLog
-from P2MT_App.interventionInfo.interventionInfo import add_InterventionLog
+from P2MT_App.interventionInfo.interventionInfo import (
+    add_InterventionLog,
+    sendInterventionEmail,
+)
 from P2MT_App.interventionInfo.forms import addInterventionLogForm
 from P2MT_App.dailyAttendance.forms import addDailyAttendanceForm
 from P2MT_App.main.referenceData import getInterventionTypes
@@ -54,6 +57,14 @@ def displayStudents():
                 interventionForm.comment.data,
             )
             db.session.commit()
+            sendInterventionEmail(
+                interventionForm.chattStateANumber.data,
+                int(interventionForm.interventionType.data),
+                int(interventionForm.interventionLevel.data),
+                interventionForm.startDate.data,
+                interventionForm.endDate.data,
+                interventionForm.comment.data,
+            )
             print("new intervention log ID:", interventionLog.id)
             flash("Intervention log has been added!", "success")
             printLogEntry("Completed add_InterventionLog.  Redirecting to students")

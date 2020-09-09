@@ -147,6 +147,7 @@
         </div>
         <!-- Submit or Delete -->
         <div class="w3-row w3-padding-large">
+          <a class="w3-btn w3-grey w3-large" href="{{url_for('p2mtTemplates_bp.displayTemplates')}}">Cancel</a>
           {{ editTemplateForm.submitUpdatedTemplate(class="w3-btn w3-blue w3-large") }}
           <button type="button" class="w3-btn w3-red w3-large"
             onclick="document.getElementById('deleteModal').style.display='block'">Delete Template</button>
@@ -285,7 +286,9 @@
     </table>
     <br>
     <h1>Template Variables</h1>
-    <p> Templates use template variables which are enclosed in double curly braces {{}}</p>
+    <p> Templates use template variables which are enclosed in double curly braces {{}}. The list below includes
+      standard template variables. However, some of the template variables are only applicable for certain
+      interventions. For example, tmiMinutes is only applicable for emails involving TMI.</p>
     <p> Standard template variables: </p>
     <p> {{ studentFirstName }} </p>
     <p> {{ studentLastName }} </p>
@@ -297,6 +300,7 @@
     <p> {{ className }} </p>
     <p> {{ attendanceType }} </p>
     <p> {{ teacherName }} </p>
+    <p> {{ comment }} </p>
     <p> {{ classAttendanceLogList }} = list of entries for TMI message testing. Each entry contains data
       for the
       following items: </p>
@@ -348,6 +352,7 @@
             <p> {{ className }} = English IV</p>
             <p> {{ attendanceType }} = Unexcused</p>
             <p> {{ teacherName }} = Stanley</p>
+            <p> {{ comment }} = 'random comment for testing'</p>
           </div>
           <div class="w3-panel w3-cell w3-dark-grey">
             <p> {{ classAttendanceLogList }} = list of five entries for TMI message testing. Each entry contains data
