@@ -255,6 +255,13 @@ class p2mtTemplates(db.Model):
     interventionLevel = db.Column(db.Integer, nullable=True)
 
 
+class adminSettings(db.Model):
+    __tablename__ = "adminSettings"
+    id = db.Column(db.Integer, primary_key=True)
+    enableLiveEmail = db.Column(db.Boolean, nullable=False, default=False)
+    timestamp = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+
+
 # class LearningLabLog(db.Model):
 #     __tablename__ = "LearningLabLog"
 #     id = db.Column(db.Integer, primary_key=True)

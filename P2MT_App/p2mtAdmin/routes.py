@@ -32,6 +32,8 @@ from P2MT_App.main.referenceData import (
     getStudentsById,
     getStaffFromFacultyAndStaff,
     getStudentName,
+    setEmailModeStatus,
+    getEmailModeStatus,
 )
 
 from P2MT_App.p2mtAdmin.p2mtAdmin import (
@@ -122,6 +124,9 @@ def displayP2MTAdmin():
     staffInfo = FacultyAndStaff.query.filter(
         FacultyAndStaff.lastName != "System"
     ).order_by(FacultyAndStaff.lastName.asc())
+
+    # Retrieve current system mode
+    SystemMode = getEmailModeStatus()
 
     if request.method == "POST":
         printLogEntry("form= " + str(request.form))
@@ -307,7 +312,23 @@ def displayP2MTAdmin():
         downloadStaffListForm=downloadStaffListFormDetails,
         uploadStaffListForm=uploadStaffListFormDetails,
         deleteStaffForm=deleteStaffFormDetails,
+        SystemMode=SystemMode,
     )
+
+
+@p2mtAdmin_bp.route("/p2mtadmin/setsystemmode", methods=["POST"])
+def setSystemMode():
+    printLogEntry("Running setSystemMode()")
+    if request.method == "POST":
+        if request.form["submit_button"] == "Set to Test Mode":
+            setEmailModeStatus(False)
+            db.session.commit()
+            print("Enable Live Email =", getEmailModeStatus())
+        elif request.form["submit_button"] == "Set to Live Mode":
+            setEmailModeStatus(True)
+            db.session.commit()
+            print("Enable Live Email =", getEmailModeStatus())
+    return redirect(url_for("p2mtAdmin_bp.displayP2MTAdmin"))
 
 
 @p2mtAdmin_bp.route("/p2mtadmin/<int:student_id>/update", methods=["GET", "POST"])

@@ -337,6 +337,22 @@
 <div class="infoTab" id="P2MTSetupTab" style="display:none">
     <div class="w3-container w3-padding-large w3-margin-right w3-margin-left w3-section">
         <fieldset class="w3-container w3-padding-large w3-hover-border-green">
+            <h3>Set System Mode</h3>
+            {% if SystemMode %}
+            <p class="w3-container w3-center w3-padding-large w3-large w3-green">Current System Mode = Live</p>
+            {% elif not SystemMode %}
+            <p class="w3-container w3-center w3-padding-large w3-large w3-red">Current System Mode = Test</p>
+            {% endif %}
+            <p>Set to Test Mode: Restricts all emails to go only to the current staff user</p>
+            <p>Set to Live Mode: Enables all emails to go to normal recipients such as students and parents</p>
+            <form action="{{ url_for('p2mtAdmin_bp.setSystemMode') }}" method="POST">
+                <input class="w3-button w3-blue w3-large" name="submit_button" type="submit" value="Set to Test Mode">
+                <input class="w3-button w3-blue w3-large" name="submit_button" type="submit" value="Set to Live Mode">
+            </form>
+        </fieldset>
+    </div>
+    <div class="w3-container w3-padding-large w3-margin-right w3-margin-left w3-section">
+        <fieldset class="w3-container w3-padding-large w3-hover-border-green">
             <h3>Setup P2MT</h3>
             <p>Use Setup P2MT to set these initial configurations for P2MT:</p>
             <ul>

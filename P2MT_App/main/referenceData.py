@@ -6,6 +6,7 @@ from P2MT_App.models import (
     SchoolCalendar,
     p2mtTemplates,
     Parents,
+    adminSettings,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -47,6 +48,22 @@ def getSystemAccountEmail():
         .first()
     )
     return systemAccountEmail[0]
+
+
+def setEmailModeStatus(emailModeStatus):
+    # Set email mode statue to enableLiveEmail=True or enableLiveEmail=False
+    newAdminSettings = adminSettings(enableLiveEmail=emailModeStatus)
+    db.session.add(newAdminSettings)
+    return
+
+
+def getEmailModeStatus():
+    emailModeStatus = (
+        db.session.query(adminSettings.enableLiveEmail)
+        .order_by(adminSettings.id.desc())
+        .first()
+    )
+    return emailModeStatus[0]
 
 
 def getTeachers():

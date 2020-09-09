@@ -7,7 +7,8 @@ from httplib2 import Http
 from email.mime.text import MIMEText
 import base64
 from google.oauth2 import service_account
-from P2MT_App.main.referenceData import getSystemAccountEmail
+from P2MT_App.main.referenceData import getSystemAccountEmail, getEmailModeStatus
+from flask_login import current_user
 
 # Email variables. Modify this!
 EMAIL_FROM = "phase2team@students.hcde.org"
@@ -82,5 +83,12 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
     # if the email recipient is a list, then use commas to seperate the email addresses
     if isinstance(email_to, list):
         email_to = ",".join(email_to)
+    # Retrieve current system mode
+    SystemMode = getEmailModeStatus()
+    if SystemMode == False:
+        print("System Mode = Test. Sending email to", current_user.email)
+        email_to = current_user.email
+        email_cc = current_user.email
     print(email_to, email_cc, email_bcc, emailSubject, emailContent)
+    return
 
