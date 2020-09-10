@@ -243,12 +243,19 @@ def calculateTmi(
             tmiMinutes = maxTmiMinutes
 
         interventionStatus = "Pending"
-        # print(chattStateANumber, classAttendanceLogList, tmiMinutes)
+        print(chattStateANumber, classAttendanceLogList, tmiMinutes)
+        print("tmiMinutes:", type(tmiMinutes), tmiMinutes)
 
         # Prepare and send TMI notification emails
         # Ignore cases where tmiMinutes = 0 (e.g., attendanceType is Q for question)
         # If sendStudentNotification == True, then get email recipient and appropriate email template
         if sendStudentTmiNotification and tmiMinutes > 0:
+            print(
+                "sendStudentTmiNotification is",
+                sendStudentTmiNotification,
+                "and tmiMinutes =",
+                tmiMinutes,
+            )
             email_to = studentEmail
             interventionStatus = "Student notification sent"
             try:
@@ -272,6 +279,12 @@ def calculateTmi(
                 )
         # If sendParentTmiNotification == True, then get email recipient and appropriate email template
         if sendParentTmiNotification and tmiMinutes > 0:
+            print(
+                "sendParentTmiNotification is",
+                sendParentTmiNotification,
+                "and tmiMinutes =",
+                tmiMinutes,
+            )
             email_to = [studentEmail] + getParentEmails(chattStateANumber)
             interventionStatus = "Parent notification sent"
             try:
@@ -294,7 +307,15 @@ def calculateTmi(
                     interventionLevel,
                 )
         # Render email template with data and send the email
-        if sendStudentTmiNotification or sendParentTmiNotification and tmiMinutes > 0:
+        if (sendStudentTmiNotification or sendParentTmiNotification) and tmiMinutes > 0:
+            print(
+                "sendStudentTmiNotification is",
+                sendStudentTmiNotification,
+                "sendParentTmiNotification is",
+                sendParentTmiNotification,
+                "and tmiMinutes =",
+                tmiMinutes,
+            )
             templateParams = {
                 "chattStateANumber": chattStateANumber,
                 "studentFirstName": studentFirstName,

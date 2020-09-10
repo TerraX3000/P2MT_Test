@@ -20,10 +20,11 @@ def displayTmiFinalApproval():
     sendStudentTmiNotification = False
     sendParentTmiNotification = False
     if request.method == "POST":
+        print("Send TMI notification form:", request.form)
         if request.form["submit_button"] == "Send Student Notifications":
             sendStudentTmiNotification = True
         elif request.form["submit_button"] == "Send Parent Notifications":
-            sendParentTmiNotification= True
+            sendParentTmiNotification = True
 
     # Update assignTmi for students with tardies
     assignTmiForTardy(startTmiPeriod, endTmiPeriod)
@@ -43,7 +44,13 @@ def displayTmiFinalApproval():
         .all()
     )
 
-    calculateTmi(startTmiPeriod, endTmiPeriod, tmiDate, sendStudentTmiNotification, sendParentTmiNotification)
+    calculateTmi(
+        startTmiPeriod,
+        endTmiPeriod,
+        tmiDate,
+        sendStudentTmiNotification,
+        sendParentTmiNotification,
+    )
     db.session.commit()
 
     tmiInterventionLog = (
@@ -54,7 +61,6 @@ def displayTmiFinalApproval():
         .order_by(Student.lastName)
         .all()
     )
-    
 
     return render_template(
         "tmifinalapproval.html",
