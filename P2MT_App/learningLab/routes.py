@@ -123,6 +123,8 @@ def displayLearningLab():
                 googleCalendarEventID,
                 interventionLog.id,
                 learningLab,
+                startDate,
+                endDate,
             ]
             # Initialize a list to store details of learning labs for email notifications
             learningLabList = []

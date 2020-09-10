@@ -5,6 +5,7 @@ from P2MT_App.scheduleAdmin.ScheduleAdmin import addClassSchedule
 from P2MT_App.models import SchoolCalendar, ClassSchedule
 from P2MT_App.main.utilityfunctions import printLogEntry, createListOfDates
 from P2MT_App.scheduleAdmin.ScheduleAdmin import addClassAttendanceLog
+from P2MT_App.googleAPI.googleCalendar import addCalendarEvent
 
 
 def addLearningLabTimeAndDays(
@@ -21,14 +22,30 @@ def addLearningLabTimeAndDays(
     online = False
     indStudy = False
     comment = learningLabCommonFields[9]
-    googleCalendarEventID = None
     interventionLog_id = learningLabCommonFields[11]
     learningLab = learningLabCommonFields[12]
+    startDate = learningLabCommonFields[13]
+    endDate = learningLabCommonFields[14]
 
     classDaysList = classDays
     classDays = ""
     for classDay in classDaysList:
         classDays = classDays + classDay
+
+    # Add learning lab to student schedule in Google Calendar
+    eventName = className + "Learning Lab"
+    location = teacherLastName
+    recurrence = "weekly_recurrence_placeholder"
+    googleCalendarEventID = addCalendarEvent(
+        eventName,
+        location,
+        classDays,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        recurrence,
+    )
 
     classSchedule = addClassSchedule(
         schoolYear,
