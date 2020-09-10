@@ -33,6 +33,15 @@ def getInterventionType(intervention_id):
     return interventionType[0]
 
 
+def getInterventionId(interventionType):
+    interventionId = (
+        db.session.query(InterventionType.id)
+        .filter(InterventionType.interventionType == interventionType)
+        .first()
+    )
+    return interventionId[0]
+
+
 def getStaffFromFacultyAndStaff():
     # Get list of staff to display as dropdown choices but exclude system account
     teacherTupleList = (
@@ -186,6 +195,23 @@ def getStudentEmail(chattStateANumber):
         .first()
     )
     return studentEmail[0]
+
+
+def getStudentGoogleCalendar(chattStateANumber):
+    studentGoogleCalendar = (
+        db.session.query(Student.googleCalendarId)
+        .filter(Student.chattStateANumber == chattStateANumber)
+        .first()
+    )
+    return studentGoogleCalendar[0]
+
+
+def getStudentScheduleLink(chattStateANumber):
+    studentGoogleCalendar = getStudentGoogleCalendar(chattStateANumber)
+    studentScheduleLink = (
+        "https://calendar.google.com/calendar/embed?src=" + studentGoogleCalendar
+    )
+    return studentScheduleLink
 
 
 def getParentEmails(chattStateANumber):

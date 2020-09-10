@@ -15,14 +15,19 @@ from P2MT_App.main.referenceData import (
     getClassDayChoices,
     getCurrentSchoolYear,
     getCurrentSemester,
+    getInterventionId,
 )
 from P2MT_App.scheduleAdmin.forms import addSingleClassSchedule
 from P2MT_App.scheduleAdmin.routes import addClassSchedule
 from P2MT_App.learningLab.learningLab import (
     addLearningLabTimeAndDays,
     propagateLearningLab,
+    updatelearningLabList,
 )
-from P2MT_App.interventionInfo.interventionInfo import add_InterventionLog
+from P2MT_App.interventionInfo.interventionInfo import (
+    add_InterventionLog,
+    sendInterventionEmail,
+)
 
 
 learningLab_bp = Blueprint("learningLab_bp", __name__)
@@ -57,6 +62,7 @@ def displayLearningLab():
         "Submit New Learning Lab"
     )
     print(request.form)
+    # Handle form submission for adding new learning lab
     if "submitAddSingleClassSchedule" in request.form:
         if addLearningLabDetails.validate_on_submit():
             printLogEntry("Add Learning Lab submitted")
@@ -102,7 +108,7 @@ def displayLearningLab():
             )
             db.session.commit()
             print("new intervention log ID:", interventionLog.id)
-
+            # Store all of the common fields in a single variable for later use
             learningLabCommonFields = [
                 schoolYear,
                 semester,
@@ -118,6 +124,9 @@ def displayLearningLab():
                 interventionLog.id,
                 learningLab,
             ]
+            # Initialize a list to store details of learning labs for email notifications
+            learningLabList = []
+            # Process each of the five possible entries of learning lab days/time
             if addLearningLabDetails.addTimeAndDays.data:
                 print("Adding learning lab time 1")
                 learningLabClassSchedule = addLearningLabTimeAndDays(
@@ -132,6 +141,12 @@ def displayLearningLab():
                     endDate,
                     schoolYear,
                     semester,
+                )
+                learningLabList = updatelearningLabList(
+                    learningLabList,
+                    addLearningLabDetails.classDays.data,
+                    addLearningLabDetails.startTime.data,
+                    addLearningLabDetails.endTime.data,
                 )
             if addLearningLabDetails.addTimeAndDays2.data:
                 print("Adding learning lab time 2")
@@ -148,6 +163,12 @@ def displayLearningLab():
                     schoolYear,
                     semester,
                 )
+                learningLabList = updatelearningLabList(
+                    learningLabList,
+                    addLearningLabDetails.classDays2.data,
+                    addLearningLabDetails.startTime2.data,
+                    addLearningLabDetails.endTime2.data,
+                )
             if addLearningLabDetails.addTimeAndDays3.data:
                 print("Adding learning lab time 3")
                 learningLabClassSchedule = addLearningLabTimeAndDays(
@@ -162,6 +183,12 @@ def displayLearningLab():
                     endDate,
                     schoolYear,
                     semester,
+                )
+                learningLabList = updatelearningLabList(
+                    learningLabList,
+                    addLearningLabDetails.classDays3.data,
+                    addLearningLabDetails.startTime3.data,
+                    addLearningLabDetails.endTime3.data,
                 )
             if addLearningLabDetails.addTimeAndDays4.data:
                 print("Adding learning lab time 4")
@@ -178,6 +205,12 @@ def displayLearningLab():
                     schoolYear,
                     semester,
                 )
+                learningLabList = updatelearningLabList(
+                    learningLabList,
+                    addLearningLabDetails.classDays4.data,
+                    addLearningLabDetails.startTime4.data,
+                    addLearningLabDetails.endTime4.data,
+                )
             if addLearningLabDetails.addTimeAndDays5.data:
                 print("Adding learning lab time 5")
                 learningLabClassSchedule = addLearningLabTimeAndDays(
@@ -193,17 +226,34 @@ def displayLearningLab():
                     schoolYear,
                     semester,
                 )
+                learningLabList = updatelearningLabList(
+                    learningLabList,
+                    addLearningLabDetails.classDays5.data,
+                    addLearningLabDetails.startTime5.data,
+                    addLearningLabDetails.endTime5.data,
+                )
+            print("learningLabList =", learningLabList)
+            # Define learning lab parameters for intervention email
+            intervention_id = getInterventionId("Academic Behavior")
+            interventionLevel = 1
+            templateParams = {
+                "learningLabList": learningLabList,
+                "className": className,
+                "teacherLastName": teacherLastName,
+            }
+            sendInterventionEmail(
+                chattStateANumber,
+                intervention_id,
+                interventionLevel,
+                startDate,
+                endDate,
+                comment,
+                templateParams=templateParams,
+            )
             return redirect(url_for("learningLab_bp.displayLearningLab"))
     print("addLearningLabDetails.errors: ", addLearningLabDetails.errors)
 
-    # LearningLabSchedules = (
-    #     ClassSchedule.query.join(InterventionLog, ClassSchedule.Student)
-    #     .filter(ClassSchedule.learningLab == True)
-    #     .order_by(
-    #         ClassSchedule.Student.id.asc(),
-    #         ClassSchedule.InterventionLog.endDate.desc(),
-    #     )
-    # )
+    # Get list of learning labs to display on learning lab manager
     LearningLabSchedules = (
         db.session.query(ClassSchedule)
         .join(InterventionLog)

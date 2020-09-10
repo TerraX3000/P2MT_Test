@@ -14,6 +14,7 @@ from P2MT_App.main.referenceData import (
     getStudentEmail,
     getParentEmails,
     getInterventionType,
+    getStudentScheduleLink,
 )
 from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
 from P2MT_App.googleAPI.googleMail import sendEmail
@@ -48,7 +49,13 @@ def add_InterventionLog(
 
 
 def sendInterventionEmail(
-    chattStateANumber, intervention_id, interventionLevel, startDate, endDate, comment
+    chattStateANumber,
+    intervention_id,
+    interventionLevel,
+    startDate,
+    endDate,
+    comment,
+    **kwargs
 ):
     # Prepare and send intervention notification emails
     interventionType = getInterventionType(intervention_id)
@@ -74,6 +81,7 @@ def sendInterventionEmail(
     studentFirstName, studentLastName = getStudentFirstNameAndLastName(
         chattStateANumber
     )
+    studentScheduleLink = getStudentScheduleLink(chattStateANumber)
 
     # Set email_to based on template parameters
     studentEmail = getStudentEmail(chattStateANumber)
@@ -87,14 +95,26 @@ def sendInterventionEmail(
     if not template.sendToStudent and not template.sendToParent:
         email_to = current_user.email
 
-    templateParams = {
-        "chattStateANumber": chattStateANumber,
-        "studentFirstName": studentFirstName,
-        "studentLastName": studentLastName,
-        "startDate": startDate,
-        "endDate": endDate,
-        "comment": comment,
-    }
+    # Use templateParams if they were passed to the function; otherwise use the default params
+    if "templateParams" in kwargs:
+        templateParams = kwargs["templateParams"]
+        templateParams["chattStateANumber"] = chattStateANumber
+        templateParams["studentFirstName"] = studentFirstName
+        templateParams["studentLastName"] = studentLastName
+        templateParams["startDate"] = startDate
+        templateParams["endDate"] = endDate
+        templateParams["comment"] = comment
+        templateParams["studentScheduleLink"] = studentScheduleLink
+    else:
+        templateParams = {
+            "chattStateANumber": chattStateANumber,
+            "studentFirstName": studentFirstName,
+            "studentLastName": studentLastName,
+            "startDate": startDate,
+            "endDate": endDate,
+            "comment": comment,
+            "studentScheduleLink": studentScheduleLink,
+        }
     emailSubject, emailContent = renderEmailTemplate(
         template.emailSubject, template.templateContent, templateParams
     )

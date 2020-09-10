@@ -203,7 +203,7 @@ def calculateTmi(
                     "classDate": classDate,
                     "className": className,
                     "attendanceType": "Tardy",
-                    "teacherName": teacherLastName,
+                    "teacherLastName": teacherLastName,
                 }
                 classAttendanceLogList.append(classAttendanceArrayItem)
 
@@ -214,7 +214,7 @@ def calculateTmi(
                     "classDate": classDate,
                     "className": className,
                     "attendanceType": "Tardy",
-                    "teacherName": teacherLastName,
+                    "teacherLastName": teacherLastName,
                 }
                 classAttendanceLogList.append(classAttendanceArrayItem)
 
@@ -224,7 +224,7 @@ def calculateTmi(
                     "classDate": classDate,
                     "className": className,
                     "attendanceType": "Excused Absence (But Missing Work)",
-                    "teacherName": teacherLastName,
+                    "teacherLastName": teacherLastName,
                 }
                 classAttendanceLogList.append(classAttendanceArrayItem)
 
@@ -234,7 +234,7 @@ def calculateTmi(
                     "classDate": classDate,
                     "className": className,
                     "attendanceType": "Unexcused Absence",
-                    "teacherName": teacherLastName,
+                    "teacherLastName": teacherLastName,
                 }
                 classAttendanceLogList.append(classAttendanceArrayItem)
 

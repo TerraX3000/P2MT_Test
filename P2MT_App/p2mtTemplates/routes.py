@@ -13,15 +13,17 @@ from P2MT_App.p2mtTemplates.p2mtTemplates import (
     add_Template,
     update_Template,
     renderEmailTemplate,
+    preview_p2mtTemplate,
 )
 from P2MT_App.main.referenceData import getInterventionTypes, getP2mtTemplatesToEdit
-from datetime import date
+from datetime import date, time
 
 p2mtTemplates_bp = Blueprint("p2mtTemplates_bp", __name__)
 
 
 @p2mtTemplates_bp.route("/p2mttemplates", methods=["GET", "POST"])
 def displayTemplates():
+    # Handles creating, editing, and testing email templates
     printLogEntry("displayEmailTemplates() function called")
     newTemplateFormDetails = submitNewTemplateForm()
     # print("newTemplateFormDetails", newTemplateFormDetails.templateTitle)
@@ -35,10 +37,10 @@ def displayTemplates():
     editTemplateFormDetails.interventionType.choices = getInterventionTypes()
 
     testTemplateFormDetails = testTemplateForm()
-
+    # Initialize jinja2 templates to prevent potential errors
     jinja2Rendered_emailSubject = None
     jinja2Rendered_templateContent = None
-
+    # Get all of the templates stored in the database
     p2mtTemplatesFromDB = (
         db.session.query(
             p2mtTemplates.templateTitle,
@@ -57,7 +59,7 @@ def displayTemplates():
         )
         .all()
     )
-
+    # Process form information to create a new template
     if "submitNewTemplate" in request.form:
         if newTemplateFormDetails.validate_on_submit():
             printLogEntry("New Template Submitted")
@@ -76,6 +78,7 @@ def displayTemplates():
             flash("New template has been added!", "success")
             return redirect(url_for("p2mtTemplates_bp.displayTemplates"))
 
+    # Process form information to update existing template
     if "submitUpdatedTemplate" in request.form:
         if editTemplateFormDetails.validate_on_submit():
             printLogEntry("Updated Template Submitted")
@@ -127,6 +130,7 @@ def displayTemplates():
     else:
         editTemplateFormDetails = None
 
+    # Process form information to test template
     if "submitTestTemplate" in request.form:
         if testTemplateFormDetails.validate_on_submit():
             printLogEntry("Test Template Submitted")
@@ -152,70 +156,9 @@ def displayTemplates():
     )
 
 
-def preview_p2mtTemplate(emailSubject, templateContent):
-    # Sample template variables
-    # Define five examples for TMI message testing
-    classAttendanceLogList = []
-    tmiClassAttendanceLog_1 = {
-        "classDate": date(2020, 8, 25),
-        "className": "English IV",
-        "attendanceType": "Unexcused Absence",
-        "teacherName": "Stanley",
-    }
-    tmiClassAttendanceLog_2 = {
-        "classDate": date(2020, 8, 26),
-        "className": "Scientific Research",
-        "attendanceType": "Excused Absence (But Missing Work)",
-        "teacherName": "Seigle",
-    }
-    tmiClassAttendanceLog_3 = {
-        "classDate": date(2020, 8, 27),
-        "className": "SAILS",
-        "attendanceType": "Tardy",
-        "teacherName": "Christopher",
-    }
-    tmiClassAttendanceLog_4 = {
-        "classDate": date(2020, 8, 28),
-        "className": "Multimedia",
-        "attendanceType": "Tardy",
-        "teacherName": "McCoy",
-    }
-    tmiClassAttendanceLog_5 = {
-        "classDate": date(2020, 8, 31),
-        "className": "STEM IV",
-        "attendanceType": "Tardy",
-        "teacherName": "Lowry",
-    }
-
-    classAttendanceLogList.append(tmiClassAttendanceLog_1)
-    classAttendanceLogList.append(tmiClassAttendanceLog_2)
-    classAttendanceLogList.append(tmiClassAttendanceLog_3)
-    classAttendanceLogList.append(tmiClassAttendanceLog_4)
-    classAttendanceLogList.append(tmiClassAttendanceLog_5)
-    # Create templateParams dictionary used for rendering email templates
-    templateParams = {
-        "studentFirstName": "Smarty",
-        "studentLastName": "Tester",
-        "startDate": date(2020, 9, 1),
-        "endDate": date(2020, 9, 8),
-        "tmiDate": date(2020, 9, 4),
-        "tmiMinutes": 330,
-        "classDate": date(2020, 8, 31),
-        "className": "English IV",
-        "attendanceType": "Unexcused Absence",
-        "teacherName": "Stanley",
-        "classAttendanceLogList": classAttendanceLogList,
-        "comment": "random comment for testing",
-    }
-    jinja2Rendered_emailSubject, jinja2Rendered_templateContent = renderEmailTemplate(
-        emailSubject, templateContent, templateParams
-    )
-    flash("Test template rendered!", "success")
-    return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
-
-
 @p2mtTemplates_bp.route("/p2mttemplates/<int:log_id>/delete", methods=["POST"])
 def delete_p2mtTemplate(log_id):
+    # Handle deleting of existing templates
     log = p2mtTemplates.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.templateTitle}"
     printLogEntry("Running delete_p2mtTemplate(" + LogDetails + ")")
@@ -223,69 +166,6 @@ def delete_p2mtTemplate(log_id):
     db.session.commit()
     flash("Template has been deleted!", "success")
     return redirect(url_for("p2mtTemplates_bp.displayTemplates"))
-
-
-@p2mtTemplates_bp.route("/printtemplate")
-def sendDressCodeInterventionEmail():
-    chattStateANumber = "A12345678"
-    subject = "STEM Dress Intervention"
-    interventionID = 4
-    interventionLevel = 1
-    templateParams = {"startDate": date(2020, 9, 1), "endDate": date(2020, 9, 8)}
-    sendInterventionEmail(
-        chattStateANumber, subject, interventionID, interventionLevel, templateParams
-    )
-    return redirect(url_for("p2mtTemplates_bp.displayTemplates"))
-
-
-def getInterventionTemplate(interventionID, interventionLevel):
-    interventionEmailTemplate = (
-        p2mtTemplates.query()
-        .filter(
-            p2mtTemplates.intervention_id == interventionID,
-            p2mtTemplates.interventionLevel == interventionLevel,
-        )
-        .first()
-    )
-    return interventionEmailTemplate
-
-
-def sendInterventionEmail(
-    chattStateANumber, subject, interventionID, interventionLevel, templateParams
-):
-    studentOnlyFlag = False
-    #   formatStudentAndParentEmailAddress(Chatt_State_A_Number, connection, studentOnlyFlag)
-    interventionEmailTemplate = p2mtTemplates.query.filter(
-        p2mtTemplates.intervention_id == interventionID,
-        p2mtTemplates.interventionLevel == interventionLevel,
-    ).first()
-
-    if interventionEmailTemplate != None:
-        jinja2_email_subject = Template(interventionEmailTemplate.emailSubject)
-        print(
-            jinja2_email_subject.render(
-                studentFirstName=chattStateANumber, studentLastName=chattStateANumber
-            )
-        )
-        jinja2_template_content = Template(interventionEmailTemplate.templateContent)
-        print(
-            jinja2_template_content.render(
-                studentFirstName=chattStateANumber,
-                startDate=templateParams["startDate"],
-                endDate=templateParams["endDate"],
-            )
-        )
-
-    # Applying template parameters
-    # bodyTemplate = HtmlService.createTemplate(templateBlob)
-    # bodyTemplate.data = templateParams
-    # body = bodyTemplate.evaluate().getContent()
-
-    # Sending email
-    # sendEmail(to, subject, body)
-
-    # console.log('sendInterventionEmail: Intervention=' + interventionID + ' level=' + level + ' interventionTemplate=' + interventionTemplate)
-    return
 
 
 # Generic_Intervention_Template = '1xBroas-qCXOAP2wrlLMKQERjyYMX-Ycv'

@@ -1,4 +1,5 @@
 import re
+from operator import itemgetter
 from P2MT_App import db
 from P2MT_App.scheduleAdmin.ScheduleAdmin import addClassSchedule
 from P2MT_App.models import SchoolCalendar, ClassSchedule
@@ -104,3 +105,37 @@ def propagateLearningLab(classSchedule_id, startDate, endDate, schoolYear, semes
         # print("Friday:", classSchedule_id, classDays)
         addClassAttendanceLog(classSchedule_id, list_of_fridays)
     return
+
+
+def updatelearningLabList(learningLabList, classDays, startTime, endTime):
+    # Create a dictionary for each learning lab day/time and append to a list
+    # For use in sending learning lab emails
+    for day in classDays:
+        # Note: dayNumber is used to sort learning lab days in order of weekday
+        if day == "M":
+            dayNumber = 1
+            dayName = "Mondays"
+        elif day == "T":
+            dayNumber = 2
+            dayName = "Tuesdays"
+        elif day == "W":
+            dayNumber = 3
+            dayName = "Wednesdays"
+        elif day == "R":
+            dayNumber = 4
+            dayName = "Thursdays"
+        elif day == "F":
+            dayNumber = 5
+            dayName = "Fridays"
+        learningLabListItem = {
+            "dayNumber": dayNumber,
+            "learningLabDay": dayName,
+            "startTime": startTime,
+            "endTime": endTime,
+        }
+        learningLabList.append(learningLabListItem)
+    # Use nifty itemgetter function (from operator import itemgetter) to sort learning labs by day and time
+    learningLabListSorted = sorted(
+        learningLabList, key=itemgetter("dayNumber", "startTime")
+    )
+    return learningLabListSorted
