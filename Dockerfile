@@ -15,6 +15,8 @@ RUN set -ex; \
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
+# Turn off buffering for Python print statements to stdout
+ENV PYTHONUNBUFFERED True
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
