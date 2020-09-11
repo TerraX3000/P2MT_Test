@@ -2,10 +2,11 @@ import re
 from operator import itemgetter
 from P2MT_App import db
 from P2MT_App.scheduleAdmin.ScheduleAdmin import addClassSchedule
-from P2MT_App.models import SchoolCalendar, ClassSchedule
+from P2MT_App.models import SchoolCalendar, ClassSchedule, Student
 from P2MT_App.main.utilityfunctions import printLogEntry, createListOfDates
+from P2MT_App.main.referenceData import getStudentGoogleCalendar
 from P2MT_App.scheduleAdmin.ScheduleAdmin import addClassAttendanceLog
-from P2MT_App.googleAPI.googleCalendar import addCalendarEvent
+from P2MT_App.googleAPI.googleCalendar import addCalendarEvent, deleteCalendarEvent
 
 
 def addLearningLabTimeAndDays(
@@ -33,8 +34,8 @@ def addLearningLabTimeAndDays(
         classDays = classDays + classDay
 
     # Add learning lab to student schedule in Google Calendar
-    eventName = className + "Learning Lab"
-    location = teacherLastName
+    eventName = className + " Learning Lab"
+    location = "STEM School (" + teacherLastName + ")"
     recurrence = "weekly_recurrence_placeholder"
     googleCalendarEventID = addCalendarEvent(
         eventName,
@@ -156,3 +157,17 @@ def updatelearningLabList(learningLabList, classDays, startTime, endTime):
         learningLabList, key=itemgetter("dayNumber", "startTime")
     )
     return learningLabListSorted
+
+
+def deleteLearningLabFromGoogleCalendar(interventionLog_id):
+    learningLabClassSchedule = (
+        db.session.query(ClassSchedule)
+        .filter(ClassSchedule.interventionLog_id == interventionLog_id)
+        .all()
+    )
+    for learningLab in learningLabClassSchedule:
+        googleCalendar = getStudentGoogleCalendar(learningLab.chattStateANumber)
+        googleCalendarEventID = learningLab.googleCalendarEventID
+        deleteCalendarEvent(googleCalendar, googleCalendarEventID)
+        learningLab.googleCalendarEventID = ""
+    return

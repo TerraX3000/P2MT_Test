@@ -369,6 +369,28 @@ def getCurrent_Start_End_Tmi_Dates():
     return startTmiPeriod, endTmiPeriod, nextTmiDay
 
 
+def findEarliestPhaseIIDayNoEarlierThan(testDate, dayOfWeek):
+    earliestSchoolDayMatch = False
+    while not earliestSchoolDayMatch:
+        schoolCalendar = (
+            db.session.query(SchoolCalendar)
+            .filter(
+                SchoolCalendar.classDate == testDate,
+                SchoolCalendar.phaseIISchoolDay == True,
+            )
+            .first()
+        )
+        if schoolCalendar != None:
+            if schoolCalendar.day == dayOfWeek:
+                earliestDate = schoolCalendar.classDate
+                earliestSchoolDayMatch = True
+            else:
+                testDate = testDate + timedelta(days=1)
+        else:
+            testDate = testDate + timedelta(days=1)
+    return testDate
+
+
 def getP2mtTemplatesToEdit():
     p2mtTemplatesValueLabelTupleList = (
         db.session.query(p2mtTemplates.id, p2mtTemplates.templateTitle)
