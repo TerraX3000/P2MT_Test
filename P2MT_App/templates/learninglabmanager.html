@@ -122,6 +122,7 @@
 
         <div class="w3-row w3-padding-large">
           {{ addSingleClassSchedule.submitAddSingleClassSchedule(class="w3-btn w3-blue w3-large") }}
+          <button class="w3-button w3-grey w3-large" onclick="resetForm(event)">Reset Form</button>
         </div>
       </fieldset>
     </form>
@@ -174,7 +175,7 @@
 
 
       <!-- Modal -->
-      <div class="w3-modal" id="deleteModal{{ClassSchedule.id}}">
+      <!-- <div class="w3-modal" id="deleteModal{{ClassSchedule.id}}">
         <div class="w3-container">
           <div class="w3-modal-content" style="width:50%">
             <header class="w3-container w3-red">
@@ -194,7 +195,7 @@
             </footer>
           </div>
         </div>
-      </div>
+      </div> -->
 
       {% endfor %}
     </tbody>
@@ -229,28 +230,33 @@
 <script type='text/javascript'>
   document.addEventListener("DOMContentLoaded", function (event) {
     // For each Add Time and Days block, disable the time and day inputs
-    // Get the four fieldsets to disable
-    var addTimeAndDayFieldset = document.querySelectorAll("fieldset[id^=fieldset_addTimeAndDays_");
-    // console.log("addTimeAndDayFieldset.length = " + addTimeAndDayFieldset.length)
-    // Cycle through each fieldset
-    for (j = 0; j < addTimeAndDayFieldset.length; j++) {
-      // Find all child nodes of the fieldset
-      fieldSetChildNodes = addTimeAndDayFieldset[j].querySelectorAll("*");
-      // console.log('fieldSetChildNodes = ' + fieldSetChildNodes.length);
-      // For each childnode, disable the childnode unless it is the Add Time checkbox
-      for (i = 0; i < fieldSetChildNodes.length; i++) {
-        // console.log('fieldSetChildNodes = ' + fieldSetChildNodes[i].id);
-        if (fieldSetChildNodes[i].id.search('addTimeAndDays') < 0) {
-          fieldSetChildNodes[i].disabled = true;
-          // console.log('search result = ' + fieldSetChildNodes[i].id.search('addTimeAndDays'));
-          // If the childnode is the Add Time checkbox, uncheck the box
-        } else if (fieldSetChildNodes[i].id.search('addTimeAndDays') == 0) {
-          document.getElementById(fieldSetChildNodes[i].id).checked = false;
-          // console.log('Checkbox value =' + fieldSetChildNodes[i].checked);
-        }
-        // Change label color to dark grey
-        if (fieldSetChildNodes[i].nodeName == "LABEL") {
-          fieldSetChildNodes[i].className = fieldSetChildNodes[i].className.replace("w3-text-green", "w3-text-grey");
+    // First, see if there are saved settings stored in the session
+    var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
+    // if there aren't saved settings, reset the form
+    if (learningLabDetails_JSON == '') {
+      // Get the four fieldsets to disable
+      var addTimeAndDayFieldset = document.querySelectorAll("fieldset[id^=fieldset_addTimeAndDays_");
+      // console.log("addTimeAndDayFieldset.length = " + addTimeAndDayFieldset.length)
+      // Cycle through each fieldset
+      for (j = 0; j < addTimeAndDayFieldset.length; j++) {
+        // Find all child nodes of the fieldset
+        fieldSetChildNodes = addTimeAndDayFieldset[j].querySelectorAll("*");
+        // console.log('fieldSetChildNodes = ' + fieldSetChildNodes.length);
+        // For each childnode, disable the childnode unless it is the Add Time checkbox
+        for (i = 0; i < fieldSetChildNodes.length; i++) {
+          // console.log('fieldSetChildNodes = ' + fieldSetChildNodes[i].id);
+          if (fieldSetChildNodes[i].id.search('addTimeAndDays') < 0) {
+            fieldSetChildNodes[i].disabled = true;
+            // console.log('search result = ' + fieldSetChildNodes[i].id.search('addTimeAndDays'));
+            // If the childnode is the Add Time checkbox, uncheck the box
+          } else if (fieldSetChildNodes[i].id.search('addTimeAndDays') == 0) {
+            document.getElementById(fieldSetChildNodes[i].id).checked = false;
+            // console.log('Checkbox value =' + fieldSetChildNodes[i].checked);
+          }
+          // Change label color to dark grey
+          if (fieldSetChildNodes[i].nodeName == "LABEL") {
+            fieldSetChildNodes[i].className = fieldSetChildNodes[i].className.replace("w3-text-green", "w3-text-grey");
+          }
         }
       }
     }
@@ -289,6 +295,74 @@
         }
       }
     }
+  }
+</script>
+
+<script>
+  var submitLearningLab = document.querySelector("input[id=submitAddSingleClassSchedule]");
+  // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+  submitLearningLab.addEventListener("click", function () { saveLearningLabValues(event); });
+
+  function saveLearningLabValues(evt) {
+    inputFields = document.querySelectorAll("input")
+    var learningLabDetails = [];
+    var object = {};
+    for (i = 0; i < inputFields.length; i++) {
+      // Don't save csrf_token
+      if (inputFields[i].id != "csrf_token") {
+        if (inputFields[i].type == "checkbox") {
+          input_value = inputFields[i].checked;
+        } else {
+          input_value = inputFields[i].value;
+        }
+        input_name = inputFields[i].id;
+        // console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
+        // learningLabDetails.push({ input_name: input_value });
+        // object = { [input_name]: input_value };
+        object[input_name] = input_value;
+        myJSON = JSON.stringify(object);
+        // console.log('myJSON =' + myJSON);
+        // learningLabDetails.push([input_name, input_value]);
+      }
+    }
+    // console.log("learningLabDetails = " + learningLabDetails);
+    // console.log("learningLabDetails = " + learningLabDetails.jsonify);
+    console.log('myJSON =' + myJSON);
+    sessionStorage.setItem("SavedLearningLabDetails", myJSON);
+  }
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    // On page load, check whether there are saved learning lab details in the session
+    // If there are, set the form values to the saved settings
+    var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
+    if (learningLabDetails_JSON) {
+      if (learningLabDetails_JSON != "") {
+        // Convert the saved settings into a JSON
+        var learningLabDetails = JSON.parse(learningLabDetails_JSON);
+        // Loop through the JSON
+        for (property in learningLabDetails) {
+          // console.log(property + ' = ' + learningLabDetails[property]);
+          element = document.getElementById(property);
+          // Set checkboxes to be checked or not checked
+          if (element.type == "checkbox") {
+            element.checked = learningLabDetails[property];
+            // Set other input values to their saved values
+          } else {
+            element.value = learningLabDetails[property];
+          }
+        }
+      }
+    }
+  });
+
+</script>
+
+<script>
+  function resetForm(evt) {
+    console.log('Reset form pressed');
+    sessionStorage.setItem("SavedLearningLabDetails", "");
   }
 </script>
 
