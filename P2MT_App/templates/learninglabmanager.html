@@ -49,8 +49,8 @@
 </div>
 {% endmacro %}
 
-{% macro macro_addTimeAndDays(addTime,startTime,endTime,classDays) %}
-<fieldset class="w3-container w3-hover-border-green">
+{% macro macro_addTimeAndDays(idName,addTime,startTime,endTime,classDays) %}
+<fieldset class="w3-container w3-hover-border-green" id="fieldset_{{idName}}">
   <legend class="w3-medium">Add Time and Days</legend>
   <div class="w3-cell-row w3-padding-small">
     {{ macro_display_checkbox(addTime, "w3-cell") }}
@@ -114,11 +114,11 @@
           {{ macro_display_formfield(addSingleClassSchedule.comment, "w3-half") }}
         </div>
 
-        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays,addSingleClassSchedule.startTime,addSingleClassSchedule.endTime,addSingleClassSchedule.classDays) }}
-        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays2,addSingleClassSchedule.startTime2,addSingleClassSchedule.endTime2,addSingleClassSchedule.classDays2) }}
-        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays3,addSingleClassSchedule.startTime3,addSingleClassSchedule.endTime3,addSingleClassSchedule.classDays3) }}
-        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays4,addSingleClassSchedule.startTime4,addSingleClassSchedule.endTime4,addSingleClassSchedule.classDays4) }}
-        {{ macro_addTimeAndDays(addSingleClassSchedule.addTimeAndDays5,addSingleClassSchedule.startTime5,addSingleClassSchedule.endTime5,addSingleClassSchedule.classDays5) }}
+        {{ macro_addTimeAndDays("addTimeAndDays",addSingleClassSchedule.addTimeAndDays,addSingleClassSchedule.startTime,addSingleClassSchedule.endTime,addSingleClassSchedule.classDays) }}
+        {{ macro_addTimeAndDays("addTimeAndDays_2",addSingleClassSchedule.addTimeAndDays2,addSingleClassSchedule.startTime2,addSingleClassSchedule.endTime2,addSingleClassSchedule.classDays2) }}
+        {{ macro_addTimeAndDays("addTimeAndDays_3",addSingleClassSchedule.addTimeAndDays3,addSingleClassSchedule.startTime3,addSingleClassSchedule.endTime3,addSingleClassSchedule.classDays3) }}
+        {{ macro_addTimeAndDays("addTimeAndDays_4",addSingleClassSchedule.addTimeAndDays4,addSingleClassSchedule.startTime4,addSingleClassSchedule.endTime4,addSingleClassSchedule.classDays4) }}
+        {{ macro_addTimeAndDays("addTimeAndDays_5",addSingleClassSchedule.addTimeAndDays5,addSingleClassSchedule.startTime5,addSingleClassSchedule.endTime5,addSingleClassSchedule.classDays5) }}
 
         <div class="w3-row w3-padding-large">
           {{ addSingleClassSchedule.submitAddSingleClassSchedule(class="w3-btn w3-blue w3-large") }}
@@ -228,11 +228,31 @@
 
 <script type='text/javascript'>
   document.addEventListener("DOMContentLoaded", function (event) {
-    var addTimeCheckBoxes = document.querySelectorAll("input[id^=addTimeAndDays]");
-    console.log('addTimeCheckBoxes.length = ' + addTimeCheckBoxes.length);
-    for (i = 0; i < addTimeCheckBoxes.length; i++) {
-      console.log('Clicking ' + addTimeCheckBoxes[i].id + ' on click # ' + i);
-      // addTimeCheckBoxes[i].click();
+    // For each Add Time and Days block, disable the time and day inputs
+    // Get the four fieldsets to disable
+    var addTimeAndDayFieldset = document.querySelectorAll("fieldset[id^=fieldset_addTimeAndDays_");
+    // console.log("addTimeAndDayFieldset.length = " + addTimeAndDayFieldset.length)
+    // Cycle through each fieldset
+    for (j = 0; j < addTimeAndDayFieldset.length; j++) {
+      // Find all child nodes of the fieldset
+      fieldSetChildNodes = addTimeAndDayFieldset[j].querySelectorAll("*");
+      // console.log('fieldSetChildNodes = ' + fieldSetChildNodes.length);
+      // For each childnode, disable the childnode unless it is the Add Time checkbox
+      for (i = 0; i < fieldSetChildNodes.length; i++) {
+        // console.log('fieldSetChildNodes = ' + fieldSetChildNodes[i].id);
+        if (fieldSetChildNodes[i].id.search('addTimeAndDays') < 0) {
+          fieldSetChildNodes[i].disabled = true;
+          // console.log('search result = ' + fieldSetChildNodes[i].id.search('addTimeAndDays'));
+          // If the childnode is the Add Time checkbox, uncheck the box
+        } else if (fieldSetChildNodes[i].id.search('addTimeAndDays') == 0) {
+          document.getElementById(fieldSetChildNodes[i].id).checked = false;
+          // console.log('Checkbox value =' + fieldSetChildNodes[i].checked);
+        }
+        // Change label color to dark grey
+        if (fieldSetChildNodes[i].nodeName == "LABEL") {
+          fieldSetChildNodes[i].className = fieldSetChildNodes[i].className.replace("w3-text-green", "w3-text-grey");
+        }
+      }
     }
   });
 </script>
@@ -262,8 +282,10 @@
       if (fieldSetChildNodes[i] != addTimeAndDayCheckBox) {
         if (addTimeAndDayCheckBox.checked) {
           fieldSetChildNodes[i].disabled = false;
+          fieldSetChildNodes[i].className = fieldSetChildNodes[i].className.replace("w3-text-grey", "w3-text-green");
         } else {
           fieldSetChildNodes[i].disabled = true;
+          fieldSetChildNodes[i].className = fieldSetChildNodes[i].className.replace("w3-text-green", "w3-text-grey");
         }
       }
     }
