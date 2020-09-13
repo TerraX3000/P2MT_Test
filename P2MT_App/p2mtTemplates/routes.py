@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, Blueprint, request
+from flask import render_template, redirect, url_for, flash, Blueprint, request, Markup
 from jinja2 import Template
 from P2MT_App import db
 from P2MT_App.models import p2mtTemplates, InterventionType
@@ -152,7 +152,7 @@ def displayTemplates():
         editTemplateForm=editTemplateFormDetails,
         testTemplateForm=testTemplateFormDetails,
         rendered_emailSubject=jinja2Rendered_emailSubject,
-        rendered_templateContent=jinja2Rendered_templateContent,
+        rendered_templateContent=Markup(jinja2Rendered_templateContent),
     )
 
 

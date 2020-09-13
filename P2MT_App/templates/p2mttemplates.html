@@ -116,10 +116,8 @@
           {{ macro_display_formfield(editTemplateForm.emailSubject, "w3-half") }}
           {% if rendered_emailSubject %}
           <div class="w3-half">
-            <label class="w3-text-green w3-large" for="Rendered Email Subject">Example of Rendered Email
-              Subject:</label>
-            <input id="Rendered Email Subject" class="w3-padding-small w3-select w3-section" type="text"
-              value="{{rendered_emailSubject}}">
+            <label class="w3-text-green w3-large">Example of Rendered Email Subject:</label>
+            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_emailSubject}}</p>
           </div>
           {% endif %}
         </div>
@@ -128,9 +126,8 @@
           {{ macro_display_formfield(editTemplateForm.templateContent, "w3-half") }}
           {% if rendered_templateContent %}
           <div class="w3-half">
-            <label class="w3-text-green w3-large" for="Rendered Content">Example of Rendered Content:</label>
-            <textarea id="Rendered Content" class="w3-padding-small w3-select w3-section"
-              rows="20">{{rendered_templateContent}}</textarea>
+            <label class="w3-text-green w3-large">Example of Rendered Content:</label>
+            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_templateContent}}</p>
           </div>
           {% endif %}
         </div>
@@ -290,31 +287,37 @@
       standard template variables. However, some of the template variables are only applicable for certain
       interventions. For example, tmiMinutes is only applicable for emails involving TMI.</p>
     <p> Standard template variables: </p>
-    <p> {{ studentFirstName }} </p>
-    <p> {{ studentLastName }} </p>
-    <p> {{ startDate }} </p>
-    <p> {{ endDate }} </p>
-    <p> {{ tmiDate }} </p>
-    <p> {{ tmiMinutes }} </p>
-    <p> {{ classDate }} </p>
-    <p> {{ className }} </p>
-    <p> {{ attendanceType }} </p>
-    <p> {{ teacherLastName }} </p>
-    <p> {{ comment }} </p>
-    <p> {{ classAttendanceLogList }} = list of entries for TMI message testing. Each entry contains data
-      for the
-      following items: </p>
-    <p> {{ classDate }} </p>
-    <p> {{ className }} </p>
-    <p> {{ attendanceType }} </p>
-    <p> {{ teacherLastName }}</p>
-    <p> {{ learningLabList }} = list of entries for learning lab message testing. Each entry contains
-      data
-      for the
-      following items: </p>
-    <p> {{ learningLabDay }} </p>
-    <p> {{ startTime }} </p>
-    <p> {{ endTime }} </p>
+    <div class="w3-row">
+      <div class="w3-third">
+        <p> {{ studentFirstName }} </p>
+        <p> {{ studentLastName }} </p>
+        <p> {{ startDate }} </p>
+        <p> {{ endDate }} </p>
+        <p> {{ tmiDate }} </p>
+        <p> {{ tmiMinutes }} </p>
+        <p> {{ classDate }} </p>
+        <p> {{ className }} </p>
+        <p> {{ attendanceType }} </p>
+        <p> {{ teacherLastName }} </p>
+        <p> {{ comment }} </p>
+      </div>
+      <div class="w3-rest">
+        <p> {{ classAttendanceLogList }} = list of entries for TMI message testing. Each entry contains data
+          for the
+          following items: </p>
+        <p> {{ classDate }} </p>
+        <p> {{ className }} </p>
+        <p> {{ attendanceType }} </p>
+        <p> {{ teacherLastName }}</p>
+        <p> {{ learningLabList }} = list of entries for learning lab message testing. Each entry contains
+          data
+          for the
+          following items: </p>
+        <p> {{ learningLabDay }} </p>
+        <p> {{ startTime }} </p>
+        <p> {{ endTime }} </p>
+      </div>
+    </div>
     <br>
     <h1>Date and Time Formatting</h1>
     <p> Variables representing dates and times can be formatted by appending special formatting codes as shown in these
@@ -322,9 +325,16 @@
     <p> {{ endDate.strftime('%A, %B %-d, %Y') }} = Tuesday, September 8, 2020</p>
     <p> {{ endDate.strftime('%-m/%-d/%y') }} = 9/8/20</p>
     <p> {{ endDate.strftime('%a %b %-d') }} = Tue Sep 8</p>
-    <p> {{ startTime.strftime('%-I:%M') }}= 9:30</p>
+    <p> {{ startTime.strftime('%-I:%M %p') }}= 9:30 AM</p>
     <p> Refer to this <a href="https://www.programiz.com/python-programming/datetime/strftime">Python time format
         guide</a> for more examples.</p>
+    <br>
+    <h1>HTML Formatting</h1>
+    <p> Templates may use HTML formatting such as applying a bold text style or adding hyperlinks.</p>
+    <p> Examples:</p>
+    <p> &lt;b&gt;This text will be bold&lt;/b&gt;</p>
+    <p> Please see &lt;a href=&quot;{{studentScheduleLink}}&quot;&gt;this link&lt;/a&gt; to your revised schedule</p>
+    <br>
     <h1>Advanced Template Controls</h1>
     <p> In addition to these variables, templates can use Jinja templating controls to achieve the desired outcome.
       Refer to the <a href='https://jinja.palletsprojects.com/en/2.11.x/templates/'>Jinja documentation for details.</a>
@@ -350,19 +360,17 @@
           {{ macro_display_formfield(testTemplateForm.emailSubject, "w3-half") }}
           {% if rendered_emailSubject %}
           <div class="w3-half">
-            <label class="w3-text-green w3-large" for="Rendered Email Subject">Rendered Email Subject:</label>
-            <input id="Rendered Email Subject" class="w3-padding-small w3-select w3-section" type="text"
-              value="{{rendered_emailSubject}}">
+            <label class="w3-text-green w3-large">Example of Rendered Email Subject:</label>
+            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_emailSubject}}</p>
           </div>
           {% endif %}
         </div>
         <div class="w3-row-padding">
           {{ macro_display_formfield(testTemplateForm.templateContent, "w3-half") }}
-          {% if rendered_templateContent %}
+          {% if rendered_templateContent != 'None' %}
           <div class="w3-half">
-            <label class="w3-text-green w3-large" for="Rendered Content">Rendered Content:</label>
-            <textarea id="Rendered Content" class="w3-padding-small w3-select w3-section"
-              rows="20">{{rendered_templateContent}}</textarea>
+            <label class="w3-text-green w3-large">Example of Rendered Content:</label>
+            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_templateContent}}</p>
           </div>
           {% endif %}
         </div>
