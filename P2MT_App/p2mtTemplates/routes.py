@@ -51,7 +51,7 @@ def displayTemplates():
             p2mtTemplates.interventionLevel,
         )
         .select_from(p2mtTemplates)
-        .join(InterventionType)
+        .outerjoin(InterventionType)
         .order_by(
             InterventionType.interventionType,
             p2mtTemplates.interventionLevel,

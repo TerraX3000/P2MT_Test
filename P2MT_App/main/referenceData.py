@@ -394,7 +394,7 @@ def findEarliestPhaseIIDayNoEarlierThan(testDate, dayOfWeek):
 def getP2mtTemplatesToEdit():
     p2mtTemplatesValueLabelTupleList = (
         db.session.query(p2mtTemplates.id, p2mtTemplates.templateTitle)
-        .join(InterventionType)
+        .outerjoin(InterventionType)
         .order_by(
             InterventionType.interventionType,
             p2mtTemplates.interventionLevel,

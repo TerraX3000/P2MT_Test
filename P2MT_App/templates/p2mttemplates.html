@@ -79,8 +79,12 @@
           {{ macro_colorCode_tdField(p2mtTemplate.sendToStudent) }}
           {{ macro_colorCode_tdField(p2mtTemplate.sendToParent) }}
           {{ macro_colorCode_tdField(p2mtTemplate.sendToTeacher) }}
+          {% if p2mtTemplate.interventionType != None %}
           <td>{{ p2mtTemplate.interventionType }}</td>
+          {% endif %}
+          {% if p2mtTemplate.interventionLevel != None %}
           <td class="w3-center">{{ p2mtTemplate.interventionLevel }}</td>
+          {% endif %}
         </tr>
         {% endfor %}
       </tbody>
