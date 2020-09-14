@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request
-from datetime import date
+from datetime import date, datetime
 from P2MT_App import db
 from P2MT_App.models import InterventionLog, ClassSchedule, Student
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -16,6 +16,8 @@ from P2MT_App.main.referenceData import (
     getCurrentSchoolYear,
     getCurrentSemester,
     getInterventionId,
+    getStartTimeChoices,
+    getEndTimeChoices,
 )
 from P2MT_App.scheduleAdmin.forms import addSingleClassSchedule
 from P2MT_App.scheduleAdmin.routes import addClassSchedule
@@ -58,6 +60,8 @@ def displayLearningLab():
     addLearningLabDetails.classDays3.choices = getClassDayChoices()
     addLearningLabDetails.classDays4.choices = getClassDayChoices()
     addLearningLabDetails.classDays5.choices = getClassDayChoices()
+    addLearningLabDetails.startTime2.choices = getStartTimeChoices()
+    addLearningLabDetails.endTime2.choices = getEndTimeChoices()
     addLearningLabDetails.submitAddSingleClassSchedule.label.text = (
         "Submit New Learning Lab"
     )
@@ -151,12 +155,18 @@ def displayLearningLab():
                     addLearningLabDetails.endTime.data,
                 )
             if addLearningLabDetails.addTimeAndDays2.data:
+                startTime2 = datetime.strptime(
+                    addLearningLabDetails.startTime2.data, "%I:%M"
+                ).time()
+                endTime2 = datetime.strptime(
+                    addLearningLabDetails.endTime2.data, "%I:%M"
+                ).time()
                 print("Adding learning lab time 2")
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays2.data,
-                    addLearningLabDetails.startTime2.data,
-                    addLearningLabDetails.endTime2.data,
+                    startTime2,
+                    endTime2,
                 )
                 propagateLearningLab(
                     learningLabClassSchedule.id,
@@ -168,8 +178,8 @@ def displayLearningLab():
                 learningLabList = updatelearningLabList(
                     learningLabList,
                     addLearningLabDetails.classDays2.data,
-                    addLearningLabDetails.startTime2.data,
-                    addLearningLabDetails.endTime2.data,
+                    startTime2,
+                    endTime2,
                 )
             if addLearningLabDetails.addTimeAndDays3.data:
                 print("Adding learning lab time 3")

@@ -233,7 +233,7 @@
     // First, see if there are saved settings stored in the session
     var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
     // if there aren't saved settings, reset the form
-    if (learningLabDetails_JSON == '') {
+    if (learningLabDetails_JSON == null || learningLabDetails_JSON == '') {
       // Get the four fieldsets to disable
       var addTimeAndDayFieldset = document.querySelectorAll("fieldset[id^=fieldset_addTimeAndDays_");
       // console.log("addTimeAndDayFieldset.length = " + addTimeAndDayFieldset.length)
@@ -299,14 +299,34 @@
 </script>
 
 <script>
-  var submitLearningLab = document.querySelector("input[id=submitAddSingleClassSchedule]");
-  // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+  // var submitLearningLab = document.querySelector("input[id=submitAddSingleClassSchedule]");
+  var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
   submitLearningLab.addEventListener("click", function () { saveLearningLabValues(event); });
 
   function saveLearningLabValues(evt) {
-    inputFields = document.querySelectorAll("input")
+    selectFields = document.querySelectorAll("select");
+    inputFields = document.querySelectorAll("input");
     var learningLabDetails = [];
     var object = {};
+    for (i = 0; i < selectFields.length; i++) {
+      // Don't save student name
+      if (selectFields[i].id != "studentName") {
+        console.log('selectfield = ' + selectFields[i].id)
+        input_value = selectFields[i].value;
+        input_name = selectFields[i].id;
+        // console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
+        // learningLabDetails.push({ input_name: input_value });
+        // object = { [input_name]: input_value };
+        object[input_name] = input_value;
+        myJSON = JSON.stringify(object);
+        // console.log('myJSON =' + myJSON);
+        // learningLabDetails.push([input_name, input_value]);
+      }
+    }
+    // teacherNameInput = document.querySelector("select[id=teacherName]");
+    // object[teacherNameInput.id] = teacherNameInput.value;
+    // classNameInput = document.querySelector("select[id=className]");
+    // object[classNameInput.id] = classNameInput.value;
     for (i = 0; i < inputFields.length; i++) {
       // Don't save csrf_token
       if (inputFields[i].id != "csrf_token") {
@@ -316,7 +336,7 @@
           input_value = inputFields[i].value;
         }
         input_name = inputFields[i].id;
-        // console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
+        console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
         // learningLabDetails.push({ input_name: input_value });
         // object = { [input_name]: input_value };
         object[input_name] = input_value;

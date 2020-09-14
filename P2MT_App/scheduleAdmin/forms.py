@@ -56,16 +56,18 @@ class addSingleClassSchedule(FlaskForm):
 
     addTimeAndDays2 = BooleanField("Add", default=True)
     classDays2 = MultiCheckboxField("Class Days")
-    startTime2 = TimeField(
-        "Start Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-    endTime2 = TimeField(
-        "End Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
+    startTime2 = SelectField("Start Time", validators=[Optional()])
+    endTime2 = SelectField("End Time", validators=[Optional()])
+    # startTime2 = TimeField(
+    #     "Start Time",
+    #     validators=[Optional()],
+    #     render_kw={"placeholder": "HH:MM 24-Hour Format"},
+    # )
+    # endTime2 = TimeField(
+    #     "End Time",
+    #     validators=[Optional()],
+    #     render_kw={"placeholder": "HH:MM 24-Hour Format"},
+    # )
 
     addTimeAndDays3 = BooleanField("Add", default=True)
     classDays3 = MultiCheckboxField("Class Days")

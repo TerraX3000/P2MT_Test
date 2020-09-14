@@ -169,6 +169,7 @@ def getStudents():
         .order_by(Student.lastName)
         .all()
     )
+    studentTupleList.insert(0, ("", "", ""))
     studentValueLabelTupleList = [
         (item[0], item[1] + " " + item[2]) for item in studentTupleList
     ]
@@ -182,6 +183,7 @@ def getStudentsById():
         .order_by(Student.lastName)
         .all()
     )
+    studentTupleList.insert(0, ("", "", ""))
     studentValueLabelTupleList = [
         (item[0], item[1] + " " + item[2]) for item in studentTupleList
     ]
@@ -269,6 +271,46 @@ def getClassDayChoices():
         ("F", "F"),
     ]
     return classDayChoices
+
+
+def getStartTimeChoices():
+    startTimeChoices = [
+        ("9:30", "9:30"),
+        ("10:00", "10:00"),
+        ("10:30", "10:30"),
+        ("11:00", "11:00"),
+        ("11:30", "11:30"),
+        ("12:00", "12:00"),
+        ("12:30", "12:30"),
+        ("1:00", "1:00"),
+        ("1:30", "1:30"),
+        ("2:00", "2:00"),
+        ("2:30", "2:30"),
+        ("3:00", "3:00"),
+        ("3:30", "3:30"),
+        ("4:00", "4:00"),
+    ]
+    return startTimeChoices
+
+
+def getEndTimeChoices():
+    endTimeChoices = [
+        ("10:00", "10:00"),
+        ("10:30", "10:30"),
+        ("11:00", "11:00"),
+        ("11:30", "11:30"),
+        ("12:00", "12:00"),
+        ("12:30", "12:30"),
+        ("1:00", "1:00"),
+        ("1:30", "1:30"),
+        ("2:00", "2:00"),
+        ("2:30", "2:30"),
+        ("3:00", "3:00"),
+        ("3:30", "3:30"),
+        ("4:00", "4:00"),
+        ("4:30", "4:30"),
+    ]
+    return endTimeChoices
 
 
 def getHouseNames():
