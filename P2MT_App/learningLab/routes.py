@@ -20,6 +20,7 @@ from P2MT_App.main.referenceData import (
     getEndTimeChoices,
 )
 from P2MT_App.scheduleAdmin.forms import addSingleClassSchedule
+from P2MT_App.learningLab.forms import addLearningLabToSchedule
 from P2MT_App.scheduleAdmin.routes import addClassSchedule
 from P2MT_App.learningLab.learningLab import (
     addLearningLabTimeAndDays,
@@ -42,7 +43,7 @@ def displayLearningLab():
     # This form includes several fields which can be pre-set rather
     # than including the fields on the form
     # Pre-setting the fields will avoid form validation errors later
-    addLearningLabDetails = addSingleClassSchedule()
+    addLearningLabDetails = addLearningLabToSchedule()
     # Pre-set campus equal to STEM School
     addLearningLabDetails.campus.choices = getCampusChoices()
     addLearningLabDetails.campus.data = "STEM School"
@@ -60,8 +61,6 @@ def displayLearningLab():
     addLearningLabDetails.classDays3.choices = getClassDayChoices()
     addLearningLabDetails.classDays4.choices = getClassDayChoices()
     addLearningLabDetails.classDays5.choices = getClassDayChoices()
-    addLearningLabDetails.startTime2.choices = getStartTimeChoices()
-    addLearningLabDetails.endTime2.choices = getEndTimeChoices()
     addLearningLabDetails.submitAddSingleClassSchedule.label.text = (
         "Submit New Learning Lab"
     )
@@ -135,11 +134,18 @@ def displayLearningLab():
             # Process each of the five possible entries of learning lab days/time
             if addLearningLabDetails.addTimeAndDays.data:
                 print("Adding learning lab time 1")
+                # Format time values from string objects to time objects
+                startTime = datetime.strptime(
+                    addLearningLabDetails.startTime.data, "%I:%M"
+                ).time()
+                endTime = datetime.strptime(
+                    addLearningLabDetails.endTime.data, "%I:%M"
+                ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays.data,
-                    addLearningLabDetails.startTime.data,
-                    addLearningLabDetails.endTime.data,
+                    startTime,
+                    endTime,
                 )
                 propagateLearningLab(
                     learningLabClassSchedule.id,
@@ -151,17 +157,19 @@ def displayLearningLab():
                 learningLabList = updatelearningLabList(
                     learningLabList,
                     addLearningLabDetails.classDays.data,
-                    addLearningLabDetails.startTime.data,
-                    addLearningLabDetails.endTime.data,
+                    startTime,
+                    endTime,
                 )
             if addLearningLabDetails.addTimeAndDays2.data:
+                print("Adding learning lab time 2")
+                # Format time values from string objects to time objects
                 startTime2 = datetime.strptime(
                     addLearningLabDetails.startTime2.data, "%I:%M"
                 ).time()
                 endTime2 = datetime.strptime(
                     addLearningLabDetails.endTime2.data, "%I:%M"
                 ).time()
-                print("Adding learning lab time 2")
+
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays2.data,
@@ -183,11 +191,18 @@ def displayLearningLab():
                 )
             if addLearningLabDetails.addTimeAndDays3.data:
                 print("Adding learning lab time 3")
+                # Format time values from string objects to time objects
+                startTime3 = datetime.strptime(
+                    addLearningLabDetails.startTime3.data, "%I:%M"
+                ).time()
+                endTime3 = datetime.strptime(
+                    addLearningLabDetails.endTime3.data, "%I:%M"
+                ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays3.data,
-                    addLearningLabDetails.startTime3.data,
-                    addLearningLabDetails.endTime3.data,
+                    startTime3,
+                    endTime3,
                 )
                 propagateLearningLab(
                     learningLabClassSchedule.id,
@@ -199,16 +214,23 @@ def displayLearningLab():
                 learningLabList = updatelearningLabList(
                     learningLabList,
                     addLearningLabDetails.classDays3.data,
-                    addLearningLabDetails.startTime3.data,
-                    addLearningLabDetails.endTime3.data,
+                    startTime3,
+                    endTime3,
                 )
             if addLearningLabDetails.addTimeAndDays4.data:
                 print("Adding learning lab time 4")
+                # Format time values from string objects to time objects
+                startTime4 = datetime.strptime(
+                    addLearningLabDetails.startTime4.data, "%I:%M"
+                ).time()
+                endTime4 = datetime.strptime(
+                    addLearningLabDetails.endTime4.data, "%I:%M"
+                ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays4.data,
-                    addLearningLabDetails.startTime4.data,
-                    addLearningLabDetails.endTime4.data,
+                    startTime4,
+                    endTime4,
                 )
                 propagateLearningLab(
                     learningLabClassSchedule.id,
@@ -220,16 +242,23 @@ def displayLearningLab():
                 learningLabList = updatelearningLabList(
                     learningLabList,
                     addLearningLabDetails.classDays4.data,
-                    addLearningLabDetails.startTime4.data,
-                    addLearningLabDetails.endTime4.data,
+                    startTime4,
+                    endTime4,
                 )
             if addLearningLabDetails.addTimeAndDays5.data:
                 print("Adding learning lab time 5")
+                # Format time values from string objects to time objects
+                startTime5 = datetime.strptime(
+                    addLearningLabDetails.startTime5.data, "%I:%M"
+                ).time()
+                endTime5 = datetime.strptime(
+                    addLearningLabDetails.endTime5.data, "%I:%M"
+                ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
                     addLearningLabDetails.classDays5.data,
-                    addLearningLabDetails.startTime5.data,
-                    addLearningLabDetails.endTime5.data,
+                    startTime5,
+                    endTime5,
                 )
                 propagateLearningLab(
                     learningLabClassSchedule.id,
@@ -241,8 +270,8 @@ def displayLearningLab():
                 learningLabList = updatelearningLabList(
                     learningLabList,
                     addLearningLabDetails.classDays5.data,
-                    addLearningLabDetails.startTime5.data,
-                    addLearningLabDetails.endTime5.data,
+                    startTime5,
+                    endTime5,
                 )
             print("learningLabList =", learningLabList)
             # Define learning lab parameters for intervention email

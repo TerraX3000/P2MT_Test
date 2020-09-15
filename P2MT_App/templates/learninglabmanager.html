@@ -28,7 +28,7 @@
     {% endfor %}
   </div>
   {% else %}
-  {{ formfield() }}
+  {{ formfield(class="w3-padding") }}
   {% endif %}
 </div>
 {% endmacro %}
@@ -50,7 +50,7 @@
 {% endmacro %}
 
 {% macro macro_addTimeAndDays(idName,addTime,startTime,endTime,classDays) %}
-<fieldset class="w3-container w3-hover-border-green" id="fieldset_{{idName}}">
+<fieldset class="w3-container w3-hover-border-green" id="fieldset{{idName}}">
   <legend class="w3-medium">Add Time and Days</legend>
   <div class="w3-cell-row w3-padding-small">
     {{ macro_display_checkbox(addTime, "w3-cell") }}
@@ -58,7 +58,7 @@
     {{ macro_display_formfield_cellrow(endTime) }}
     <div class="w3-cell">
       <div class="w3-cell">
-        {{ classDays.label(class="w3-text-green") }}
+        {{ classDays.label(class="w3-text-green", id=idName ) }}
         {% if classDays.errors %}
         {{ classDays(class="w3-check is-invalid") }}
         <div class="invalid-feedback">
@@ -114,11 +114,11 @@
           {{ macro_display_formfield(addSingleClassSchedule.comment, "w3-half") }}
         </div>
 
-        {{ macro_addTimeAndDays("addTimeAndDays",addSingleClassSchedule.addTimeAndDays,addSingleClassSchedule.startTime,addSingleClassSchedule.endTime,addSingleClassSchedule.classDays) }}
-        {{ macro_addTimeAndDays("addTimeAndDays_2",addSingleClassSchedule.addTimeAndDays2,addSingleClassSchedule.startTime2,addSingleClassSchedule.endTime2,addSingleClassSchedule.classDays2) }}
-        {{ macro_addTimeAndDays("addTimeAndDays_3",addSingleClassSchedule.addTimeAndDays3,addSingleClassSchedule.startTime3,addSingleClassSchedule.endTime3,addSingleClassSchedule.classDays3) }}
-        {{ macro_addTimeAndDays("addTimeAndDays_4",addSingleClassSchedule.addTimeAndDays4,addSingleClassSchedule.startTime4,addSingleClassSchedule.endTime4,addSingleClassSchedule.classDays4) }}
-        {{ macro_addTimeAndDays("addTimeAndDays_5",addSingleClassSchedule.addTimeAndDays5,addSingleClassSchedule.startTime5,addSingleClassSchedule.endTime5,addSingleClassSchedule.classDays5) }}
+        {{ macro_addTimeAndDays("_addTimeAndDays",addSingleClassSchedule.addTimeAndDays,addSingleClassSchedule.startTime,addSingleClassSchedule.endTime,addSingleClassSchedule.classDays) }}
+        {{ macro_addTimeAndDays("_addTimeAndDays_2",addSingleClassSchedule.addTimeAndDays2,addSingleClassSchedule.startTime2,addSingleClassSchedule.endTime2,addSingleClassSchedule.classDays2) }}
+        {{ macro_addTimeAndDays("_addTimeAndDays_3",addSingleClassSchedule.addTimeAndDays3,addSingleClassSchedule.startTime3,addSingleClassSchedule.endTime3,addSingleClassSchedule.classDays3) }}
+        {{ macro_addTimeAndDays("_addTimeAndDays_4",addSingleClassSchedule.addTimeAndDays4,addSingleClassSchedule.startTime4,addSingleClassSchedule.endTime4,addSingleClassSchedule.classDays4) }}
+        {{ macro_addTimeAndDays("_addTimeAndDays_5",addSingleClassSchedule.addTimeAndDays5,addSingleClassSchedule.startTime5,addSingleClassSchedule.endTime5,addSingleClassSchedule.classDays5) }}
 
         <div class="w3-row w3-padding-large">
           {{ addSingleClassSchedule.submitAddSingleClassSchedule(class="w3-btn w3-blue w3-large") }}
@@ -232,6 +232,49 @@
     // For each Add Time and Days block, disable the time and day inputs
     // First, see if there are saved settings stored in the session
     var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
+    // If there are saved settings, use them to set the select field and input field values
+    if (learningLabDetails_JSON) {
+      if (learningLabDetails_JSON != "") {
+        // Convert the saved settings into a JSON
+        var learningLabDetails = JSON.parse(learningLabDetails_JSON);
+        // Loop through the JSON
+        for (property in learningLabDetails) {
+          // console.log(property + ' = ' + learningLabDetails[property]);
+          element = document.getElementById(property);
+          // Verify if element exists and then set values
+          if (element != null) {
+            // Set checkboxes to be checked or not checked
+            if (element.type == "checkbox") {
+              element.checked = learningLabDetails[property]["value"];
+
+              // Set other input values to their saved values
+              // Don't set values for labels since they don't have values
+            } else if (element.nodeName != "LABEL") {
+              element.value = learningLabDetails[property]["value"];
+            }
+            // Set the disabled and className properties of elements 
+            // Note: this also sets the className property on the labels with id=_addTimeAndDay, etc.
+            element.disabled = learningLabDetails[property]["disabled"];
+            element.className = learningLabDetails[property]["className"];
+            // console.log("element =" + element.id + learningLabDetails[property]["type"]);
+            // Set label className (which defines text color) except for the labels defined
+            // with id=_addTimeAndDay, etc.
+            if (learningLabDetails[property]["type"] != "LABEL") {
+              // console.log("Setting label className property for: " + element.id);
+              element_label = element.labels[0];
+              // Set the label className property if the label exists 
+              if (element_label) {
+                element_label.className = learningLabDetails[property]["label_className"];
+              }
+            } else {
+              // console.log("No label for element: " + element.id);
+            }
+          }
+        }
+      }
+    }
+
+
     // if there aren't saved settings, reset the form
     if (learningLabDetails_JSON == null || learningLabDetails_JSON == '') {
       // Get the four fieldsets to disable
@@ -270,6 +313,7 @@
   }
 
   function toggleAddTimeAndDays(evt) {
+    // Disable or enable "Add Time and Days" fieldsets when checking the "Add Time" checkbox
     addTimeAndDayCheckBox = evt.target;
     // console.log('addTimeAndDayCheckBox = ' + addTimeAndDayCheckBox.id);
     // console.log('checkbox parent = ' + addTimeAndDayCheckBox.parentNode.nodeName);
@@ -299,90 +343,128 @@
 </script>
 
 <script>
-  // var submitLearningLab = document.querySelector("input[id=submitAddSingleClassSchedule]");
-  var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+  // Create event listener to save learning lab details in session variable on form submit
+  var submitLearningLab = document.querySelector("input[id=submitAddSingleClassSchedule]");
+  // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
   submitLearningLab.addEventListener("click", function () { saveLearningLabValues(event); });
 
   function saveLearningLabValues(evt) {
+    // Save the current learning lab values in a session variable for later reuse
+    // Get all of the select fields (e.g. teacherName, className, etc.)
     selectFields = document.querySelectorAll("select");
+    // Get all of the input fields (e.g. class dates, class days, etc.)
     inputFields = document.querySelectorAll("input");
-    var learningLabDetails = [];
+    // Get all of the label fields (needed to set the text color to green or grey)
+    labelFields = document.querySelectorAll("label[id^=_addTimeAndDays");
+    console.log("label count =" + labelFields.length);
+    // Initialize the JSON object to hold the properties and values
     var object = {};
+    // Cycle through the selectfields
     for (i = 0; i < selectFields.length; i++) {
       // Don't save student name
       if (selectFields[i].id != "studentName") {
-        console.log('selectfield = ' + selectFields[i].id)
-        input_value = selectFields[i].value;
+        // console.log('selectfield = ' + selectFields[i].id)
+        // Get the selectField id and value
         input_name = selectFields[i].id;
+        input_type = selectFields[i].type;
+        input_value = selectFields[i].value;
+        input_disabled = selectFields[i].disabled;
+        input_className = selectFields[i].className;
+        input_label = selectFields[i].labels[0];
+        if (input_label) {
+          // console.log('label = ' + input_label.textContent);
+          input_label_className = input_label.className;
+        } else {
+          input_label_className = "";
+        }
         // console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
-        // learningLabDetails.push({ input_name: input_value });
-        // object = { [input_name]: input_value };
-        object[input_name] = input_value;
-        myJSON = JSON.stringify(object);
-        // console.log('myJSON =' + myJSON);
-        // learningLabDetails.push([input_name, input_value]);
+        // Store the select field id and value in the JSON object
+        // object[input_name] = input_value;
+        object[input_name] = { type: input_type, value: input_value, disabled: input_disabled, className: input_className, label_className: input_label_className };
       }
     }
-    // teacherNameInput = document.querySelector("select[id=teacherName]");
-    // object[teacherNameInput.id] = teacherNameInput.value;
-    // classNameInput = document.querySelector("select[id=className]");
-    // object[classNameInput.id] = classNameInput.value;
+    // Cycle through the input fields
     for (i = 0; i < inputFields.length; i++) {
       // Don't save csrf_token
       if (inputFields[i].id != "csrf_token") {
+        // If the input field is a checkbox, get it's 'checked' state
         if (inputFields[i].type == "checkbox") {
           input_value = inputFields[i].checked;
+          // Otherwise, get the value of the input field
         } else {
           input_value = inputFields[i].value;
         }
         input_name = inputFields[i].id;
-        console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
-        // learningLabDetails.push({ input_name: input_value });
-        // object = { [input_name]: input_value };
-        object[input_name] = input_value;
-        myJSON = JSON.stringify(object);
-        // console.log('myJSON =' + myJSON);
-        // learningLabDetails.push([input_name, input_value]);
+        input_type = inputFields[i].type;
+        input_disabled = inputFields[i].disabled;
+        input_className = inputFields[i].className;
+        input_label = inputFields[i].labels[0];
+        if (input_label) {
+          // console.log('label = ' + input_label.textContent);
+          input_label_className = input_label.className;
+        } else {
+          input_label_className = "";
+        }
+        // console.log(inputFields[i].type + " " + input_name + ' = ' + input_value);
+        // Store the input field id and value in the JSON object
+        // object[input_name] = input_value;
+        object[input_name] = { type: input_type, value: input_value, disabled: input_disabled, className: input_className, label_className: input_label_className };
       }
     }
-    // console.log("learningLabDetails = " + learningLabDetails);
-    // console.log("learningLabDetails = " + learningLabDetails.jsonify);
+    // Cycle through the label fields
+    for (i = 0; i < labelFields.length; i++) {
+      label_name = labelFields[i].id;
+      console.log("label_name =" + label_name);
+      label_nodeName = labelFields[i].nodeName;
+      label_textContent = labelFields[i].textContent;
+      label_disabled = labelFields[i].disabled;
+      label_className = labelFields[i].className;
+      object[label_name] = { type: label_nodeName, textContent: label_textContent, disabled: label_disabled, className: label_className };
+    }
+    // Convert the JSON object to a string
+    myJSON = JSON.stringify(object);
     console.log('myJSON =' + myJSON);
+    // Save the JSON object to the session variable
     sessionStorage.setItem("SavedLearningLabDetails", myJSON);
   }
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function (event) {
-    // On page load, check whether there are saved learning lab details in the session
-    // If there are, set the form values to the saved settings
-    var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
-    if (learningLabDetails_JSON) {
-      if (learningLabDetails_JSON != "") {
-        // Convert the saved settings into a JSON
-        var learningLabDetails = JSON.parse(learningLabDetails_JSON);
-        // Loop through the JSON
-        for (property in learningLabDetails) {
-          // console.log(property + ' = ' + learningLabDetails[property]);
-          element = document.getElementById(property);
-          // Set checkboxes to be checked or not checked
-          if (element.type == "checkbox") {
-            element.checked = learningLabDetails[property];
-            // Set other input values to their saved values
-          } else {
-            element.value = learningLabDetails[property];
-          }
-        }
-      }
-    }
-  });
+  // document.addEventListener("DOMContentLoaded", function (event) {
+  //   // On page load, check whether there are saved learning lab details in the session
+  //   // If there are, set the form values to the saved settings
+  //   var learningLabDetails_JSON = sessionStorage.getItem("SavedLearningLabDetails");
+  //   if (learningLabDetails_JSON) {
+  //     if (learningLabDetails_JSON != "") {
+  //       // Convert the saved settings into a JSON
+  //       var learningLabDetails = JSON.parse(learningLabDetails_JSON);
+  //       // Loop through the JSON
+  //       for (property in learningLabDetails) {
+  //         // console.log(property + ' = ' + learningLabDetails[property]);
+  //         element = document.getElementById(property);
+  //         // Verify if element exists and then set values
+  //         if (element != null) {
+  //           // Set checkboxes to be checked or not checked
+  //           if (element.type == "checkbox") {
+  //             element.checked = learningLabDetails[property];
+  //             // Set other input values to their saved values
+  //           } else {
+  //             element.value = learningLabDetails[property];
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // });
 
 </script>
 
 <script>
   function resetForm(evt) {
-    console.log('Reset form pressed');
+    // On form reset, clear the saved learning lab details and reload the form
+    // console.log('Reset form pressed');
     sessionStorage.setItem("SavedLearningLabDetails", "");
+    location.reload()
   }
 </script>
 
