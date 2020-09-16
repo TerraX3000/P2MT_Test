@@ -7,7 +7,11 @@ from httplib2 import Http
 from email.mime.text import MIMEText
 import base64
 from google.oauth2 import service_account
-from P2MT_App.main.referenceData import getSystemAccountEmail, getEmailModeStatus
+from P2MT_App.main.referenceData import (
+    getSystemAccountEmail,
+    getEmailModeStatus,
+    getApiKey,
+)
 from flask_login import current_user
 import json
 
@@ -68,10 +72,16 @@ def service_account_login():
     # SCOPES = ["https://www.googleapis.com/auth/sqlservice.admin"]
     # SCOPES = ["https://www.googleapis.com/auth/calendar"]
     # SCOPES = ["https://www.googleapis.com/auth/tasks"]
-    SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
+    # SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
+    SERVICE_ACCOUNT_INFO = json.loads(getApiKey())
+    print("SERVICE_ACCOUNT_INFO =", SERVICE_ACCOUNT_INFO)
 
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    # credentials = service_account.Credentials.from_service_account_file(
+    # SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    # )
+
+    credentials = service_account.Credentials.from_service_account_info(
+        SERVICE_ACCOUNT_INFO, scopes=SCOPES
     )
 
     print(
