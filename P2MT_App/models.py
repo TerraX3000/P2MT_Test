@@ -262,6 +262,13 @@ class adminSettings(db.Model):
     timestamp = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
+class apiKeys(db.Model):
+    __tablename__ = "apiKeys"
+    id = db.Column(db.Integer, primary_key=True)
+    apiKey = db.Column(db.Text, nullable=True)
+    timestamp = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+
+
 # class LearningLabLog(db.Model):
 #     __tablename__ = "LearningLabLog"
 #     id = db.Column(db.Integer, primary_key=True)

@@ -3,7 +3,7 @@ import os
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = "sqlite:///p2mt_admin_settings.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///p2mt_api_key.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Set environment variables necessary for Google login and API usage
