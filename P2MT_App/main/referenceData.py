@@ -7,6 +7,7 @@ from P2MT_App.models import (
     p2mtTemplates,
     Parents,
     adminSettings,
+    apiKeys,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -446,3 +447,8 @@ def getP2mtTemplatesToEdit():
     )
     p2mtTemplatesValueLabelTupleList.insert(0, ("", ""))
     return p2mtTemplatesValueLabelTupleList
+
+
+def getApiKey():
+    apikey_json = db.session.query(apiKeys.apiKey).order_by(apiKeys.id.desc()).first()
+    return apikey_json[0]
