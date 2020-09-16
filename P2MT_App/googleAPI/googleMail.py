@@ -47,26 +47,69 @@ def send_message(service, user_id, message):
   Returns:
     Sent Message.
   """
+    print("Running send_message()")
     try:
         message = (
             service.users().messages().send(userId=user_id, body=message).execute()
         )
         print("Message Id: %s" % message["id"])
         return message
-    except errors.HttpError as error:
-        print("An error occurred: %s" % error)
+    except:
+        print("Error occurred")
+        # except errors.HttpError as error:
+        print("An error occurred: %s" % errors)
+        print("error code: ", errors.HttpError)
 
 
 def service_account_login():
+    print("Running service_account_login()")
     SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+    # SCOPES = ["https://www.googleapis.com/auth/sqlservice.admin"]
+    # SCOPES = ["https://www.googleapis.com/auth/calendar"]
     SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
 
     credentials = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES
     )
 
-    delegated_credentials = credentials.with_subject(EMAIL_FROM)
+    print(
+        "credentials.project_id =", credentials.project_id,
+    )
+    print(
+        "credentials._service_account_email =", credentials._service_account_email,
+    )
+    print(
+        "credentials.scopes =", credentials.scopes,
+    )
+    print(
+        "credentials.expired =", credentials.expired,
+    )
+    print(
+        "credentials.valid =", credentials.valid,
+    )
+    delegated_credentials = credentials.with_subject("phase2team@students.hcde.org")
+    print(
+        "delegated_credentials.project_id =", delegated_credentials.project_id,
+    )
+    print(
+        "delegated_credentials._service_account_email =",
+        delegated_credentials._service_account_email,
+    )
+    print(
+        "delegated_credentials.scopes =", delegated_credentials.scopes,
+    )
+    print(
+        "delegated_credentials.expired =", delegated_credentials.expired,
+    )
+    print(
+        "delegated_credentials.valid =", delegated_credentials.valid,
+    )
     service = build("gmail", "v1", credentials=delegated_credentials)
+
+    # service = googleapiclient.discovery.build(
+    #     "sqladmin", "v1beta4", credentials=credentials
+    # )
+
     return service
 
 
@@ -90,5 +133,11 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
         email_to = current_user.email
         email_cc = current_user.email
     print(email_to, email_cc, email_bcc, emailSubject, emailContent)
+    message = create_message(email_to, email_cc, emailSubject, emailContent)
+    print("message =", message)
+    service = service_account_login()
+    print("service =", service)
+    sent = send_message(service, "me", message)
+    print("sent message =", sent)
     return
 
