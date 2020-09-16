@@ -9,6 +9,7 @@ import base64
 from google.oauth2 import service_account
 from P2MT_App.main.referenceData import getSystemAccountEmail, getEmailModeStatus
 from flask_login import current_user
+import json
 
 # Email variables. Modify this!
 EMAIL_FROM = "phase2team@students.hcde.org"
@@ -66,6 +67,7 @@ def service_account_login():
     SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
     # SCOPES = ["https://www.googleapis.com/auth/sqlservice.admin"]
     # SCOPES = ["https://www.googleapis.com/auth/calendar"]
+    # SCOPES = ["https://www.googleapis.com/auth/tasks"]
     SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
 
     credentials = service_account.Credentials.from_service_account_file(
@@ -104,6 +106,18 @@ def service_account_login():
     print(
         "delegated_credentials.valid =", delegated_credentials.valid,
     )
+
+    # Create an httplib2.Http object to handle our HTTP requests and authorize
+    # it with the Credentials.
+    # http = Http()
+    # http = credentials.authorize(http)
+
+    # service = build("tasks", "v1", http=http)
+
+    # # List all the tasklists for the account.
+    # lists = service.tasklists().list().execute(http=http)
+    # pprint.pprint(lists)
+
     service = build("gmail", "v1", credentials=delegated_credentials)
 
     # service = googleapiclient.discovery.build(
@@ -137,7 +151,9 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
     print("message =", message)
     service = service_account_login()
     print("service =", service)
-    sent = send_message(service, "me", message)
-    print("sent message =", sent)
+    print("service json =", json.dumps(service, indent=4, separators=("", " = ")))
+    # print("service resource =", service["resources"])
+    # sent = send_message(service, "me", message)
+    # print("sent message =", sent)
     return
 
