@@ -5,6 +5,7 @@ from sqlalchemy.engine import Engine
 from sqlite3 import Connection as SQLite3Connection
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+import pytz
 
 # Third-party libraries for login authorization and management
 from authlib.integrations.flask_client import OAuth
@@ -43,10 +44,20 @@ login_manager = LoginManager()
 oauth = OAuth()
 
 
+# This function is used in jinja2 templates to display UTC datetime strings in local time
+def datetimefilter(value, format="%a %b %-d @ %-I:%M %p"):
+    tz = pytz.timezone("US/Eastern")  # timezone you want to convert to from UTC
+    utc = pytz.timezone("UTC")
+    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
+    local_dt = value.astimezone(tz)
+    return local_dt.strftime(format)
+
+
 def create_app(config_class):
     app = Flask(__name__)
     app.config.from_object(config_class)
     app.jinja_env.globals.update(zip=zip)
+    app.jinja_env.filters["datetimefilter"] = datetimefilter
     # Initialize the database with the app
     db.init_app(app)
     # Initialize Migrate with the app and the database

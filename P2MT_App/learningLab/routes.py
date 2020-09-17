@@ -108,7 +108,7 @@ def displayLearningLab():
                 startDate,
                 endDate,
                 comment,
-                parentNotification=datetime.now(),
+                parentNotification=datetime.utcnow(),
             )
             db.session.commit()
             print("new intervention log ID:", interventionLog.id)

@@ -126,12 +126,12 @@
         <td> {{ studentTmiLog.Student.lastName }} </td>
         <td> {{ studentTmiLog.tmiMinutes }}</td>
         {% if studentTmiLog.studentNotification %}
-        <td> {{ studentTmiLog.studentNotification.strftime('%a %b %-d @ %-I:%M %p') }}</td>
+        <td> {{ studentTmiLog.studentNotification | datetimefilter }}</td>
         {% else %}
         <td></td>
         {% endif %}
         {% if studentTmiLog.parentNotification %}
-        <td> {{ studentTmiLog.parentNotification.strftime('%a %b %-d @ %-I:%M %p') }}</td>
+        <td> {{ studentTmiLog.parentNotification | datetimefilter }}</td>
         {% else %}
         <td></td>
         {% endif %}

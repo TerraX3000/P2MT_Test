@@ -288,7 +288,7 @@ def calculateTmi(
             )
             email_to = studentEmail
             interventionStatus = "Student notification sent"
-            studentNotification = datetime.now()
+            studentNotification = datetime.utcnow()
             try:
                 template = (
                     p2mtTemplates.query.filter(
@@ -318,7 +318,7 @@ def calculateTmi(
             )
             email_to = [studentEmail] + getParentEmails(chattStateANumber)
             interventionStatus = "Parent notification sent"
-            parentNotification = datetime.now()
+            parentNotification = datetime.utcnow()
             try:
                 template = (
                     p2mtTemplates.query.filter(
