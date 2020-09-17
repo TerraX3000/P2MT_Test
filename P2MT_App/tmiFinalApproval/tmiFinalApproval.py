@@ -92,31 +92,36 @@ def getStudentsWithTmiInterventions(tmiDate):
     return tmiInterventionLog
 
 
-def getStudentsWithAssignTmi(startPeriod, endPeriod):
+def getStudentsWithAssignTmi(startPeriod, endPeriod, **kwargs):
     # Get list of chattStateAnumbers for students where assignTmi is true
     studentsWithAssignTmi = (
-        (
-            db.session.query(
-                Student.id,
-                ClassSchedule.chattStateANumber,
-                Student.firstName,
-                Student.lastName,
-                Student.email,
-            )
-            .select_from(Student)
-            .join(ClassSchedule)
-            .join(ClassSchedule.ClassAttendanceLog)
-            .filter(
-                ClassAttendanceLog.classDate >= startPeriod,
-                ClassAttendanceLog.classDate <= endPeriod,
-                ClassAttendanceLog.assignTmi == True,
-            )
+        db.session.query(
+            Student.id,
+            ClassSchedule.chattStateANumber,
+            Student.firstName,
+            Student.lastName,
+            Student.email,
         )
-        .distinct()
-        .all()
-    )
+        .select_from(Student)
+        .join(ClassSchedule)
+        .join(ClassSchedule.ClassAttendanceLog)
+        .filter(
+            ClassAttendanceLog.classDate >= startPeriod,
+            ClassAttendanceLog.classDate <= endPeriod,
+            ClassAttendanceLog.assignTmi == True,
+        )
+    ).distinct()
+    # Check whether a chattStateANumber is passed as an optional kwarg
+    # If so, filter the results for a single student instead of all students
+    # This case is used to send TMI notifications for an individual student
+    if "chattStateANumber" in kwargs:
+        chattStateANumber = kwargs["chattStateANumber"]
+        studentsWithAssignTmi = studentsWithAssignTmi.filter(
+            ClassSchedule.chattStateANumber == chattStateANumber
+        )
+    results = studentsWithAssignTmi.all()
     # print(str(studentsWithAssignTmi))
-    return studentsWithAssignTmi
+    return results
 
 
 def findTmiClassesForStudent(startPeriod, endPeriod, chattStateANumber):
@@ -182,29 +187,39 @@ def calculateTmi(
     tmiDate,
     sendStudentTmiNotification,
     sendParentTmiNotification,
+    **kwargs,
 ):
     printLogEntry("calculateTMI() function called")
-    # Remove tmi interventions for students with no classes marked assignTmi=True
-    tmiInterventionLogs = getStudentsWithTmiInterventions(tmiDate)
-    # Cycle through list of tmi logs
-    for tmiLog in tmiInterventionLogs:
-        # Search for classes with assignTmi=True
-        tmiClassesSearchResult = (
-            db.session.query(ClassAttendanceLog)
-            .join(ClassSchedule)
-            .filter(
-                ClassSchedule.chattStateANumber == tmiLog.chattStateANumber,
-                ClassAttendanceLog.classDate >= startTmiPeriod,
-                ClassAttendanceLog.classDate <= endTmiPeriod,
-                ClassAttendanceLog.assignTmi == True,
-            )
-            .all()
+    # Check whether a chattStateANumber is passed as an optional kwarg
+    # If so, process the request for a single student instead of all students
+    # This case is used to send TMI notifications for an individual student
+    if "chattStateANumber" in kwargs:
+        chattStateANumber = kwargs["chattStateANumber"]
+        studentsWithAssignTmi = getStudentsWithAssignTmi(
+            startTmiPeriod, endTmiPeriod, chattStateANumber=chattStateANumber
         )
-        # If no classes found, then delete the log from the intervention log
-        if len(tmiClassesSearchResult) == 0:
-            db.session.delete(tmiLog)
+    else:
+        # Remove tmi interventions for students with no classes marked assignTmi=True
+        tmiInterventionLogs = getStudentsWithTmiInterventions(tmiDate)
+        # Cycle through list of tmi logs
+        for tmiLog in tmiInterventionLogs:
+            # Search for classes with assignTmi=True
+            tmiClassesSearchResult = (
+                db.session.query(ClassAttendanceLog)
+                .join(ClassSchedule)
+                .filter(
+                    ClassSchedule.chattStateANumber == tmiLog.chattStateANumber,
+                    ClassAttendanceLog.classDate >= startTmiPeriod,
+                    ClassAttendanceLog.classDate <= endTmiPeriod,
+                    ClassAttendanceLog.assignTmi == True,
+                )
+                .all()
+            )
+            # If no classes found, then delete the log from the intervention log
+            if len(tmiClassesSearchResult) == 0:
+                db.session.delete(tmiLog)
+        studentsWithAssignTmi = getStudentsWithAssignTmi(startTmiPeriod, endTmiPeriod)
 
-    studentsWithAssignTmi = getStudentsWithAssignTmi(startTmiPeriod, endTmiPeriod)
     for student in studentsWithAssignTmi:
         student_id = student[0]
         chattStateANumber = student[1]

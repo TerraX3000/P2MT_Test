@@ -1,4 +1,4 @@
-from flask import render_template, flash, request, Blueprint
+from flask import render_template, flash, request, Blueprint, redirect, url_for
 from P2MT_App import db
 from P2MT_App.main.utilityfunctions import printLogEntry
 from P2MT_App.models import Student, ClassSchedule, ClassAttendanceLog, InterventionLog
@@ -73,3 +73,37 @@ def displayTmiFinalApproval():
         endTmiPeriod=endTmiPeriod,
         tmiDay=tmiDate,
     )
+
+
+@tmiFinalApproval_bp.route(
+    "/tmifinalapproval/<int:log_id>/sendtminotification", methods=["POST"]
+)
+def sendTmiNotification(log_id):
+    # Process request to email TMI notification for a single student
+    # Get the TMI intervention log for the student
+    log = InterventionLog.query.get_or_404(log_id)
+    LogDetails = f"{(log_id)} {log.chattStateANumber} {log.staffID}"
+    printLogEntry("Running sendTmiNotification(" + LogDetails + ")")
+    sendStudentTmiNotification = False
+    sendParentTmiNotification = False
+    # Determine whether the notification goes to the student or parent
+    if request.method == "POST":
+        print("Send TMI notification form:", request.form)
+        if request.form["submit_button"] == "Send Student Notification":
+            sendStudentTmiNotification = True
+        elif request.form["submit_button"] == "Send Parent Notification":
+            sendParentTmiNotification = True
+    # Get the start, end, and actual date for this TMI period
+    startTmiPeriod, endTmiPeriod, tmiDate = getCurrent_Start_End_Tmi_Dates()
+    # Call calculateTmi but include the chattStateANumber as an optional kwarg
+    calculateTmi(
+        startTmiPeriod,
+        endTmiPeriod,
+        tmiDate,
+        sendStudentTmiNotification,
+        sendParentTmiNotification,
+        chattStateANumber=log.chattStateANumber,
+    )
+    db.session.commit()
+    flash("Email notification for individual student has been sent!", "success")
+    return redirect(url_for("tmiFinalApproval_bp.displayTmiFinalApproval"))

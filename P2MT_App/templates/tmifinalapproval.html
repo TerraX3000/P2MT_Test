@@ -114,6 +114,7 @@
         <th>TMI Minutes</th>
         <th>Student Notification</th>
         <th>Parent Notification</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody id="interventionLog">
@@ -135,6 +136,10 @@
         {% else %}
         <td></td>
         {% endif %}
+        <td><button type="button" class="w3-btn w3-green w3-text-white w3-small"
+            onclick="document.getElementById('sendEmailModal_{{studentTmiLog.id}}').style.display='block'">Send
+            Email...</button>
+        </td>
       </tr>
       <tr class="w3-amber" style="visibility:collapse;"
         onclick="activateAccordion(this,'accordion_{{studentTmiLog.id}}')"
@@ -147,6 +152,7 @@
         <th>Date:</th>
         <th>Attendance:</th>
         <th>Teacher:</th>
+        <th></th>
         <th></th>
       </tr>
       {% for studentFixedFields in classAttendanceFixedFields %}
@@ -163,10 +169,39 @@
         <td>{{ studentFixedFields.attendanceCode }}</td>
         <td>{{ studentFixedFields.ClassSchedule.teacherLastName }}</td>
         <td></td>
+        <td></td>
       </tr>
       {% endif %}
       {% endfor %}
+
+      <!-- Send Email Modal -->
+      <div class="w3-modal" id="sendEmailModal_{{studentTmiLog.id}}">
+        <div class="w3-container">
+          <div class="w3-modal-content" style="width:50%">
+            <header class="w3-container w3-green">
+              <span onclick="document.getElementById('sendEmailModal_{{studentTmiLog.id}}').style.display='none'"
+                class="w3-button w3-display-topright">&times;</span>
+              <h2>Send Email Notification for Individual</h2>
+            </header>
+            <footer class="w3-container w3-margin-top w3-white w3-center">
+              <div class="w3-bar">
+                <form action="{{ url_for('tmiFinalApproval_bp.sendTmiNotification', log_id=studentTmiLog.id) }}"
+                  method="POST">
+                  <button type="button" class="w3-button w3-large"
+                    onclick="document.getElementById('sendEmailModal_{{studentTmiLog.id}}').style.display='none'">Cancel</button>
+                  <input class="w3-button w3-blue w3-large" name="submit_button" type="submit"
+                    value="Send Student Notification">
+                  <input class="w3-button w3-blue w3-large" name="submit_button" type="submit"
+                    value="Send Parent Notification">
+                </form>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
       {% endfor %}
+
+
     </tbody>
   </table>
 </div>
