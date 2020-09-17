@@ -180,6 +180,8 @@ class InterventionLog(db.Model):
     erSession = db.Column(db.String(50), nullable=True)
     erSession = db.Column(db.String(50), nullable=True)
     interventionStatus = db.Column(db.String(50), nullable=True)
+    studentNotification = db.Column(db.DateTime, nullable=True)
+    parentNotification = db.Column(db.DateTime, nullable=True)
     classAttendanceLog_id = db.relationship(
         "ClassAttendanceLog", backref="InterventionLog", lazy=True
     )
