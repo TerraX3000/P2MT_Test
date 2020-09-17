@@ -1,7 +1,10 @@
 from P2MT_App import db
 from datetime import date, datetime
 from sqlalchemy import func
+from flask import send_file, current_app
 from flask_login import current_user
+import os
+import csv
 from P2MT_App.models import (
     ClassAttendanceLog,
     InterventionLog,
@@ -394,3 +397,41 @@ def calculateTmi(
         )
     return
 
+
+def downloadTmiLog(tmiDate):
+    printLogEntry("downloadTmiLog() function called")
+    # Create a CSV output file and append with a timestamp
+    output_file_path = os.path.join(current_app.root_path, "static/download")
+    output_file_path = "/tmp"
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    csvFilename = output_file_path + "/" + "tmilog_" + timestamp + ".csv"
+    csvOutputFile = open(csvFilename, "w")
+    csvOutputWriter = csv.writer(
+        csvOutputFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+    )
+    csvOutputFileRowCount = 0
+    # Write header row for CSV file
+    csvOutputWriter.writerow(["firstName", "lastName", "tmiMinutes"])
+    tmiLogs = (
+        db.session.query(
+            Student.firstName, Student.lastName, InterventionLog.tmiMinutes
+        )
+        .select_from(Student)
+        .join(InterventionLog)
+        .filter(
+            InterventionLog.intervention_id == 3,
+            InterventionLog.interventionLevel == 1,
+            InterventionLog.startDate == tmiDate,
+        )
+        .all()
+    )
+    for log in tmiLogs:
+        csvOutputWriter.writerow(
+            [log.firstName, log.lastName, log.tmiMinutes,]
+        )
+        # print(
+        #     log.firstName, log.lastName, log.tmiMinutes,
+        # )
+    csvOutputFileRowCount = csvOutputFileRowCount + 1
+    csvOutputFile.close()
+    return send_file(csvFilename, as_attachment=True, cache_timeout=0)

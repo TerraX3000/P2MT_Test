@@ -8,6 +8,7 @@ from datetime import date
 from P2MT_App.tmiFinalApproval.tmiFinalApproval import (
     calculateTmi,
     assignTmiForTardy,
+    downloadTmiLog,
 )
 
 tmiFinalApproval_bp = Blueprint("tmiFinalApproval_bp", __name__)
@@ -110,3 +111,11 @@ def sendTmiNotification(log_id):
     db.session.commit()
     flash("Email notification for individual student has been sent!", "success")
     return redirect(url_for("tmiFinalApproval_bp.displayTmiFinalApproval"))
+
+
+@tmiFinalApproval_bp.route("/tmifinalapproval/download")
+@login_required
+def download_TmiLog():
+    printLogEntry("download_TmiLog() function called")
+    startTmiPeriod, endTmiPeriod, tmiDate = getCurrent_Start_End_Tmi_Dates()
+    return downloadTmiLog(tmiDate)
