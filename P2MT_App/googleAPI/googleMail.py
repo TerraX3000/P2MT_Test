@@ -12,6 +12,7 @@ from P2MT_App.main.referenceData import (
     getEmailModeStatus,
     getApiKey,
 )
+from P2MT_App.main.utilityfunctions import printLogEntry
 from flask_login import current_user
 import json
 
@@ -22,7 +23,7 @@ EMAIL_SUBJECT = "STEM Intervention"
 EMAIL_CONTENT = "STEM Intervention Email Content"
 
 
-def create_message(sender, to, subject, message_text):
+def create_message(sender, to, cc, bcc, subject, message_text):
     """Create a message for an email.
   Args:
     sender: Email address of the sender.
@@ -32,8 +33,10 @@ def create_message(sender, to, subject, message_text):
   Returns:
     An object containing a base64url encoded email object.
   """
-    message = MIMEText(message_text)
+    message = MIMEText(message_text, "html")
     message["to"] = to
+    message["cc"] = cc
+    message["bcc"] = bcc
     message["from"] = sender
     message["subject"] = subject
     raw = base64.urlsafe_b64encode(message.as_bytes())
@@ -64,87 +67,61 @@ def send_message(service, user_id, message):
         # except errors.HttpError as error:
         print("An error occurred: %s" % errors)
         print("error code: ", errors.HttpError)
+    return
 
 
 def service_account_login():
-    print("Running service_account_login()")
+    printLogEntry("Running service_account_login()")
     SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-    # SCOPES = ["https://www.googleapis.com/auth/sqlservice.admin"]
-    # SCOPES = ["https://www.googleapis.com/auth/calendar"]
-    # SCOPES = ["https://www.googleapis.com/auth/tasks"]
     # SERVICE_ACCOUNT_FILE = "google_credentials/verdant-root-256217-566d3ff37798.json"
-    SERVICE_ACCOUNT_INFO = json.loads(getApiKey())
-    print("SERVICE_ACCOUNT_INFO =", SERVICE_ACCOUNT_INFO)
-
     # credentials = service_account.Credentials.from_service_account_file(
-    # SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    #     SERVICE_ACCOUNT_FILE, scopes=SCOPES
     # )
-
+    SERVICE_ACCOUNT_INFO = json.loads(getApiKey())
     credentials = service_account.Credentials.from_service_account_info(
         SERVICE_ACCOUNT_INFO, scopes=SCOPES
     )
 
-    print(
-        "credentials.project_id =", credentials.project_id,
-    )
-    print(
-        "credentials._service_account_email =", credentials._service_account_email,
-    )
-    print(
-        "credentials.scopes =", credentials.scopes,
-    )
-    print(
-        "credentials.expired =", credentials.expired,
-    )
-    print(
-        "credentials.valid =", credentials.valid,
-    )
+    # print(
+    #     "credentials.project_id =", credentials.project_id,
+    # )
+    # print(
+    #     "credentials._service_account_email =", credentials._service_account_email,
+    # )
+    # print(
+    #     "credentials.scopes =", credentials.scopes,
+    # )
+    # print(
+    #     "credentials.expired =", credentials.expired,
+    # )
+    # print(
+    #     "credentials.valid =", credentials.valid,
+    # )
     delegated_credentials = credentials.with_subject("phase2team@students.hcde.org")
-    print(
-        "delegated_credentials.project_id =", delegated_credentials.project_id,
-    )
-    print(
-        "delegated_credentials._service_account_email =",
-        delegated_credentials._service_account_email,
-    )
-    print(
-        "delegated_credentials.scopes =", delegated_credentials.scopes,
-    )
-    print(
-        "delegated_credentials.expired =", delegated_credentials.expired,
-    )
-    print(
-        "delegated_credentials.valid =", delegated_credentials.valid,
-    )
-
-    # Create an httplib2.Http object to handle our HTTP requests and authorize
-    # it with the Credentials.
-    # http = Http()
-    # http = credentials.authorize(http)
-
-    # service = build("tasks", "v1", http=http)
-
-    # # List all the tasklists for the account.
-    # lists = service.tasklists().list().execute(http=http)
-    # pprint.pprint(lists)
-
-    service = build("gmail", "v1", credentials=delegated_credentials)
-
-    # service = googleapiclient.discovery.build(
-    #     "sqladmin", "v1beta4", credentials=credentials
+    # delegated_credentials = credentials.with_subject("mccoy_z@hcde.org")
+    # print(
+    #     "delegated_credentials.project_id =", delegated_credentials.project_id,
+    # )
+    # print(
+    #     "delegated_credentials._service_account_email =",
+    #     delegated_credentials._service_account_email,
+    # )
+    # print(
+    #     "delegated_credentials.scopes =", delegated_credentials.scopes,
+    # )
+    # print(
+    #     "delegated_credentials.expired =", delegated_credentials.expired,
+    # )
+    # print(
+    #     "delegated_credentials.valid =", delegated_credentials.valid,
     # )
 
+    service = build("gmail", "v1", credentials=delegated_credentials)
     return service
 
 
-# service = service_account_login()
-# # Call the Gmail API
-# message = create_message(EMAIL_FROM, EMAIL_TO, EMAIL_SUBJECT, EMAIL_CONTENT)
-# print("message =", message)
-# sent = send_message(service, "me", message)
-
-
 def sendEmail(email_to, email_cc, emailSubject, emailContent):
+    printLogEntry("Running sendEmail()")
     # include the system account as a bcc recipient on all emails
     email_bcc = getSystemAccountEmail()
     # if the email recipient is a list, then use commas to seperate the email addresses
@@ -157,13 +134,14 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
         email_to = current_user.email
         email_cc = current_user.email
     print(email_to, email_cc, email_bcc, emailSubject, emailContent)
-    message = create_message(email_to, email_cc, emailSubject, emailContent)
+    email_sender = "phase2team@students.hcde.org"
+    message = create_message(
+        email_sender, email_to, email_cc, email_bcc, emailSubject, emailContent
+    )
     print("message =", message)
     service = service_account_login()
     print("service =", service)
-    print("service json =", json.dumps(service, indent=4, separators=("", " = ")))
-    # print("service resource =", service["resources"])
-    # sent = send_message(service, "me", message)
-    # print("sent message =", sent)
+    sent = send_message(service, "phase2team@students.hcde.org", message)
+    print("sent message =", sent)
     return
 

@@ -1,11 +1,34 @@
 # Google Calendar API stuff
 import datetime
-from P2MT_App.main.referenceData import findEarliestPhaseIIDayNoEarlierThan
+from P2MT_App.main.referenceData import findEarliestPhaseIIDayNoEarlierThan, getApiKey
 from P2MT_App.main.utilityfunctions import printLogEntry
+import json
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+
+
+def service_account_calendar_login():
+    printLogEntry("Running service_account_calendar_login()")
+    SCOPES = ["https://www.googleapis.com/auth/calendar"]
+    SERVICE_ACCOUNT_INFO = json.loads(getApiKey())
+    credentials = service_account.Credentials.from_service_account_info(
+        SERVICE_ACCOUNT_INFO, scopes=SCOPES
+    )
+    delegated_credentials = credentials.with_subject("phase2team@students.hcde.org")
+    service = build("calendar", "v3", credentials=delegated_credentials)
+    return service
 
 
 def addCalendarEvent(
-    eventName, location, classDays, startDate, endDate, startTime, endTime, recurrence
+    googleCalendarID,
+    eventName,
+    location,
+    classDays,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    recurrence,
 ):
     printLogEntry("Running addCalendarEvent()")
     print("classDays =", classDays)
@@ -75,19 +98,30 @@ def addCalendarEvent(
 
     # Add code to send event to Google Calendar API service object
     # Return the googleCalendarEventID to be added to ClassSchedule table
-    googleCalendarEventID = "test"
+    service = service_account_calendar_login()
+    print("service =", service)
+    calendarEventDetails = (
+        service.events().insert(calendarId=googleCalendarID, body=event).execute()
+    )
+    googleCalendarEventID = calendarEventDetails["id"]
+    print("googleCalendarEventID =", googleCalendarEventID)
+    # googleCalendarEventID = "test"
     return googleCalendarEventID
 
 
-def deleteCalendarEvent(googleCalendar, googleCalendarEventID):
+def deleteCalendarEvent(googleCalendarID, googleCalendarEventID):
     printLogEntry("Running deleteCalendarEvent()")
     print(
         "googleCalendar =",
-        googleCalendar,
+        googleCalendarID,
         "googleCalendarEventID =",
         googleCalendarEventID,
     )
     # Reference: https://developers.google.com/calendar/v3/reference/events/delete
     # Add code to create Google Calendar Service object
-    # service.events().delete(calendarId=googleCalendar, eventId=googleCalendarEventID).execute()
+    service = service_account_calendar_login()
+    print("service =", service)
+    service.events().delete(
+        calendarId=googleCalendarID, eventId=googleCalendarEventID
+    ).execute()
     return

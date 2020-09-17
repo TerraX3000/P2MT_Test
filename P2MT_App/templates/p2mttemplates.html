@@ -121,7 +121,7 @@
           {% if rendered_emailSubject %}
           <div class="w3-half">
             <label class="w3-text-green w3-large">Example of Rendered Email Subject:</label>
-            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_emailSubject}}</p>
+            <p class="w3-padding-small w3-white">{{rendered_emailSubject}}</p>
           </div>
           {% endif %}
         </div>
@@ -131,7 +131,7 @@
           {% if rendered_templateContent %}
           <div class="w3-half">
             <label class="w3-text-green w3-large">Example of Rendered Content:</label>
-            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_templateContent}}</p>
+            <p class="w3-padding-small w3-white">{{rendered_templateContent}}</p>
           </div>
           {% endif %}
         </div>
@@ -334,6 +334,12 @@
         guide</a> for more examples.</p>
     <br>
     <h1>HTML Formatting</h1>
+    <p> The templates are formatted as HTML email messages. In order for line breaks to appear, it is neccesary to use
+      HTML tags for paragraphs or line breaks.</p>
+    <p>Examples:</p>
+    <p> &lt;p&gt; This examples uses paragraphs tags (note the closing tag preceded with a forward slash) &lt;/p&gt;</p>
+    <p> This example uses a line break (note it is a self-closing tag so only one tag is needed) &lt;br&gt;</p>
+    <br>
     <p> Templates may use HTML formatting such as applying a bold text style or adding hyperlinks.</p>
     <p> Examples:</p>
     <p> &lt;b&gt;This text will be bold&lt;/b&gt;</p>
@@ -365,7 +371,7 @@
           {% if rendered_emailSubject %}
           <div class="w3-half">
             <label class="w3-text-green w3-large">Example of Rendered Email Subject:</label>
-            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_emailSubject}}</p>
+            <p class="w3-padding-small w3-white">{{rendered_emailSubject}}</p>
           </div>
           {% endif %}
         </div>
@@ -374,7 +380,7 @@
           {% if rendered_templateContent != 'None' %}
           <div class="w3-half">
             <label class="w3-text-green w3-large">Example of Rendered Content:</label>
-            <p class="w3-padding-small w3-white" style="white-space: pre-wrap;">{{rendered_templateContent}}</p>
+            <p class="w3-padding-small w3-white">{{rendered_templateContent}}</p>
           </div>
           {% endif %}
         </div>

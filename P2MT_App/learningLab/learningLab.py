@@ -37,7 +37,9 @@ def addLearningLabTimeAndDays(
     eventName = className + " Learning Lab"
     location = "STEM School (" + teacherLastName + ")"
     recurrence = "weekly_recurrence_placeholder"
+    googleCalendarID = getStudentGoogleCalendar(chattStateANumber)
     googleCalendarEventID = addCalendarEvent(
+        googleCalendarID,
         eventName,
         location,
         classDays,
@@ -166,8 +168,8 @@ def deleteLearningLabFromGoogleCalendar(interventionLog_id):
         .all()
     )
     for learningLab in learningLabClassSchedule:
-        googleCalendar = getStudentGoogleCalendar(learningLab.chattStateANumber)
+        googleCalendarID = getStudentGoogleCalendar(learningLab.chattStateANumber)
         googleCalendarEventID = learningLab.googleCalendarEventID
-        deleteCalendarEvent(googleCalendar, googleCalendarEventID)
+        deleteCalendarEvent(googleCalendarID, googleCalendarEventID)
         learningLab.googleCalendarEventID = ""
     return
