@@ -83,12 +83,13 @@ def assignTmiForTardy(startTmiPeriod, endTmiPeriod):
     return
 
 
-def getTmiInterventions(tmiDate, student_id):
+def getStudentsWithTmiInterventions(tmiDate):
     tmiInterventionLog = InterventionLog.query.filter(
-        InterventionLog.student_id == tmiDate
+        InterventionLog.intervention_id == 3,
+        InterventionLog.interventionLevel == 1,
+        InterventionLog.startDate == tmiDate,
     ).all()
-
-    return
+    return tmiInterventionLog
 
 
 def getStudentsWithAssignTmi(startPeriod, endPeriod):
@@ -169,7 +170,7 @@ def updateInterventionLogForTmi(
             interventionLevel=1,
             startDate=tmiDate,
             endDate=tmiDate,
-            comment=None,
+            comment="",
             tmiMinutes=tmiMinutes,
         )
     return
@@ -183,9 +184,27 @@ def calculateTmi(
     sendParentTmiNotification,
 ):
     printLogEntry("calculateTMI() function called")
+    # Remove tmi interventions for students with no classes marked assignTmi=True
+    tmiInterventionLogs = getStudentsWithTmiInterventions(tmiDate)
+    # Cycle through list of tmi logs
+    for tmiLog in tmiInterventionLogs:
+        # Search for classes with assignTmi=True
+        tmiClassesSearchResult = (
+            db.session.query(ClassAttendanceLog)
+            .join(ClassSchedule)
+            .filter(
+                ClassSchedule.chattStateANumber == tmiLog.chattStateANumber,
+                ClassAttendanceLog.classDate >= startTmiPeriod,
+                ClassAttendanceLog.classDate <= endTmiPeriod,
+                ClassAttendanceLog.assignTmi == True,
+            )
+            .all()
+        )
+        # If no classes found, then delete the log from the intervention log
+        if len(tmiClassesSearchResult) == 0:
+            db.session.delete(tmiLog)
 
     studentsWithAssignTmi = getStudentsWithAssignTmi(startTmiPeriod, endTmiPeriod)
-
     for student in studentsWithAssignTmi:
         student_id = student[0]
         chattStateANumber = student[1]
