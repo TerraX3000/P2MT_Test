@@ -110,7 +110,9 @@
 
 <script type='text/javascript'>
   function displayModal(log_id, interventionType, interventionLevel) {
-    console.log(log_id + interventionType + interventionLevel);
+    // console.log(log_id + interventionType + interventionLevel);
+    // Display error message modal if the user tries to delete TMI intervention
+    // Otherwise, display the delete modal
     if (interventionType == 'Attendance' && interventionLevel == 1) {
       document.getElementById('errorModal').style.display = 'block';
     } else {
