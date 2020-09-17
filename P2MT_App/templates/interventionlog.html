@@ -42,12 +42,13 @@
       <td>{{ InterventionLog.FacultyAndStaff.lastName}}</td>
       <td>{{ InterventionLog.comment }}</td>
       <td><button type="button" class="w3-btn w3-red"
-          onclick="document.getElementById('deleteModal{{InterventionLog.id}}').style.display='block'">Delete</button>
+          onclick="displayModal{{(InterventionLog.id, InterventionLog.InterventionType.interventionType, InterventionLog.interventionLevel)}}">Delete</button>
       </td>
+
     </tr>
 
 
-    <!-- Modal -->
+    <!-- Delete Log Modal -->
     <div class="w3-modal" id="deleteModal{{InterventionLog.id}}">
       <div class="w3-container">
         <div class="w3-modal-content" style="width:50%">
@@ -73,6 +74,29 @@
   </tbody>
 </table>
 
+<!-- Error Message Modal -->
+<div class="w3-modal" id="errorModal">
+  <div class="w3-container">
+    <div class="w3-modal-content" style="width:50%">
+      <header class="w3-container w3-red">
+        <span onclick="document.getElementById('errorModal').style.display='none'"
+          class="w3-button w3-display-topright">&times;</span>
+        <h2>Error</h2>
+      </header>
+      <p class="w3-padding">You cannot delete attendance interventions from the intervention log. Attendance
+        interventions are
+        automatically calculated based on attendance records. If an attendance intervention is not warranted, then you
+        should update the corresponding attendance records. </p>
+      <footer class="w3-container w3-margin-top w3-white w3-center">
+        <div class="w3-bar">
+          <button type="button" class="w3-button w3-large"
+            onclick="document.getElementById('errorModal').style.display='none'">OK</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
+
 <!-- Search Filter -->
 <script type="text/javascript" src="{{ url_for('static', filename="js/searchFilters.js") }}"></script>
 <script>
@@ -82,6 +106,18 @@
   searchFilter.firstNameCellPosition = 0;
   searchFilter.lastNameCellPosition = 1;
   searchFilter.addEventListener('keyup', filterFirstLastNames);
+</script>
+
+<script type='text/javascript'>
+  function displayModal(log_id, interventionType, interventionLevel) {
+    console.log(log_id + interventionType + interventionLevel);
+    if (interventionType == 'Attendance' && interventionLevel == 1) {
+      document.getElementById('errorModal').style.display = 'block';
+    } else {
+      document.getElementById('deleteModal' + log_id).style.display = 'block';
+      return
+    }
+  }
 </script>
 
 
