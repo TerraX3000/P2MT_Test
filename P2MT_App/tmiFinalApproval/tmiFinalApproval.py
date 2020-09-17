@@ -1,5 +1,5 @@
 from P2MT_App import db
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import func
 from flask_login import current_user
 from P2MT_App.models import (
@@ -135,7 +135,12 @@ def findTmiClassesForStudent(startPeriod, endPeriod, chattStateANumber):
 
 
 def updateInterventionLogForTmi(
-    chattStateANumber, tmiDate, tmiMinutes, interventionStatus
+    chattStateANumber,
+    tmiDate,
+    tmiMinutes,
+    interventionStatus,
+    studentNotification,
+    parentNotification,
 ):
     # Check if there is existing TMI intervention for the student
     # If one exists, update the intervention status and TMI minutes
@@ -150,8 +155,12 @@ def updateInterventionLogForTmi(
         log = InterventionLog.query.filter(
             InterventionLog.id == tmiInterventionForStudent.id
         ).first()
-        log.comment = interventionStatus
+        # log.comment = interventionStatus
         log.tmiMinutes = tmiMinutes
+        if studentNotification:
+            log.studentNotification = studentNotification
+        if parentNotification:
+            log.parentNotification = parentNotification
     else:
         print("add new intervention")
         add_InterventionLog(
@@ -160,7 +169,7 @@ def updateInterventionLogForTmi(
             interventionLevel=1,
             startDate=tmiDate,
             endDate=tmiDate,
-            comment=interventionStatus,
+            comment=None,
             tmiMinutes=tmiMinutes,
         )
     return
@@ -243,6 +252,8 @@ def calculateTmi(
             tmiMinutes = maxTmiMinutes
 
         interventionStatus = "Pending"
+        studentNotification = None
+        parentNotification = None
         print(chattStateANumber, classAttendanceLogList, tmiMinutes)
         print("tmiMinutes:", type(tmiMinutes), tmiMinutes)
 
@@ -258,6 +269,7 @@ def calculateTmi(
             )
             email_to = studentEmail
             interventionStatus = "Student notification sent"
+            studentNotification = datetime.now()
             try:
                 template = (
                     p2mtTemplates.query.filter(
@@ -287,6 +299,7 @@ def calculateTmi(
             )
             email_to = [studentEmail] + getParentEmails(chattStateANumber)
             interventionStatus = "Parent notification sent"
+            parentNotification = datetime.now()
             try:
                 template = (
                     p2mtTemplates.query.filter(
@@ -338,7 +351,12 @@ def calculateTmi(
 
         # Update intervention log
         updateInterventionLogForTmi(
-            chattStateANumber, tmiDate, tmiMinutes, interventionStatus
+            chattStateANumber,
+            tmiDate,
+            tmiMinutes,
+            interventionStatus,
+            studentNotification,
+            parentNotification,
         )
     return
 

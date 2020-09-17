@@ -61,6 +61,8 @@ def displayTmiFinalApproval():
         .order_by(Student.lastName)
         .all()
     )
+    for log in tmiInterventionLog:
+        print("log time=", log.Student.lastName, log.studentNotification)
 
     return render_template(
         "tmifinalapproval.html",

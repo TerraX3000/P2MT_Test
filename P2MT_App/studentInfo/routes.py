@@ -55,6 +55,7 @@ def displayStudents():
                 interventionForm.startDate.data,
                 interventionForm.endDate.data,
                 interventionForm.comment.data,
+                parentNotification=datetime.now(),
             )
             db.session.commit()
             sendInterventionEmail(

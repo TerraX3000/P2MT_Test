@@ -31,19 +31,34 @@ def add_InterventionLog(
     endDate,
     comment,
     tmiMinutes=None,
+    **kwargs
 ):
     printLogEntry("add_InterventionLog() function called")
     print(chattStateANumber, interventionType, interventionLevel, startDate, endDate)
-    interventionLog = InterventionLog(
-        intervention_id=interventionType,
-        interventionLevel=interventionLevel,
-        startDate=startDate,
-        endDate=endDate,
-        comment=comment,
-        staffID=1,
-        chattStateANumber=chattStateANumber,
-        tmiMinutes=tmiMinutes,
-    )
+    if "parentNotification" in kwargs:
+        parentNotification = kwargs["parentNotification"]
+        interventionLog = InterventionLog(
+            intervention_id=interventionType,
+            interventionLevel=interventionLevel,
+            startDate=startDate,
+            endDate=endDate,
+            comment=comment,
+            staffID=1,
+            chattStateANumber=chattStateANumber,
+            tmiMinutes=tmiMinutes,
+            parentNotification=parentNotification,
+        )
+    else:
+        interventionLog = InterventionLog(
+            intervention_id=interventionType,
+            interventionLevel=interventionLevel,
+            startDate=startDate,
+            endDate=endDate,
+            comment=comment,
+            staffID=1,
+            chattStateANumber=chattStateANumber,
+            tmiMinutes=tmiMinutes,
+        )
     db.session.add(interventionLog)
     return interventionLog
 
