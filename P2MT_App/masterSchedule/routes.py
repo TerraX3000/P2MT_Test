@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request
+from flask_login import login_required
 from datetime import date
 from P2MT_App import db
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -20,12 +21,14 @@ masterSchedule_bp = Blueprint("masterSchedule_bp", __name__)
 
 
 @masterSchedule_bp.route("/masterschedule/download")
+@login_required
 def download_MasterSchedule():
     printLogEntry("download_MasterSchedule() function called")
     return downloadClassSchedule(getCurrentSchoolYear(), getCurrentSemester())
 
 
 @masterSchedule_bp.route("/masterschedule")
+@login_required
 def displayMasterSchedule():
     printLogEntry("Running displayMasterSchedule()")
     ClassSchedules = ClassSchedule.query.filter(
@@ -37,6 +40,7 @@ def displayMasterSchedule():
 
 
 @masterSchedule_bp.route("/masterschedule/<int:log_id>/delete", methods=["POST"])
+@login_required
 def delete_ClassSchedule(log_id):
 
     log = ClassSchedule.query.get_or_404(log_id)
@@ -49,6 +53,7 @@ def delete_ClassSchedule(log_id):
 
 
 @masterSchedule_bp.route("/masterschedule/<int:log_id>/edit", methods=["POST"])
+@login_required
 def edit_ClassSchedule(log_id):
     editSingleClassScheduleDetails = editSingleClassSchedule()
     log = ClassSchedule.query.get_or_404(log_id)

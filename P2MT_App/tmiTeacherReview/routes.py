@@ -1,4 +1,5 @@
 from flask import render_template, flash, request, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.main.utilityfunctions import printLogEntry
 from P2MT_App.models import Student, ClassSchedule, ClassAttendanceLog
@@ -20,6 +21,7 @@ tmiTeacherReview_bp = Blueprint("tmiTeacherReview_bp", __name__)
 
 
 @tmiTeacherReview_bp.route("/tmiteacherreview", methods=["GET", "POST"])
+@login_required
 def displayTmiTeacherReview():
     printLogEntry("Running displayTmiTeacherReview()")
     startTmiPeriod, endTmiPeriod, tmiDay = getCurrent_Start_End_Tmi_Dates()

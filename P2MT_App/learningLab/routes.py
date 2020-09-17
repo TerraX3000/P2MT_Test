@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request
+from flask_login import login_required
 from datetime import date, datetime
 from P2MT_App import db
 from P2MT_App.models import InterventionLog, ClassSchedule, Student
@@ -37,6 +38,7 @@ learningLab_bp = Blueprint("learningLab_bp", __name__)
 
 
 @learningLab_bp.route("/learninglab", methods=["GET", "POST"])
+@login_required
 def displayLearningLab():
     printLogEntry("Running displayLearningLab()")
     # Learning lab uses the same form as adding a single class schedule

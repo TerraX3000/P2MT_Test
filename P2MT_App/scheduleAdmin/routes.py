@@ -7,6 +7,7 @@ from flask import (
     Blueprint,
     send_file,
 )
+from flask_login import login_required
 from P2MT_App.scheduleAdmin.forms import (
     uploadClassScheduleForm,
     propagateClassAttendanceLogsForm,
@@ -39,6 +40,7 @@ scheduleAdmin_bp = Blueprint("scheduleAdmin_bp", __name__)
 
 # Route for direct download from templates folder
 @scheduleAdmin_bp.route("/templates/class_schedule_template")
+@login_required
 def downloadClassScheduleTemplate():
     try:
         return send_file(
@@ -52,6 +54,7 @@ def downloadClassScheduleTemplate():
 
 
 @scheduleAdmin_bp.route("/scheduleadmin", methods=["GET", "POST"])
+@login_required
 def displayScheduleAdmin():
     printLogEntry("Running displayScheduleAdmin()")
     uploadClassScheduleFormDetails = uploadClassScheduleForm()

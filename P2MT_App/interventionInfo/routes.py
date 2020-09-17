@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint
+from flask_login import login_required
 from sqlalchemy import and_, not_
 from P2MT_App import db
 from P2MT_App.models import InterventionLog
@@ -11,6 +12,7 @@ interventionInfo_bp = Blueprint("interventionInfo_bp", __name__)
 
 
 @interventionInfo_bp.route("/interventionlog")
+@login_required
 def displayInterventionLogs():
     printLogEntry("Running displayInterventionLogs()")
     InterventionLogs = InterventionLog.query.filter(
@@ -25,6 +27,7 @@ def displayInterventionLogs():
 
 
 @interventionInfo_bp.route("/interventionlog/<int:log_id>/delete", methods=["POST"])
+@login_required
 def delete_InterventionLog(log_id):
     log = InterventionLog.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.chattStateANumber} {log.staffID}"
@@ -45,6 +48,7 @@ def delete_InterventionLog(log_id):
 
 
 @interventionInfo_bp.route("/interventionlog/download")
+@login_required
 def download_InterventionLog():
     printLogEntry(
         "download_Daildownload_InterventionLogyAttendanceLog() function called"

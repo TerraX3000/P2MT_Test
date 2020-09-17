@@ -1,4 +1,5 @@
 from flask import render_template, flash, request, Blueprint, redirect, url_for
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.main.utilityfunctions import printLogEntry
 from P2MT_App.models import Student, ClassSchedule, ClassAttendanceLog, InterventionLog
@@ -13,6 +14,7 @@ tmiFinalApproval_bp = Blueprint("tmiFinalApproval_bp", __name__)
 
 
 @tmiFinalApproval_bp.route("/tmifinalapproval", methods=["GET", "POST"])
+@login_required
 def displayTmiFinalApproval():
     printLogEntry("Running displayTmiFinalApproval()")
     startTmiPeriod, endTmiPeriod, tmiDate = getCurrent_Start_End_Tmi_Dates()
@@ -78,6 +80,7 @@ def displayTmiFinalApproval():
 @tmiFinalApproval_bp.route(
     "/tmifinalapproval/<int:log_id>/sendtminotification", methods=["POST"]
 )
+@login_required
 def sendTmiNotification(log_id):
     # Process request to email TMI notification for a single student
     # Get the TMI intervention log for the student

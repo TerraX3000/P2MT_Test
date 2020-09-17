@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.main.setupFunctions import (
     initializeInterventionTypes,
@@ -22,6 +23,7 @@ def displayAbout():
 
 
 @main_bp.route("/setupP2mt")
+@login_required
 def setupP2mt():
     # Create all the database tables if not already created
     db.create_all()
@@ -32,6 +34,7 @@ def setupP2mt():
 
 
 @main_bp.route("/testP2mt")
+@login_required
 def testP2mt():
     initializeInterventionTypes()
     setAttendanceForTmiTesting(date(2020, 8, 3), date(2020, 8, 18))

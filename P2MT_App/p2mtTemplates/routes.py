@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request, Markup
+from flask_login import login_required
 from jinja2 import Template
 from P2MT_App import db
 from P2MT_App.models import p2mtTemplates, InterventionType
@@ -22,6 +23,7 @@ p2mtTemplates_bp = Blueprint("p2mtTemplates_bp", __name__)
 
 
 @p2mtTemplates_bp.route("/p2mttemplates", methods=["GET", "POST"])
+@login_required
 def displayTemplates():
     # Handles creating, editing, and testing email templates
     printLogEntry("displayEmailTemplates() function called")
@@ -157,6 +159,7 @@ def displayTemplates():
 
 
 @p2mtTemplates_bp.route("/p2mttemplates/<int:log_id>/delete", methods=["POST"])
+@login_required
 def delete_p2mtTemplate(log_id):
     # Handle deleting of existing templates
     log = p2mtTemplates.query.get_or_404(log_id)

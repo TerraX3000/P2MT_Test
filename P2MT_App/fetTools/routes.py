@@ -10,6 +10,7 @@ from flask import (
     current_app,
     send_file,
 )
+from flask_login import login_required
 from P2MT_App.fetTools.forms import UploadFetDataForm
 from P2MT_App.fetTools.generateFetOutputFiles import ripFetFiles
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -29,6 +30,7 @@ def save_csvFile(form_csvFetFile, filename):
 
 
 @fetTools_bp.route("/fettools", methods=["GET", "POST"])
+@login_required
 def displayFetTools():
     form = UploadFetDataForm()
     if form.validate_on_submit():
@@ -71,12 +73,14 @@ def displayFetTools():
 
 
 @fetTools_bp.route("/fetoutputfiles", methods=["GET"])
+@login_required
 def fetOutputFiles():
     print("===  Arriving at fetOutputFiles   ===", datetime.now(), "   ===")
     return render_template("fetoutputfiles.html", title="FET Output Files")
 
 
 @fetTools_bp.route("/fetoutputfiles/downloadcsv")
+@login_required
 def download_FetCsvFile():
     printLogEntry("download_FetCsvFile() function called")
     csvFilename = "/tmp/FetOutputFile.csv"
@@ -84,6 +88,7 @@ def download_FetCsvFile():
 
 
 @fetTools_bp.route("/fetoutputfiles/downloadjson")
+@login_required
 def download_FetJsonFile():
     printLogEntry("download_FetJsonFile() function called")
     csvFilename = "/tmp/FetOutputFile.json"

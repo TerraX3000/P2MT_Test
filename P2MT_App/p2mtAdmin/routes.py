@@ -7,6 +7,7 @@ from flask import (
     Blueprint,
     send_file,
 )
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.models import Student, FacultyAndStaff, Parents
 from P2MT_App.p2mtAdmin.forms import (
@@ -60,6 +61,7 @@ p2mtAdmin_bp = Blueprint("p2mtAdmin_bp", __name__)
 
 # Route for direct download from templates folder
 @p2mtAdmin_bp.route("/templates/student_list_template")
+@login_required
 def downloadStudentListTemplate():
     try:
         return send_file(
@@ -73,6 +75,7 @@ def downloadStudentListTemplate():
 
 
 @p2mtAdmin_bp.route("/templates/parent_list_template")
+@login_required
 def downloadParentListTemplate():
     try:
         return send_file(
@@ -86,6 +89,7 @@ def downloadParentListTemplate():
 
 
 @p2mtAdmin_bp.route("/templates/staff_list_template")
+@login_required
 def downloadStaffListTemplate():
     try:
         return send_file(
@@ -99,6 +103,7 @@ def downloadStaffListTemplate():
 
 
 @p2mtAdmin_bp.route("/p2mtadmin", methods=["GET", "POST"])
+@login_required
 def displayP2MTAdmin():
     printLogEntry("Running displayP2MTAdmin()")
     addStudentFormDetails = addStudentForm()
@@ -317,6 +322,7 @@ def displayP2MTAdmin():
 
 
 @p2mtAdmin_bp.route("/p2mtadmin/setsystemmode", methods=["POST"])
+@login_required
 def setSystemMode():
     printLogEntry("Running setSystemMode()")
     if request.method == "POST":
@@ -332,6 +338,7 @@ def setSystemMode():
 
 
 @p2mtAdmin_bp.route("/p2mtadmin/<int:student_id>/update", methods=["GET", "POST"])
+@login_required
 def updateStudent(student_id):
     printLogEntry("Running updateStudent()")
     student = Student.query.get_or_404(student_id)
@@ -377,6 +384,7 @@ def updateStudent(student_id):
 @p2mtAdmin_bp.route(
     "/p2mtadmin/<string:chattStateANumber>/parentupdate", methods=["GET", "POST"]
 )
+@login_required
 def updateParents(chattStateANumber):
     printLogEntry("Running updateParents()")
     parents = Parents.query.filter(
@@ -449,6 +457,7 @@ def updateParents(chattStateANumber):
 
 
 @p2mtAdmin_bp.route("/p2mtadmin/<int:staff_id>/staffupdate", methods=["GET", "POST"])
+@login_required
 def updateStaff(staff_id):
     printLogEntry("Running updateStaff()")
     staff = FacultyAndStaff.query.get_or_404(staff_id)

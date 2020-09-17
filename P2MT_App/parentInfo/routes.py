@@ -1,4 +1,5 @@
 from flask import render_template, request, flash, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.models import Parents, Student
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -8,12 +9,14 @@ parentsInfo_bp = Blueprint("parentsInfo_bpInfo_bp", __name__)
 
 
 @parentsInfo_bp.route("/parents/download")
+@login_required
 def download_ParentList():
     printLogEntry("download_ParentList() function called")
     return downloadParentsList()
 
 
 @parentsInfo_bp.route("/parents", methods=["GET", "POST"])
+@login_required
 def displayParents():
     printLogEntry("Running displayParents()")
     parents = Parents.query.join(Student).order_by(Student.lastName.asc())

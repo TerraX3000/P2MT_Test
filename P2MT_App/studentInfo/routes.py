@@ -1,4 +1,5 @@
 from flask import render_template, redirect, request, url_for, flash, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.models import Student
 from P2MT_App.dailyAttendance.dailyAttendance import add_DailyAttendanceLog
@@ -17,12 +18,14 @@ studentInfo_bp = Blueprint("studentInfo_bp", __name__)
 
 
 @studentInfo_bp.route("/students/download")
+@login_required
 def download_StudentList():
     printLogEntry("download_StudentList() function called")
     return downloadStudentList()
 
 
 @studentInfo_bp.route("/students", methods=["GET", "POST"])
+@login_required
 def displayStudents():
     printLogEntry("Running displayStudents()")
     dailyAttendanceForm = addDailyAttendanceForm()

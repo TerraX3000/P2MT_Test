@@ -1,4 +1,5 @@
 from flask import render_template, flash, request, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.main.utilityfunctions import printLogEntry
 from P2MT_App.models import Student, ClassSchedule, ClassAttendanceLog
@@ -13,6 +14,7 @@ classAttendance_bp = Blueprint("classAttendance_bp", __name__)
 
 
 @classAttendance_bp.route("/classattendancelog", methods=["GET", "POST"])
+@login_required
 def displayClassAttendanceLog():
     printLogEntry("Running displayClassAttendanceLog()")
     classAttendanceForm = updateClassAttendanceForm()

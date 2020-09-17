@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint
+from flask_login import login_required
 from P2MT_App import db
 from P2MT_App.models import DailyAttendanceLog
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -8,6 +9,7 @@ dailyAttendance_bp = Blueprint("dailyAttendance_bp", __name__)
 
 
 @dailyAttendance_bp.route("/dailyattendancelog")
+@login_required
 def displayDailyAttendanceLogs():
     printLogEntry("displayDailyAttendanceLogs() function called")
     DailyAttendanceLogs = DailyAttendanceLog.query.order_by(
@@ -21,6 +23,7 @@ def displayDailyAttendanceLogs():
 
 
 @dailyAttendance_bp.route("/dailyattendancelog/<int:log_id>/delete", methods=["POST"])
+@login_required
 def delete_DailyAttendanceLog(log_id):
     log = DailyAttendanceLog.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.chattStateANumber} {log.staffID}"
@@ -32,6 +35,7 @@ def delete_DailyAttendanceLog(log_id):
 
 
 @dailyAttendance_bp.route("/dailyattendancelog/download")
+@login_required
 def download_DailyAttendanceLog():
     printLogEntry("download_DailyAttendanceLog() function called")
     return downloadDailyAttendanceLog()
