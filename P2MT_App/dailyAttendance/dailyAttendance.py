@@ -1,4 +1,5 @@
 from flask import flash, current_app, send_file
+from flask_login import current_user
 from P2MT_App import db
 from P2MT_App.models import DailyAttendanceLog, Student, FacultyAndStaff
 from P2MT_App.main.utilityfunctions import printLogEntry
@@ -14,7 +15,7 @@ def add_DailyAttendanceLog(chattStateANumber, absenceDate, attendanceCode, comme
         absenceDate=absenceDate,
         attendanceCode=attendanceCode,
         comment=comment,
-        staffID=1,
+        staffID=current_user,
         chattStateANumber=chattStateANumber,
     )
     db.session.add(dailyAttendanceLog)

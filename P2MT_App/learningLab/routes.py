@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 from datetime import date, datetime
 from P2MT_App import db
 from P2MT_App.models import InterventionLog, ClassSchedule, Student
@@ -84,7 +84,7 @@ def displayLearningLab():
             comment = addLearningLabDetails.comment.data
             googleCalendarEventID = addLearningLabDetails.googleCalendarEventID.data
             campus = "STEM School"
-            staffID = None
+            staffID = current_user
             learningLab = True
 
             print(

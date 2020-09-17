@@ -1,3 +1,4 @@
+from flask_login import current_user
 import re
 from operator import itemgetter
 from P2MT_App import db
@@ -19,7 +20,7 @@ def addLearningLabTimeAndDays(
     campus = learningLabCommonFields[3]
     className = learningLabCommonFields[4]
     teacherLastName = learningLabCommonFields[5]
-    staffID = None
+    staffID = current_user
     online = False
     indStudy = False
     comment = learningLabCommonFields[9]
