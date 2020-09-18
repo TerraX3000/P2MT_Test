@@ -40,8 +40,6 @@ class addSingleClassSchedule(FlaskForm):
     campus = SelectField("Campus", validators=[DataRequired()])
     className = SelectField("Class Name", validators=[DataRequired()])
     teacherName = SelectField("Teacher", coerce=str, validators=[DataRequired()])
-
-    addTimeAndDays = BooleanField("Add", default=True)
     classDays = MultiCheckboxField("Class Days", validators=[DataRequired()])
     startTime = TimeField(
         "Start Time",
@@ -53,68 +51,10 @@ class addSingleClassSchedule(FlaskForm):
         validators=[DataRequired()],
         render_kw={"placeholder": "HH:MM 24-Hour Format"},
     )
-
-    addTimeAndDays2 = BooleanField("Add", default=True)
-    classDays2 = MultiCheckboxField("Class Days")
-    startTime2 = SelectField("Start Time", validators=[Optional()])
-    endTime2 = SelectField("End Time", validators=[Optional()])
-    # startTime2 = TimeField(
-    #     "Start Time",
-    #     validators=[Optional()],
-    #     render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    # )
-    # endTime2 = TimeField(
-    #     "End Time",
-    #     validators=[Optional()],
-    #     render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    # )
-
-    addTimeAndDays3 = BooleanField("Add", default=True)
-    classDays3 = MultiCheckboxField("Class Days")
-    startTime3 = TimeField(
-        "Start Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-    endTime3 = TimeField(
-        "End Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-
-    addTimeAndDays4 = BooleanField("Add", default=True)
-    classDays4 = MultiCheckboxField("Class Days")
-    startTime4 = TimeField(
-        "Start Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-    endTime4 = TimeField(
-        "End Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-
-    addTimeAndDays5 = BooleanField("Add", default=True)
-    classDays5 = MultiCheckboxField("Class Days")
-    startTime5 = TimeField(
-        "Start Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-    endTime5 = TimeField(
-        "End Time",
-        validators=[Optional()],
-        render_kw={"placeholder": "HH:MM 24-Hour Format"},
-    )
-
     online = BooleanField("Online")
     indStudy = BooleanField("Independent Study")
     comment = StringField("Comment (Optional)")
     googleCalendarEventID = StringField("Google Calendar Event ID (Optional)")
-    # Start and end dates used for learning lab and recorded in intervention log
-    startDate = DateField("Start Date")
-    endDate = DateField("End Date")
     submitAddSingleClassSchedule = SubmitField("Add Class Schedule for Single Student")
 
 
