@@ -41,9 +41,15 @@ class editSingleClassSchedule(FlaskForm):
     teacherName = SelectField("Teacher", coerce=str)
     classDays = MultiCheckboxField("Class Days", validators=[DataRequired()])
     startTime = TimeField(
-        "Start Time (HH:MM 24-Hr format)", validators=[DataRequired()]
+        "Start Time",
+        validators=[DataRequired()],
+        render_kw={"placeholder": "HH:MM 24-Hour Format"},
     )
-    endTime = TimeField("End Time (HH:MM 24-Hr format)", validators=[DataRequired()])
+    endTime = TimeField(
+        "End Time",
+        validators=[DataRequired()],
+        render_kw={"placeholder": "HH:MM 24-Hour Format"},
+    )
     online = BooleanField("Online")
     indStudy = BooleanField("Independent Study")
     comment = StringField("Comment (Optional)")
