@@ -84,7 +84,7 @@ def displayLearningLab():
             comment = addLearningLabDetails.comment.data
             googleCalendarEventID = addLearningLabDetails.googleCalendarEventID.data
             campus = "STEM School"
-            staffID = current_user
+            staffID = current_user.id
             learningLab = True
 
             print(

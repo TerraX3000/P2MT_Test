@@ -43,7 +43,7 @@ def add_InterventionLog(
             startDate=startDate,
             endDate=endDate,
             comment=comment,
-            staffID=current_user,
+            staffID=current_user.id,
             chattStateANumber=chattStateANumber,
             tmiMinutes=tmiMinutes,
             parentNotification=parentNotification,
@@ -55,7 +55,7 @@ def add_InterventionLog(
             startDate=startDate,
             endDate=endDate,
             comment=comment,
-            staffID=current_user,
+            staffID=current_user.id,
             chattStateANumber=chattStateANumber,
             tmiMinutes=tmiMinutes,
         )

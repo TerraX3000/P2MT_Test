@@ -20,7 +20,7 @@ def addLearningLabTimeAndDays(
     campus = learningLabCommonFields[3]
     className = learningLabCommonFields[4]
     teacherLastName = learningLabCommonFields[5]
-    staffID = current_user
+    staffID = current_user.id
     online = False
     indStudy = False
     comment = learningLabCommonFields[9]

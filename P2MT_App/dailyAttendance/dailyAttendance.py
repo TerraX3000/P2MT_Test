@@ -15,7 +15,7 @@ def add_DailyAttendanceLog(chattStateANumber, absenceDate, attendanceCode, comme
         absenceDate=absenceDate,
         attendanceCode=attendanceCode,
         comment=comment,
-        staffID=current_user,
+        staffID=current_user.id,
         chattStateANumber=chattStateANumber,
     )
     db.session.add(dailyAttendanceLog)
