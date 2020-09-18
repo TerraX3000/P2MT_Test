@@ -34,6 +34,7 @@ def create_message(sender, to, cc, bcc, subject, message_text):
     An object containing a base64url encoded email object.
   """
     message = MIMEText(message_text, "html")
+    message["reply-to"] = cc
     message["to"] = to
     message["cc"] = cc
     message["bcc"] = bcc
