@@ -265,7 +265,7 @@ def displayP2MTAdmin():
             return downloadStaffList()
 
     if "submitStaffToEdit" in request.form:
-        if selectStaffToEditFormDetails.validate_on_submit:
+        if selectStaffToEditFormDetails.validate_on_submit():
             printLogEntry("Staff to Edit Form Submitted")
             staff_id = int(selectStaffToEditFormDetails.staffName.data)
             print("staff_id = ", staff_id)
