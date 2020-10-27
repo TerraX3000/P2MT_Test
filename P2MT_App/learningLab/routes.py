@@ -167,10 +167,10 @@ def displayLearningLab():
                 print("Adding learning lab time 2")
                 # Format time values from string objects to time objects
                 startTime2 = datetime.strptime(
-                    addLearningLabDetails.startTime2.data, "%I:%M"
+                    addLearningLabDetails.startTime2.data, "%H:%M"
                 ).time()
                 endTime2 = datetime.strptime(
-                    addLearningLabDetails.endTime2.data, "%I:%M"
+                    addLearningLabDetails.endTime2.data, "%H:%M"
                 ).time()
 
                 learningLabClassSchedule = addLearningLabTimeAndDays(
@@ -196,10 +196,10 @@ def displayLearningLab():
                 print("Adding learning lab time 3")
                 # Format time values from string objects to time objects
                 startTime3 = datetime.strptime(
-                    addLearningLabDetails.startTime3.data, "%I:%M"
+                    addLearningLabDetails.startTime3.data, "%H:%M"
                 ).time()
                 endTime3 = datetime.strptime(
-                    addLearningLabDetails.endTime3.data, "%I:%M"
+                    addLearningLabDetails.endTime3.data, "%H:%M"
                 ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
@@ -224,10 +224,10 @@ def displayLearningLab():
                 print("Adding learning lab time 4")
                 # Format time values from string objects to time objects
                 startTime4 = datetime.strptime(
-                    addLearningLabDetails.startTime4.data, "%I:%M"
+                    addLearningLabDetails.startTime4.data, "%H:%M"
                 ).time()
                 endTime4 = datetime.strptime(
-                    addLearningLabDetails.endTime4.data, "%I:%M"
+                    addLearningLabDetails.endTime4.data, "%H:%M"
                 ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
@@ -252,10 +252,10 @@ def displayLearningLab():
                 print("Adding learning lab time 5")
                 # Format time values from string objects to time objects
                 startTime5 = datetime.strptime(
-                    addLearningLabDetails.startTime5.data, "%I:%M"
+                    addLearningLabDetails.startTime5.data, "%H:%M"
                 ).time()
                 endTime5 = datetime.strptime(
-                    addLearningLabDetails.endTime5.data, "%I:%M"
+                    addLearningLabDetails.endTime5.data, "%H:%M"
                 ).time()
                 learningLabClassSchedule = addLearningLabTimeAndDays(
                     learningLabCommonFields,
