@@ -10,6 +10,7 @@ class addDailyAttendanceForm(FlaskForm):
     attendanceCode = SelectField(
         "Attendance Code",
         choices=[
+            ("DL (Distance Learning)", "DL (Distance Learner)"),
             ("Missed Swipe", "Missed Swipe"),
             ("W/D Use Only", "W/D Use Only"),
             ("P (Present)", "P (Present)"),
