@@ -14,13 +14,17 @@ def add_DailyAttendanceLog(
     printLogEntry("add_DailyAttendanceLog() function called")
     print(chattStateANumber, attendanceCode, comment, absenceDateStart, absenceDateEnd)
     # Create lists of days to use for propagating absence dates
-    schoolCalendar = db.session.query(SchoolCalendar)
-    phaseIIDays = schoolCalendar.filter(SchoolCalendar.phaseIISchoolDay)
-    dateRange = phaseIIDays.filter(
-        SchoolCalendar.classDate >= absenceDateStart,
-        SchoolCalendar.classDate <= absenceDateEnd,
-    )
-    for absenceDate in createListOfDates(dateRange):
+    if absenceDateEnd != None:
+        schoolCalendar = db.session.query(SchoolCalendar)
+        phaseIIDays = schoolCalendar.filter(SchoolCalendar.phaseIISchoolDay)
+        dateRange = phaseIIDays.filter(
+            SchoolCalendar.classDate >= absenceDateStart,
+            SchoolCalendar.classDate <= absenceDateEnd,
+        )
+        dateRange = createListOfDates(dateRange)
+    else:
+        dateRange = [absenceDateStart]
+    for absenceDate in dateRange:
         dailyAttendanceLog = DailyAttendanceLog(
             absenceDate=absenceDate,
             attendanceCode=attendanceCode,

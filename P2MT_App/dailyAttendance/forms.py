@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, SelectField, TextAreaField
 from wtforms.fields.html5 import DateField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 
 
 class addDailyAttendanceForm(FlaskForm):
@@ -37,6 +37,6 @@ class addDailyAttendanceForm(FlaskForm):
         validators=[DataRequired()],
     )
     absenceDateStart = DateField("Absence Date Start", validators=[DataRequired()])
-    absenceDateEnd = DateField("Absence Date End", validators=[DataRequired()])
+    absenceDateEnd = DateField("Absence Date End (Optional)", validators=[Optional()])
     comment = TextAreaField("Comment")
     submitDailyAttendance = SubmitField("Submit New Daily Attendance")
