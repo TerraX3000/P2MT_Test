@@ -1,24 +1,34 @@
 from flask import flash, current_app, send_file
 from flask_login import current_user
 from P2MT_App import db
-from P2MT_App.models import DailyAttendanceLog, Student, FacultyAndStaff
-from P2MT_App.main.utilityfunctions import printLogEntry
+from P2MT_App.models import DailyAttendanceLog, Student, FacultyAndStaff, SchoolCalendar
+from P2MT_App.main.utilityfunctions import printLogEntry, createListOfDates
 import csv
 import os
 from datetime import datetime
 
 
-def add_DailyAttendanceLog(chattStateANumber, absenceDate, attendanceCode, comment):
+def add_DailyAttendanceLog(
+    chattStateANumber, absenceDateStart, absenceDateEnd, attendanceCode, comment
+):
     printLogEntry("add_DailyAttendanceLog() function called")
-    print(chattStateANumber, attendanceCode, comment, absenceDate)
-    dailyAttendanceLog = DailyAttendanceLog(
-        absenceDate=absenceDate,
-        attendanceCode=attendanceCode,
-        comment=comment,
-        staffID=current_user.id,
-        chattStateANumber=chattStateANumber,
+    print(chattStateANumber, attendanceCode, comment, absenceDateStart, absenceDateEnd)
+    # Create lists of days to use for propagating absence dates
+    schoolCalendar = db.session.query(SchoolCalendar)
+    phaseIIDays = schoolCalendar.filter(SchoolCalendar.phaseIISchoolDay)
+    dateRange = phaseIIDays.filter(
+        SchoolCalendar.classDate >= absenceDateStart,
+        SchoolCalendar.classDate <= absenceDateEnd,
     )
-    db.session.add(dailyAttendanceLog)
+    for absenceDate in createListOfDates(dateRange):
+        dailyAttendanceLog = DailyAttendanceLog(
+            absenceDate=absenceDate,
+            attendanceCode=attendanceCode,
+            comment=comment,
+            staffID=current_user.id,
+            chattStateANumber=chattStateANumber,
+        )
+        db.session.add(dailyAttendanceLog)
     return
 
 

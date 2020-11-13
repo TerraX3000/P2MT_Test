@@ -12,7 +12,7 @@
     {% endfor %}
   </div>
   {% else %}
-  {{ formfield(id=uniqueId, class="w3-select w3-section") }}
+  {{ formfield(id=uniqueId, class="w3-select") }}
   {% endif %}
 </div>
 {% endmacro %}
@@ -76,9 +76,10 @@
               {{ dailyAttendanceForm.chattStateANumber(id="attendanceStudentId_" + student.id|string, value = student.chattStateANumber, class="w3-hide") }}
               <legend class="w3-xlarge">{{student.firstName}} {{student.lastName}}</legend>
               <div class="w3-row-padding">
-                {{ macro_display_formfield(dailyAttendanceForm.absenceDate, "w3-half", "absenceDate_" + student.id|string) }}
+                {{ macro_display_formfield(dailyAttendanceForm.absenceDateStart, "w3-half", "absenceDateStart_" + student.id|string) }}
+                {{ macro_display_formfield(dailyAttendanceForm.absenceDateEnd, "w3-half", "absenceDateEnd_" + student.id|string) }}
                 {{ macro_display_formfield(dailyAttendanceForm.attendanceCode, "w3-half", "attendanceCode_" + student.id|string) }}
-                {{ macro_display_formfield(dailyAttendanceForm.comment, "w3-half", "commentAttendance_" + student.id|string) }}
+                {{ macro_display_formfield(dailyAttendanceForm.comment, "w3-threequarter", "commentAttendance_" + student.id|string) }}
               </div>
             </fieldset>
             <footer class="w3-container w3-margin-top w3-white w3-center">

@@ -36,6 +36,7 @@ class addDailyAttendanceForm(FlaskForm):
         ],
         validators=[DataRequired()],
     )
-    absenceDate = DateField("Absence Date", validators=[DataRequired()])
+    absenceDateStart = DateField("Absence Date Start", validators=[DataRequired()])
+    absenceDateEnd = DateField("Absence Date End", validators=[DataRequired()])
     comment = TextAreaField("Comment")
     submitDailyAttendance = SubmitField("Submit New Daily Attendance")

@@ -39,7 +39,8 @@ def displayStudents():
             printLogEntry("Running dailyAttendanceForm")
             add_DailyAttendanceLog(
                 dailyAttendanceForm.chattStateANumber.data,
-                dailyAttendanceForm.absenceDate.data,
+                dailyAttendanceForm.absenceDateStart.data,
+                dailyAttendanceForm.absenceDateEnd.data,
                 dailyAttendanceForm.attendanceCode.data,
                 dailyAttendanceForm.comment.data,
             )
