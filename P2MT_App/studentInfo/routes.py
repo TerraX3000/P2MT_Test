@@ -1,7 +1,14 @@
 from flask import render_template, redirect, request, url_for, flash, Blueprint
 from flask_login import login_required
 from P2MT_App import db
-from P2MT_App.models import Student
+from P2MT_App.models import (
+    Student,
+    DailyAttendanceLog,
+    ClassAttendanceLog,
+    ClassSchedule,
+    InterventionLog,
+    Parents,
+)
 from P2MT_App.dailyAttendance.dailyAttendance import add_DailyAttendanceLog
 from P2MT_App.interventionInfo.interventionInfo import (
     add_InterventionLog,
@@ -83,3 +90,79 @@ def displayStudents():
             dailyAttendanceForm=dailyAttendanceForm,
             interventionForm=interventionForm,
         )
+
+
+@studentInfo_bp.route("/students/info", methods=["GET", "POST"])
+@login_required
+def displayStudentInfo():
+    # Display student info page with the following info:
+    # Student name, email, house, year of graduation
+    # Parent info
+    # Absences
+    # Class attendance (when not present)
+    # Interventions
+    # Learning labs
+    # Class schedule
+    printLogEntry("Running displayStudentInfo()")
+    chattStateANumber = request.args["chattStateANumber"]
+    print("chattStateANumber = ", chattStateANumber)
+
+    students = Student.query.filter(
+        Student.chattStateANumber == chattStateANumber
+    ).order_by(Student.yearOfGraduation.asc(), Student.lastName.asc())
+
+    parents = (
+        Parents.query.join(Student)
+        .filter(Student.chattStateANumber == chattStateANumber)
+        .order_by(Student.lastName.asc())
+    )
+
+    DailyAttendanceLogs = DailyAttendanceLog.query.filter(
+        DailyAttendanceLog.chattStateANumber == chattStateANumber
+    ).order_by(DailyAttendanceLog.absenceDate.desc())
+
+    classAttendanceFixedFields = (
+        ClassAttendanceLog.query.filter(ClassAttendanceLog.attendanceCode != "P")
+        .filter(ClassSchedule.chattStateANumber == chattStateANumber)
+        .join(ClassSchedule)
+        .join(ClassSchedule.Student)
+        .order_by(
+            Student.lastName,
+            ClassAttendanceLog.classDate.desc(),
+            ClassSchedule.className,
+        )
+        .all()
+    )
+
+    InterventionLogs = InterventionLog.query.filter(
+        InterventionLog.parentNotification != None,
+        InterventionLog.chattStateANumber == chattStateANumber,
+    ).order_by(InterventionLog.endDate.desc())
+
+    ClassSchedules = ClassSchedule.query.filter(
+        ClassSchedule.learningLab == False,
+        ClassSchedule.chattStateANumber == chattStateANumber,
+    ).order_by(ClassSchedule.chattStateANumber.desc())
+
+    LearningLabSchedules = (
+        db.session.query(ClassSchedule)
+        .join(InterventionLog)
+        .join(Student)
+        .filter(
+            ClassSchedule.learningLab == True,
+            ClassSchedule.chattStateANumber == chattStateANumber,
+        )
+        .order_by(InterventionLog.endDate.desc(), Student.lastName.asc())
+    ).all()
+
+    return render_template(
+        "studentinfo.html",
+        title="Student Info",
+        students=students,
+        parents=parents,
+        DailyAttendanceLogs=DailyAttendanceLogs,
+        classAttendanceFixedFields=classAttendanceFixedFields,
+        InterventionLogs=InterventionLogs,
+        ClassSchedules=ClassSchedules,
+        LearningLabSchedules=LearningLabSchedules,
+    )

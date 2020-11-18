@@ -41,6 +41,7 @@
       <th scope="col">House</th>
       <th scope="col">Actions</th>
       <th scope="col"></th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody id="filteredTable" class="w3-main">
@@ -58,7 +59,13 @@
       <td><button type="button" class="w3-btn w3-green"
           onclick="document.getElementById('addInterventionModal{{student.id}}').style.display='block'">Intervention</button>
       </td>
-
+      <td>
+        <form method="POST"
+          action="{{ url_for('studentInfo_bp.displayStudentInfo', chattStateANumber=student.chattStateANumber) }}"
+          enctype="multipart/form-data">
+          <input type="submit" class="w3-btn w3-green" value="Info">
+        </form>
+      </td>
     </tr>
     <!-- Attendance Modal -->
     <div class="w3-modal" id="addAttendanceModal{{student.id}}">
