@@ -26,15 +26,8 @@
 </script>
 </head>
 
-<!-- <div class="w3-container w3-margin">
-    <form method="POST" action="{{ url_for('main_bp.saveTeams') }}" enctype="multipart/form-data">
-        <input id="teamList" name="teamList" type="hidden" value="">
-        <input id="saveTeamButton" type="submit" class="w3-btn w3-green" value="Save Teams">
-    </form>
-</div> -->
-
 <div id="Team 0" class="w3-container w3-light-grey" id="div1" ondrop="drop(event, this)" ondragover="allowDrop(event)">
-    <form method="POST" action="{{ url_for('main_bp.saveTeams') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('pblPlanner_bp.saveTeams') }}" enctype="multipart/form-data">
         <input id="teamList" name="teamList" type="hidden" value="">
         <input id="saveTeamButton" type="submit" class="w3-btn w3-green w3-margin" value="Save Teams">
     </form>

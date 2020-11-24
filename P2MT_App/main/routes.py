@@ -9,10 +9,6 @@ from P2MT_App.main.testFunctions import setAttendanceForTmiTesting
 from datetime import date
 from flask_login import current_user, login_required
 
-# STEM III Drag and Drop
-from P2MT_App.models import Student
-import json
-
 main_bp = Blueprint("main_bp", __name__)
 
 
@@ -58,40 +54,3 @@ def displayAnalyticsTest():
 def displaySandbox():
     return render_template("sandbox.html")
 
-
-@main_bp.route("/stemiiiteams")
-def displayStemIIITeams():
-    students = db.session.query(
-        Student.firstName, Student.lastName, Student.chattStateANumber
-    ).filter(Student.yearOfGraduation == 2022)
-
-    teams = []
-    for i in range(1, 31, 1):
-        teams.append(f"Team {i}")
-
-    pblOptions = [
-        "",
-        "EPB Holiday Windows",
-        "Prosthetic Test Tool",
-        "Coding Machine for Kids",
-        "River Street Architecture",
-        "Tiger Team Rockets",
-        "Brown Academy Makeover",
-    ]
-    return render_template(
-        "stemiiiteams.html",
-        title="STEM III Team Builder",
-        students=students,
-        teams=teams,
-        pblOptions=pblOptions,
-    )
-
-
-@main_bp.route("/saveteams", methods=["GET", "POST"])
-def saveTeams():
-    print("Running saveTeams()")
-    teamListjson = request.form["teamList"]
-    teamList = json.loads(teamListjson)
-    for team, teamInfo in teamList.items():
-        print(team, teamInfo["teamMemberList"], teamInfo["pblChoice"])
-    return redirect(url_for("main_bp.displayStemIIITeams"))
