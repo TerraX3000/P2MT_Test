@@ -18,6 +18,6 @@
 }
 
 .sticky + .content {
-  padding-top: 50px;
+  padding-top: 350px;
 }
 /* End: CSS for scrollable tables with fixed header rows */

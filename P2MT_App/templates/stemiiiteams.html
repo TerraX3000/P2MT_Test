@@ -1,0 +1,142 @@
+{% extends 'layout.html'%}
+{% block content %}
+<div class="w3-container w3-green w3-row">
+    <div class="w3-third">
+        <h2>{{title}}</h2>
+    </div>
+</div>
+
+<script>
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.target.style.opacity = '0.4';
+        ev.dataTransfer.setData("Text", ev.target.id);
+    }
+
+    function drop(ev, el) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("Text");
+        document.getElementById(data).style.opacity = '1';
+        el.appendChild(document.getElementById(data));
+        // console.log('Element = ' + el);
+    }
+</script>
+</head>
+
+<!-- <div class="w3-container w3-margin">
+    <form method="POST" action="{{ url_for('main_bp.saveTeams') }}" enctype="multipart/form-data">
+        <input id="teamList" name="teamList" type="hidden" value="">
+        <input id="saveTeamButton" type="submit" class="w3-btn w3-green" value="Save Teams">
+    </form>
+</div> -->
+
+<div id="Team 0" class="w3-container w3-light-grey" id="div1" ondrop="drop(event, this)" ondragover="allowDrop(event)">
+    <form method="POST" action="{{ url_for('main_bp.saveTeams') }}" enctype="multipart/form-data">
+        <input id="teamList" name="teamList" type="hidden" value="">
+        <input id="saveTeamButton" type="submit" class="w3-btn w3-green w3-margin" value="Save Teams">
+    </form>
+    <p>Students</p>
+    <div class="w3-container w3-cell-row">
+        {% for student in students %}
+        <div id="{{student.chattStateANumber}}"
+            class="w3-container w3-cell w3-blue w3-padding w3-border w3-round-xlarge w3-tiny" draggable="true"
+            ondragstart="drag(event)">{{student.firstName}} {{student.lastName}}</div>
+        {% if loop.index is divisibleby(9) %}
+    </div>
+    <div class="w3-container w3-cell-row">
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="content w3-container">
+    <div class="w3-cell-row w3-margin w3-small">
+        {% for team in teams %}
+        <div class="w3-cell w3-container w3-border w3-round-xlarge w3-padding" id="{{team}}" ondrop="drop(event, this)"
+            ondragover="allowDrop(event)">
+            <p>{{team}}</p>
+            <select name="pblChoice" id="{{team}} pblChoice" class="w3-select w3-margin">
+                {% for pblOption in pblOptions %}
+                <option value="{{pblOption}}">{{pblOption}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if loop.index is divisibleby(3) %}
+    </div>
+    <div class="w3-cell-row w3-margin w3-small">
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script used with css to create sticky header per example here-->
+<!-- https://www.w3schools.com/howto/howto_js_sticky_header.asp -->
+<!-- Note: set css padding-top=350px based on experimenting with scroll behavior -->
+<!-- The value of 350px is likely  due to the size of the student list-->
+<!-- The sticy header behavior requires using class=content and id=myStickyHeader -->
+<script>
+    window.onscroll = function () { myStickyFunction() };
+    var header = document.getElementById("Team 0");
+    var sticky = header.offsetTop;
+    // console.log('offsetTop = ' + header.offsetTop)
+    function myStickyFunction() {
+        // console.log('pageYOffset = ' + window.pageYOffset)
+        if (window.pageYOffset > sticky) {
+            header.classList.add("sticky");
+        } else {
+            header.classList.remove("sticky");
+        }
+    }
+</script>
+
+<script>
+    // Create event listener to save team details in session variable on form submit
+    var saveTeamButton = document.querySelector("input[id=saveTeamButton]");
+    // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+    saveTeamButton.addEventListener("click", function () { saveTeam(event); });
+
+    function saveTeam(evt) {
+        evt.preventDefault();
+        // Save the current team members
+        teamDivs = document.querySelectorAll("div[id^=Team");
+        // console.log("Total teams count =" + teamDivs.length);
+        teamMembers = document.querySelectorAll("div[id^=A0");
+        // console.log("Total students =" + teamMembers.length);
+        // Initialize the JSON object to hold the properties and values
+        var object = {};
+        // Cycle through the selectfields
+        for (i = 0; i < teamDivs.length; i++) {
+            var teamMemberList = [];
+            teamMembers = teamDivs[i].querySelectorAll("div[id^=A0");
+            for (j = 0; j < teamMembers.length; j++) {
+                // console.log('team = ' + teamDivs[i].id + ' teamMember = ' + teamMembers[j].id);
+                teamMemberList.push(teamMembers[j].id);
+            }
+            pblSelect = teamDivs[i].querySelector("select");
+            if (pblSelect != null) {
+                // console.log("pblSelect = " + pblSelect.id);
+                pblChoice = pblSelect.value;
+            } else {
+                pblChoice = "";
+            }
+            team = teamDivs[i].id;
+            object[team] = { teamMemberList: teamMemberList, pblChoice: pblChoice };
+        }
+
+        // Convert the JSON object to a string
+        myJSON = JSON.stringify(object);
+        // console.log('myJSON =' + myJSON);
+        // Save the JSON object to the session variable
+        sessionStorage.setItem("SavedTeams", myJSON);
+        trigger_field = document.getElementById(evt.target.id);
+        form = trigger_field.form;
+        document.getElementById("teamList").value = myJSON;
+        form.submit();
+
+    }
+</script>
+
+{% endblock content %}
