@@ -31,6 +31,9 @@ class Student(db.Model):
     parentInfo = db.relationship(
         "Parents", backref="Student", passive_deletes=True, lazy=True,
     )
+    pblTeams = db.relationship(
+        "PblTeams", backref="Student", passive_deletes=True, lazy=True,
+    )
 
     def __repr__(self):
         return (
@@ -319,3 +322,49 @@ class apiKeys(db.Model):
 
 #     def __repr__(self):
 #         return f"LearningLabAttendanceLog('{self.id}','{self.classSchedule_id}','{self.classDate}','{self.attendanceCode}','{self.assignTmi}')"
+
+
+class PblEvents(db.Model):
+    __tablename__ = "pblEvents"
+    id = db.Column(db.Integer, primary_key=True)
+    className = db.Column(db.String(50), nullable=True)
+    schoolYear = db.Column(db.Integer, nullable=True)
+    semester = db.Column(db.String(20), nullable=True)
+    quarter = db.Column(db.Integer, nullable=True)
+    pblName = db.Column(db.String(100), nullable=True)
+    eventCategory = db.Column(db.String(100), nullable=True)
+    confirmed = db.Column(db.Boolean, nullable=True, default=False)
+    eventDate = db.Column(db.Date, nullable=True)
+    startTime = db.Column(db.Time, nullable=True)
+    endTime = db.Column(db.Time, nullable=True)
+    eventLocation = db.Column(db.String(100), nullable=True)
+    eventStreetAddress1 = db.Column(db.String(100), nullable=True)
+    eventStreetAddress2 = db.Column(db.String(100), nullable=True)
+    eventCity = db.Column(db.String(100), nullable=True)
+    eventState = db.Column(db.String(100), nullable=True)
+    eventZip = db.Column(db.String(10), nullable=True)
+    eventComments = db.Column(db.Text, nullable=True)
+    googleCalendarEventID = db.Column(db.String(250), nullable=True)
+
+    def __repr__(self):
+        return f"pblEvent('{self.pblName}','{self.eventCategory}','{self.eventDate}','{self.startTime}','{self.endTime}')"
+
+
+class PblTeams(db.Model):
+    __tablename__ = "pblTeams"
+    id = db.Column(db.Integer, primary_key=True)
+    className = db.Column(db.String(50), nullable=True)
+    schoolYear = db.Column(db.Integer, nullable=True)
+    semester = db.Column(db.String(20), nullable=True)
+    quarter = db.Column(db.Integer, nullable=True)
+    pblNumber = db.Column(db.Integer, nullable=True)
+    pblTeamNumber = db.Column(db.Integer, nullable=True)
+    chattStateANumber = db.Column(
+        db.String(20),
+        db.ForeignKey("Student.chattStateANumber", ondelete="CASCADE"),
+        nullable=False,
+    )
+    pblName = db.Column(db.String(100), nullable=True)
+
+    def __repr__(self):
+        return f"pblTeam('{self.className}','{self.pblNumber}','{self.pblTeamNumber}','{self.pblName}','{self.chattStateANumber}')"
