@@ -8,6 +8,7 @@ from P2MT_App.models import (
     Parents,
     adminSettings,
     apiKeys,
+    PblEvents,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -261,6 +262,58 @@ def getSemester():
         .all()
     )
     return semesterValueLabelTupleList
+
+
+def getSchoolYearChoices():
+    schoolYearChoices = [
+        (2020, 2020),
+        (2021, 2021),
+        (2022, 2022),
+        (2023, 2023),
+        (2024, 2024),
+        (2025, 2025),
+    ]
+    return schoolYearChoices
+
+
+def getSemesterChoices():
+    semesterChoices = [
+        ("Fall", "Fall"),
+        ("Spring", "Spring"),
+    ]
+    return semesterChoices
+
+
+def getQuarterChoices():
+    quarterChoices = [
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+    ]
+    return quarterChoices
+
+
+def getPblOptions(quarter):
+    pblOptions = (
+        db.session.query(PblEvents.pblName)
+        .filter(PblEvents.quarter == quarter)
+        .order_by(PblEvents.pblName,)
+        .distinct()
+    )
+    pblOptions = [item[0] for item in pblOptions]
+    # print(pblOptions)
+    return pblOptions
+
+
+def getPblEventCategoryChoices():
+    pblEventCategoryChoices = [
+        ("Kickoff", "Kickoff"),
+        ("Final", "Final"),
+        ("Design Review", "Design Review"),
+        ("Sponsor Meeting", "Sponsor Meeting"),
+    ]
+    return pblEventCategoryChoices
 
 
 def getClassDayChoices():

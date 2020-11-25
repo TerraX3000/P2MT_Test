@@ -1,0 +1,117 @@
+{% extends 'layout.html'%}
+{% block content %}
+<div class="w3-container w3-green w3-row">
+  <div class="w3-third">
+    <h2>{{title}}</h2>
+  </div>
+  <div>
+    <input type="text" class="w3-third w3-margin w3-padding" size="25" id="searchFilter"
+      placeholder="Search by PBL Name...">
+  </div>
+  <div class="w3-rest w3-margin w3-padding-large">
+    <a href="{{ url_for('pblPlanner_bp.download_PblEvents' )}}" target="blank"><i
+        class="fa fa-download fa-fw"></i>Download PBL Events</a>
+  </div>
+</div>
+
+<div class="w3-container w3-margin w3-center">
+  <form method="POST" action="{{ url_for('pblPlanner_bp.new_PblEvent') }}" enctype="multipart/form-data">
+    <input id="createNewPblEvent" type="submit" class="w3-btn w3-green w3-margin" value="Create New PBL Event">
+  </form>
+</div>
+
+<table class="w3-table w3-bordered w3-striped w3-hoverable">
+  <thead>
+    <tr class="w3-blue">
+      <th scope="col">Class</th>
+      <th scope="col">Year</th>
+      <th scope="col">Semester</th>
+      <th scope="col">Quarter</th>
+      <th scope="col">PBL Name</th>
+      <th scope="col">Event Category</th>
+      <th scope="col">Confirmed</th>
+      <th scope="col">Date</th>
+      <th scope="col">Start Time</th>
+      <th scope="col">End Time</th>
+      <th scope="col">Location</th>
+      <th scope="col">Street Address</th>
+      <th scope="col">City</th>
+      <th scope="col">State</th>
+      <th scope="col">Zip Code</th>
+      <th scope="col">Comments</th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody id="filteredTable">
+    {% for pblEvent in pblEvents %}
+    <tr>
+      <td scope="row">{{ pblEvent.className }}</td>
+      <td>{{ pblEvent.schoolYear }}</td>
+      <td>{{ pblEvent.semester }}</td>
+      <td>{{ pblEvent.quarter }}</td>
+      <td>{{ pblEvent.pblName }}</td>
+      <td>{{ pblEvent.eventCategory }}</td>
+      {% if pblEvent.confirmed == 1 %}
+      <td class="w3-text-green">{{ pblEvent.confirmed }}</td>
+      {% else %}
+      <td class="w3-text-red">{{ pblEvent.confirmed }}</td>
+      {% endif %}
+      <td>{{ pblEvent.eventDate.strftime('%a %b %-d') }}</td>
+      <td>{{ pblEvent.startTime.strftime('%-I:%M')}}</td>
+      <td>{{ pblEvent.endTime.strftime('%-I:%M') }}</td>
+      <td>{{ pblEvent.eventLocation }}</td>
+      <td>{{ pblEvent.eventStreetAddress1 }}</td>
+      <td>{{ pblEvent.eventCity }}</td>
+      <td>{{ pblEvent.eventState }}</td>
+      <td>{{ pblEvent.eventZip }}</td>
+      <td>{{ pblEvent.eventComments }}</td>
+      <td>
+        <form action="{{ url_for('pblPlanner_bp.edit_PblEvent', log_id=pblEvent.id) }}" method="POST">
+          <input class="w3-button w3-green" type="submit" value="Edit">
+        </form>
+      </td>
+      <td><button type="button" class="w3-btn w3-red"
+          onclick="document.getElementById('deleteModal{{pblEvent.id}}').style.display='block'">Delete</button>
+      </td>
+    </tr>
+
+
+    <!-- Modal -->
+    <div class="w3-modal" id="deleteModal{{pblEvent.id}}">
+      <div class="w3-container">
+        <div class="w3-modal-content" style="width:50%">
+          <header class="w3-container w3-red">
+            <span onclick="document.getElementById('deleteModal{{pblEvent.id}}').style.display='none'"
+              class="w3-button w3-display-topright">&times;</span>
+            <h2>Delete This PBL Event?</h2>
+          </header>
+          <footer class="w3-container w3-margin-top w3-white w3-center">
+            <div class="w3-bar">
+              <form action="{{ url_for('pblPlanner_bp.delete_PblEvent', log_id=pblEvent.id) }}" method="POST">
+                <button type="button" class="w3-button w3-large"
+                  onclick="document.getElementById('deleteModal{{pblEvent.id}}').style.display='none'">Cancel</button>
+                <input class="w3-button w3-red w3-large" type="submit" value="Delete">
+              </form>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Search Filter -->
+<script type="text/javascript" src="{{ url_for('static', filename="js/searchFilters.js") }}"></script>
+<script>
+  // Note: the table does not include the header rows
+  var tableBody = document.getElementById('filteredTable');
+  var searchFilter = document.getElementById('searchFilter');
+  searchFilter.firstNameCellPosition = 4;
+  searchFilter.lastNameCellPosition = 5;
+  searchFilter.addEventListener('keyup', filterFirstLastNames);
+</script>
+
+{% endblock content %}
