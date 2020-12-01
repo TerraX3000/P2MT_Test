@@ -325,13 +325,12 @@ class apiKeys(db.Model):
 
 
 class PblEvents(db.Model):
-    __tablename__ = "pblEvents"
+    __tablename__ = "PblEvents"
     id = db.Column(db.Integer, primary_key=True)
-    className = db.Column(db.String(50), nullable=True)
-    schoolYear = db.Column(db.Integer, nullable=True)
-    semester = db.Column(db.String(20), nullable=True)
-    quarter = db.Column(db.Integer, nullable=True)
-    pblName = db.Column(db.String(100), nullable=True)
+    pbl_id = db.Column(
+        db.Integer, db.ForeignKey("Pbls.id", ondelete="CASCADE"), nullable=False,
+    )
+    # pblName = db.Column(db.String(100), nullable=True)
     eventCategory = db.Column(db.String(100), nullable=True)
     confirmed = db.Column(db.Boolean, nullable=True, default=False)
     eventDate = db.Column(db.Date, nullable=True)
@@ -347,14 +346,15 @@ class PblEvents(db.Model):
     googleCalendarEventID = db.Column(db.String(250), nullable=True)
 
     def __repr__(self):
-        return f"pblEvent('{self.pblName}','{self.eventCategory}','{self.eventDate}','{self.startTime}','{self.endTime}')"
+        return f"pblEvent('{self.id}','{self.pbl_id}','{self.eventCategory}','{self.eventDate}','{self.startTime}','{self.endTime}')"
 
 
 class PblTeams(db.Model):
-    __tablename__ = "pblTeams"
+    __tablename__ = "PblTeams"
     id = db.Column(db.Integer, primary_key=True)
     className = db.Column(db.String(50), nullable=True)
     schoolYear = db.Column(db.Integer, nullable=True)
+    academicYear = db.Column(db.String(20), nullable=True)
     semester = db.Column(db.String(20), nullable=True)
     quarter = db.Column(db.Integer, nullable=True)
     pblNumber = db.Column(db.Integer, nullable=True)
@@ -364,7 +364,36 @@ class PblTeams(db.Model):
         db.ForeignKey("Student.chattStateANumber", ondelete="CASCADE"),
         nullable=False,
     )
-    pblName = db.Column(db.String(100), nullable=True)
+    pbl_id = db.Column(
+        db.Integer, db.ForeignKey("Pbls.id", ondelete="SET NULL"), nullable=True,
+    )
+    # pblName = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
-        return f"pblTeam('{self.className}','{self.pblNumber}','{self.pblTeamNumber}','{self.pblName}','{self.chattStateANumber}')"
+        return f"pblTeam('{self.className}','{self.pblNumber}','{self.pblTeamNumber}','{self.pbl_id}','{self.chattStateANumber}')"
+
+
+class Pbls(db.Model):
+    __tablename__ = "Pbls"
+    id = db.Column(db.Integer, primary_key=True)
+    className = db.Column(db.String(50), nullable=True)
+    schoolYear = db.Column(db.Integer, nullable=True)
+    academicYear = db.Column(db.String(20), nullable=True)
+    semester = db.Column(db.String(20), nullable=True)
+    quarter = db.Column(db.Integer, nullable=True)
+    pblNumber = db.Column(db.Integer, nullable=True)
+    pblName = db.Column(db.String(100), nullable=True)
+    pblSponsor = db.Column(db.String(100), nullable=True)
+    pblSponsorPersonName = db.Column(db.String(100), nullable=True)
+    pblSponsorPhone = db.Column(db.String(100), nullable=True)
+    pblSponsorEmail = db.Column(db.String(100), nullable=True)
+    pblComments = db.Column(db.Text, nullable=True)
+    PblEvents = db.relationship(
+        "PblEvents", backref="Pbls", passive_deletes=True, lazy=True,
+    )
+    PblTeams = db.relationship(
+        "PblTeams", backref="Pbls", passive_deletes=True, lazy=True,
+    )
+
+    def __repr__(self):
+        return f"pbl('{self.id}', '{self.pblName}','{self.className}','{self.schoolYear}','{self.semester}','{self.quarter}')"

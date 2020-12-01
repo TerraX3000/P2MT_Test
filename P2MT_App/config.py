@@ -3,6 +3,7 @@ import os
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
+    # SQLALCHEMY_DATABASE_URI = "sqlite:///p2mt_tmi_notifications.db"
     SQLALCHEMY_DATABASE_URI = "sqlite:///p2mt_pbl_planner.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
