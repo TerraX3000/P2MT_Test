@@ -212,3 +212,99 @@ SQL Output:
 
 SELECT "p2mtTemplates"."templateTitle" AS "p2mtTemplates_templateTitle", "p2mtTemplates"."sendToStudent" AS "p2mtTemplates_sendToStudent", "p2mtTemplates"."sendToParent" AS "p2mtTemplates_sendToParent", "p2mtTemplates"."sendToTeacher" AS "p2mtTemplates_sendToTeacher", "InterventionType"."interventionType" AS "InterventionType_interventionType", "p2mtTemplates"."interventionLevel" AS "p2mtTemplates_interventionLevel" 
 FROM "p2mtTemplates" JOIN "InterventionType" ON "InterventionType".id = "p2mtTemplates".intervention_id ORDER BY "InterventionType"."interventionType", "p2mtTemplates"."interventionLevel", "p2mtTemplates"."templateTitle"
+
+
+
+######################
+Example 7:
+######################
+
+
+Overview:
+This example produces unexpected results.  See the next example for the proper solution.
+The target of the query is PblTeams in order to produce a list of all students and the event 
+details for their PBL.
+
+The filter is intended to limit the output to either kickoff or final events.
+However, using a dot notation to to access the event details resulted in randomly displaying 
+the wrong event type. 
+
+The key issue is that there is a one-to-many relationship from Pbls to PblEvents.  
+
+The event info is stored in a list object and it is necessary to use a subscript 
+notation.  However, when doing so, there is no guarantee to which event you will access.  Most
+likely, the events are ordered based on when they were created.
+
+For example, this notation there is no guarantee that this will produce a kickoff event:
+eventCategory = pblStudent.Pbls.PblEvents[0].eventCategory
+
+
+Code:
+
+pblStudents = (
+        PblTeams.query.join(Pbls)
+        .join(Pbls.PblEvents)
+        .join(Student)
+        .filter(Pbls.quarter == quarter, PblEvents.eventCategory == eventCategory)
+        .order_by(
+            Pbls.quarter,
+            PblEvents.eventDate,
+            PblEvents.startTime,
+            Pbls.pblName,
+            PblTeams.pblTeamNumber,
+            Student.lastName,
+        ).all()
+    )
+
+SQL Output:
+
+SELECT "PblTeams".id AS "PblTeams_id", "PblTeams"."className" AS "PblTeams_className", "PblTeams"."schoolYear" AS "PblTeams_schoolYear", "PblTeams"."academicYear" AS "PblTeams_academicYear", "PblTeams".semester AS "PblTeams_semester", "PblTeams".quarter AS "PblTeams_quarter", "PblTeams"."pblNumber" AS "PblTeams_pblNumber", "PblTeams"."pblTeamNumber" AS "PblTeams_pblTeamNumber", "PblTeams"."chattStateANumber" AS "PblTeams_chattStateANumber", "PblTeams".pbl_id AS "PblTeams_pbl_id" 
+FROM "PblTeams" JOIN "Pbls" ON "Pbls".id = "PblTeams".pbl_id JOIN "PblEvents" ON "Pbls".id = "PblEvents".pbl_id JOIN "Student" ON "Student"."chattStateANumber" = "PblTeams"."chattStateANumber" 
+WHERE "Pbls".quarter = ? AND "PblEvents"."eventCategory" = ? ORDER BY "Pbls".quarter, "PblEvents"."eventDate", "PblEvents"."startTime", "Pbls"."pblName", "PblTeams"."pblTeamNumber", "Student"."lastName"
+
+######################
+Example 8:
+######################
+
+Overview:
+This example is the correct approach to the problem described in the previous example.
+
+The key issue is that there is a one-to-many relationship from Pbls to PblEvents.
+
+The difference in this approach is that the query is performed on both PblTeams 
+and PblEvents. This approach ensures that the PblEvents returned satisfy the filter
+criteri for the event category.
+
+This approach also requires a different approach to access the data types.  For example:
+className = pblStudent[0].chattStateANumber
+        schoolYear = pblStudent[0].schoolYear
+        firstName = pblStudent[0].Student.firstName
+        pblName = pblStudent[0].Pbls.pblName
+        eventCategory = pblStudent[1].eventCategory
+
+Note the subscript 0 for PblTeam results and subscript 2 for PblEvents results.
+
+Code:
+
+pblStudents = (
+        db.session.query(PblTeams, PblEvents)
+        .select_from(PblTeams)
+        .join(Pbls)
+        .join(Pbls.PblEvents)
+        .join(Student)
+        .filter(Pbls.quarter == quarter, PblEvents.eventCategory == eventCategory)
+        .order_by(
+            Pbls.quarter,
+            PblEvents.eventDate,
+            PblEvents.startTime,
+            Pbls.pblName,
+            PblTeams.pblTeamNumber,
+            Student.lastName,
+        ).all()
+    )
+
+SQL Output:
+
+SELECT "PblTeams".id AS "PblTeams_id", "PblTeams"."className" AS "PblTeams_className", "PblTeams"."schoolYear" AS "PblTeams_schoolYear", "PblTeams"."academicYear" AS "PblTeams_academicYear", "PblTeams".semester AS "PblTeams_semester", "PblTeams".quarter AS "PblTeams_quarter", "PblTeams"."pblNumber" AS "PblTeams_pblNumber", "PblTeams"."pblTeamNumber" AS "PblTeams_pblTeamNumber", "PblTeams"."chattStateANumber" AS "PblTeams_chattStateANumber", "PblTeams".pbl_id AS "PblTeams_pbl_id", "PblEvents".id AS "PblEvents_id", "PblEvents".pbl_id AS "PblEvents_pbl_id", "PblEvents"."eventCategory" AS "PblEvents_eventCategory", "PblEvents".confirmed AS "PblEvents_confirmed", "PblEvents"."eventDate" AS "PblEvents_eventDate", "PblEvents"."startTime" AS "PblEvents_startTime", "PblEvents"."endTime" AS "PblEvents_endTime", "PblEvents"."eventLocation" AS "PblEvents_eventLocation", "PblEvents"."eventStreetAddress1" AS "PblEvents_eventStreetAddress1", "PblEvents"."eventStreetAddress2" AS "PblEvents_eventStreetAddress2", "PblEvents"."eventCity" AS "PblEvents_eventCity", "PblEvents"."eventState" AS "PblEvents_eventState", "PblEvents"."eventZip" AS "PblEvents_eventZip", "PblEvents"."eventComments" AS "PblEvents_eventComments", "PblEvents"."googleCalendarEventID" AS "PblEvents_googleCalendarEventID" 
+FROM "PblTeams" JOIN "Pbls" ON "Pbls".id = "PblTeams".pbl_id JOIN "PblEvents" ON "Pbls".id = "PblEvents".pbl_id JOIN "Student" ON "Student"."chattStateANumber" = "PblTeams"."chattStateANumber" 
+WHERE "Pbls".quarter = ? AND "PblEvents"."eventCategory" = ? ORDER BY "Pbls".quarter, "PblEvents"."eventDate", "PblEvents"."startTime", "Pbls"."pblName", "PblTeams"."pblTeamNumber", "Student"."lastName"
