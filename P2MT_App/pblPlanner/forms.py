@@ -32,14 +32,27 @@ class selectSingleClassScheduleToEditForm(FlaskForm):
     submitSingleClassScheduleToEdit = SubmitField("Edit")
 
 
+class pblEditorForm(FlaskForm):
+    log_id = HiddenField()
+    className = SelectField("Class*", validators=[DataRequired()])
+    schoolYear = SelectField("Year*", coerce=int, validators=[Optional()])
+    academicYear = SelectField("Academic Year*", validators=[DataRequired()])
+    semester = SelectField("Semester*", validators=[Optional()])
+    quarter = SelectField("Quarter*", coerce=int, validators=[Optional()])
+    pblName = StringField("PBL Name*", validators=[DataRequired()])
+    pblSponsor = StringField("PBL Sponsor Organization", validators=[Optional()])
+    pblSponsorPersonName = StringField(
+        "PBL Sponsor Person Name", validators=[Optional()]
+    )
+    pblSponsorEmail = StringField("PBL Sponsor Email", validators=[Optional()])
+    pblSponsorPhone = StringField("PBL Sponsor Phone", validators=[Optional()])
+    pblComments = StringField("PBL Comments", validators=[Optional()])
+    submitEditPbl = SubmitField("Save PBL")
+
+
 class pblEventEditorForm(FlaskForm):
     log_id = HiddenField()
-    className = SelectField("Class", validators=[DataRequired()])
-    schoolYear = SelectField("Year", coerce=int, validators=[DataRequired()])
-    semester = SelectField("Semester", validators=[DataRequired()])
-    quarter = SelectField("Quarter", coerce=int, validators=[DataRequired()])
-    pblName = StringField("PBL Name", validators=[DataRequired()])
-    eventCategory = SelectField("Event Category", validators=[DataRequired()])
+    eventCategory = SelectField("Event Category*", validators=[DataRequired()])
     confirmed = BooleanField("Confirmed", validators=[Optional()])
     eventDate = DateField("Event Date", validators=[Optional()])
     startTime = SelectField(
@@ -51,9 +64,9 @@ class pblEventEditorForm(FlaskForm):
     eventLocation = StringField("Location", validators=[Optional()])
     eventStreetAddress1 = StringField("Street Address", validators=[Optional()])
     eventStreetAddress2 = StringField("Street Address 2", validators=[Optional()])
-    eventCity = StringField("City", validators=[Optional()])
-    eventState = StringField("State", validators=[Optional()])
+    eventCity = StringField("City", default="Chattanooga", validators=[Optional()])
+    eventState = StringField("State", default="TN", validators=[Optional()])
     eventZip = StringField("Zip", validators=[Optional()])
     eventComments = StringField("Comments", validators=[Optional()])
     googleCalendarEventID = StringField("Google Calendar Event ID (Optional)")
-    submitEditPblEvent = SubmitField("Submit PBL Event")
+    submitEditPblEvent = SubmitField("Save PBL Event")

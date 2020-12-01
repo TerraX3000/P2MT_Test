@@ -7,72 +7,224 @@ from P2MT_App.main.referenceData import (
     getQuarterChoices,
     getPblEventCategoryChoices,
     getPblOptions,
+    getPblOptionsTuple,
+    getAcademicYearChoices,
+    getSchoolYearAndSemester,
+    getCurrentAcademicYear,
+    getClassYearOfGraduation,
+    getCurrentQuarter,
 )
 from P2MT_App.main.utilityfunctions import printFormErrors, printLogEntry
-from P2MT_App.pblPlanner.forms import pblEventEditorForm
-from P2MT_App.pblPlanner.pblPlanner import downloadPblEvents
-from datetime import date
+from P2MT_App.pblPlanner.forms import pblEventEditorForm, pblEditorForm
+from P2MT_App.pblPlanner.pblPlanner import (
+    downloadPblEvents,
+    downloadPblTeamsAndEventDetails,
+    downloadPblFieldTripInfo,
+    downloadPblTeams,
+)
+from datetime import date, time
 from flask_login import current_user, login_required
 
 # STEM III Drag and Drop
-from P2MT_App.models import Student, PblEvents, PblTeams
+from P2MT_App.models import Student, PblEvents, PblTeams, Pbls
 import json
 from datetime import datetime
 
 pblPlanner_bp = Blueprint("pblPlanner_bp", __name__)
 
 
-# STEM III Drag and Drop
-from P2MT_App.models import Student
-import json
-
-
 @pblPlanner_bp.route("/stemiiipblplanner")
 @login_required
 def displayStemIIIPblPlanner():
+    pbls = Pbls.query.order_by(
+        Pbls.schoolYear.desc(), Pbls.quarter.desc(), Pbls.pblName
+    )
+
     pblEvents = (
-        db.session.query(PblEvents)
-        .filter(PblEvents.quarter > 0)
+        PblEvents.query.join(Pbls)
+        .filter(Pbls.quarter >= 0)
         .order_by(
-            PblEvents.quarter.desc(),
-            PblEvents.eventDate,
-            PblEvents.startTime,
-            PblEvents.pblName,
+            Pbls.quarter.desc(), PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,
         )
     )
-
     return render_template(
-        "pblplanner.html", title="STEM III PBL Planner", pblEvents=pblEvents,
+        "pblplanner.html", title="STEM III PBL Planner", pbls=pbls, pblEvents=pblEvents,
     )
 
 
-@pblPlanner_bp.route("/stemiiipblplanner/download")
+@pblPlanner_bp.route("/stemiiipblreports")
+@login_required
+def download_PblReports():
+    printLogEntry("Running download_PblReports()")
+    quarterOptions = getQuarterChoices()
+    currentQuarter = getCurrentQuarter()
+    eventCategoryChoices = getPblEventCategoryChoices()
+    return render_template(
+        "pblreports.html",
+        title="STEM III PBL Reports",
+        quarterOptions=quarterOptions,
+        displayQuarter=currentQuarter,
+        eventCategoryChoices=eventCategoryChoices,
+    )
+
+
+@pblPlanner_bp.route("/stemiiipblplanner/downloadevents", methods=["GET", "POST"])
 @login_required
 def download_PblEvents():
     printLogEntry("Running download_PblEvents()")
-    return downloadPblEvents()
+    if request.method == "POST":
+        quarter = request.form["selectedQuarter"]
+        eventCategory = request.form["selectedEventCategory"]
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    else:
+        quarter = getCurrentQuarter()
+        eventCategory = "Kickoff"
+    return downloadPblEvents(quarter, eventCategory)
 
 
-@pblPlanner_bp.route("/stemiiiteams")
+@pblPlanner_bp.route("/stemiiipblplanner/downloadteams", methods=["GET", "POST"])
 @login_required
-def displayStemIIITeams():
+def download_PblTeams():
+    printLogEntry("Running download_PblTeams()")
+    if request.method == "POST":
+        quarter = request.form["selectedQuarter"]
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    else:
+        quarter = getCurrentQuarter()
+    return downloadPblTeams(quarter)
+
+
+@pblPlanner_bp.route(
+    "/stemiiipblplanner/downloadteamsandevents", methods=["GET", "POST"]
+)
+@login_required
+def download_PblTeamsAndEvents():
+    printLogEntry("Running download_PblTeamsAndEvents()")
+    if request.method == "POST":
+        quarter = request.form["selectedQuarter"]
+        eventCategory = request.form["selectedEventCategory"]
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    else:
+        quarter = getCurrentQuarter()
+        eventCategory = "Kickoff"
+    return downloadPblTeamsAndEventDetails(quarter, eventCategory)
+
+
+@pblPlanner_bp.route(
+    "/stemiiipblplanner/downloadfieldtripinfo", methods=["GET", "POST"]
+)
+@login_required
+def download_PblFieldTripInfo():
+    printLogEntry("Running download_PblEvents()")
+    if request.method == "POST":
+        quarter = request.form["selectedQuarter"]
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    else:
+        quarter = getCurrentQuarter()
+    return downloadPblFieldTripInfo(quarter)
+
+
+@pblPlanner_bp.route(
+    "/stemiiiteams", defaults={"selectedQuarter": None}, methods=["GET", "POST"]
+)
+@pblPlanner_bp.route("/stemiiiteams/<selectedQuarter>", methods=["GET", "POST"])
+@login_required
+def displayStemIIITeams(selectedQuarter):
+    # This route uses multiple route decorators to handle different scenarios:
+    # Default: GET with no parameters will display PBL team based on computed current quarter
+    # POST with request.form handles case when user changes quarter using dropdown menu
+    # GET with selectedQuarter handles case when redirected from saving team in order to stay
+    # on previous page
+    printLogEntry("Running displayStemIIITeams()")
+    print("request.form=", request.form)
+    print("request.method=", request.method)
+    print("selectedQuarter", selectedQuarter)
+    # Create list of students to include for PBL teams
     students = db.session.query(
         Student.firstName, Student.lastName, Student.chattStateANumber
-    ).filter(Student.yearOfGraduation == 2022)
+    ).filter(Student.yearOfGraduation == getClassYearOfGraduation("Juniors"))
 
-    teams = []
+    # Create PblTeam for each student for each quarter
+    className = "STEM III"
+    academicYear = getCurrentAcademicYear()
+    quarters = [1, 2, 3, 4]
+    for student in students:
+        for quarter in quarters:
+            # Check whether PblTeam exists for student
+            log = PblTeams.query.filter(
+                PblTeams.className == className,
+                PblTeams.academicYear == academicYear,
+                PblTeams.quarter == quarter,
+                PblTeams.chattStateANumber == student.chattStateANumber,
+            ).first()
+            # Skip the record if the student is already in the PblTeams table
+            if log:
+                pass
+            # Add a new record if the student is not already in the PblTeams table
+            else:
+                schoolYear, semester = getSchoolYearAndSemester(academicYear, quarter)
+                pblTeam = PblTeams(
+                    className=className,
+                    academicYear=academicYear,
+                    schoolYear=schoolYear,
+                    semester=semester,
+                    quarter=quarter,
+                    pblNumber=quarter,
+                    pblTeamNumber=0,
+                    chattStateANumber=student.chattStateANumber,
+                    pbl_id=None,
+                )
+                db.session.add(pblTeam)
+                db.session.commit()
+                print(
+                    "Adding new PBL Team for",
+                    student.firstName,
+                    student.lastName,
+                    student.chattStateANumber,
+                )
+    if request.method == "GET" and selectedQuarter:
+        quarter = int(selectedQuarter)
+    elif request.method == "POST":
+        selectedQuarter = request.form["selectedQuarter"]
+        print("selectedQuarter =", selectedQuarter)
+        quarter = int(selectedQuarter)
+    else:
+        quarter = getCurrentQuarter()
+    pblTeams = (
+        PblTeams.query.join(Student)
+        .filter(
+            PblTeams.className == className,
+            PblTeams.academicYear == academicYear,
+            PblTeams.quarter == quarter,
+        )
+        .all()
+    )
+
+    # Create set of numbered teams to assign students
+    teamNumbers = []
     for i in range(1, 31, 1):
-        teams.append(f"Team {i}")
+        teamNumbers.append(f"{i}")
 
-    pblOptions = getPblOptions(2)
-    pblOptions.insert(0, (""))
+    # Create tuple of pblOptions and set default choice to None
+    pblOptions = list(getPblOptionsTuple(quarter))
+    pblOptions.insert(0, ("", "Choose PBL..."))
+    pblOptions = tuple(pblOptions)
+
     print(pblOptions)
+    quarterOptions = getQuarterChoices()
     return render_template(
         "pblteams.html",
         title="STEM III Team Builder",
         students=students,
-        teams=teams,
+        teamNumbers=teamNumbers,
         pblOptions=pblOptions,
+        pblTeams=pblTeams,
+        quarterOptions=quarterOptions,
+        displayQuarter=quarter,
     )
 
 
@@ -82,23 +234,289 @@ def saveTeams():
     print("Running saveTeams()")
     teamListjson = request.form["teamList"]
     teamList = json.loads(teamListjson)
+    quarter = int(request.form["quarter"])
+
+    className = "STEM III"
+    academicYear = getCurrentAcademicYear()
+    schoolYear, semester = getSchoolYearAndSemester(academicYear, quarter)
+    pblNumber = quarter
+
     for team, teamInfo in teamList.items():
         print(team, teamInfo["teamMemberList"], teamInfo["pblChoice"])
-    return redirect(url_for("pblPlanner_bp.displayStemIIITeams"))
+        # Get the team number from team name (e.g. extract '1' from 'Team 1')
+        pblTeamNumber = int(team.split()[1].strip())
+        # Set the pblChoice to None if student not in team or if team's pblChoice is not set
+        if pblTeamNumber == 0:
+            pblChoice = None
+        elif teamInfo["pblChoice"] == "":
+            pblChoice = None
+        else:
+            pblChoice = int(teamInfo["pblChoice"])
+        for chattStateANumber in teamInfo["teamMemberList"]:
+            # Update database with PblTeam info
+            # Get PblTeam log for student if it exists
+            log = PblTeams.query.filter(
+                PblTeams.className == className,
+                PblTeams.academicYear == academicYear,
+                PblTeams.quarter == quarter,
+                PblTeams.chattStateANumber == chattStateANumber,
+            ).first()
+            # Update the record if the student is already in the PblTeams table
+            if log:
+                log.pblTeamNumber = pblTeamNumber
+                log.pbl_id = pblChoice
+            # Add a new record if the student is not already in the PblTeams table
+            else:
+                pblTeam = PblTeams(
+                    className=className,
+                    academicYear=academicYear,
+                    schoolYear=schoolYear,
+                    semester=semester,
+                    quarter=quarter,
+                    pblNumber=pblNumber,
+                    pblTeamNumber=pblTeamNumber,
+                    chattStateANumber=chattStateANumber,
+                    pbl_id=pblChoice,
+                )
+                db.session.add(pblTeam)
+            db.session.commit()
+    return redirect(
+        url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)
+    )
 
 
-@pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/edit", methods=["POST"])
+@pblPlanner_bp.route("/stemiiipblplanner/newpbl", methods=["POST"])
+@login_required
+def new_Pbl():
+    pblEditorFormDetails = pblEditorForm()
+    pblEditorFormDetails.className.choices = [("STEM III", "STEM III")]
+    pblEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
+    pblEditorFormDetails.academicYear.choices = getAcademicYearChoices()
+    pblEditorFormDetails.academicYear.default = getCurrentAcademicYear()
+    pblEditorFormDetails.semester.choices = getSemesterChoices()
+    quarterChoices = list(getQuarterChoices())
+    quarterChoices.insert(0, (0, "0"))
+    quarterChoices = tuple(quarterChoices)
+    pblEditorFormDetails.quarter.choices = quarterChoices
+    pblEditorFormDetails.log_id.data = 0
+
+    printLogEntry("Running new_PblEvent()")
+
+    if "submitEditPbl" in request.form:
+        print("request.form", request.form)
+        if not pblEditorFormDetails.validate_on_submit():
+            print("Edit PBL Form errors")
+            printFormErrors(pblEditorFormDetails)
+        if pblEditorFormDetails.validate_on_submit():
+            print("submitEditPbl submitted")
+
+            # Update the database with the values submitted in the form
+            className = pblEditorFormDetails.className.data
+            academicYear = pblEditorFormDetails.academicYear.data
+            schoolYear = pblEditorFormDetails.schoolYear.data
+            semester = pblEditorFormDetails.semester.data
+            quarter = pblEditorFormDetails.quarter.data
+            schoolYear, semester = getSchoolYearAndSemester(academicYear, quarter)
+            pblName = pblEditorFormDetails.pblName.data
+            pblSponsor = pblEditorFormDetails.pblSponsor.data
+            pblSponsorPersonName = pblEditorFormDetails.pblSponsorPersonName.data
+            pblSponsorEmail = pblEditorFormDetails.pblSponsorEmail.data
+            pblSponsorPhone = pblEditorFormDetails.pblSponsorPhone.data
+            pblComments = pblEditorFormDetails.pblComments.data
+
+            pblLog = Pbls(
+                className=className,
+                schoolYear=schoolYear,
+                academicYear=academicYear,
+                semester=semester,
+                quarter=quarter,
+                pblNumber=quarter,
+                pblName=pblName,
+                pblSponsor=pblSponsor,
+                pblSponsorPersonName=pblSponsorPersonName,
+                pblSponsorEmail=pblSponsorEmail,
+                pblSponsorPhone=pblSponsorPhone,
+                pblComments=pblComments,
+            )
+            db.session.add(pblLog)
+            db.session.commit()
+
+            # Use id for PBL record to create placeholder kickoff and final events
+            pblEventLog = PblEvents(
+                pbl_id=pblLog.id,
+                eventCategory="Kickoff",
+                confirmed=0,
+                startTime=time(hour=9, minute=30, second=0),
+                endTime=time(hour=10, minute=30, second=0),
+            )
+            db.session.add(pblEventLog)
+            db.session.commit()
+            pblEventLog = PblEvents(
+                pbl_id=pblLog.id,
+                eventCategory="Final",
+                confirmed=0,
+                startTime=time(hour=9, minute=30, second=0),
+                endTime=time(hour=10, minute=30, second=0),
+            )
+            db.session.add(pblEventLog)
+            db.session.commit()
+
+            return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
+
+    return render_template(
+        "pblEditor.html",
+        title="New PBL Editor",
+        pblEditorForm=pblEditorFormDetails,
+        pblName=None,
+    )
+
+
+@pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/editpbl", methods=["POST"])
+@login_required
+def edit_Pbl(log_id):
+    pblEditorFormDetails = pblEditorForm()
+    pblEditorFormDetails.className.choices = [("STEM III", "STEM III")]
+    pblEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
+    pblEditorFormDetails.academicYear.choices = getAcademicYearChoices()
+    pblEditorFormDetails.semester.choices = getSemesterChoices()
+    quarterChoices = list(getQuarterChoices())
+    quarterChoices.insert(0, (0, "0"))
+    quarterChoices = tuple(quarterChoices)
+    pblEditorFormDetails.quarter.choices = quarterChoices
+    # pblEditorFormDetails.pblName.choices = getPblOptionsTuple(2)
+
+    log = Pbls.query.get_or_404(log_id)
+    LogDetails = f"{(log_id)} {log.pblName}"
+    printLogEntry("Running edit_Pbl(" + LogDetails + ")")
+
+    if "submitEditPbl" in request.form:
+        print("request.form", request.form)
+        if not pblEditorFormDetails.validate_on_submit():
+            print("Edit PBL Form errors")
+            printFormErrors(pblEditorFormDetails)
+        if pblEditorFormDetails.validate_on_submit():
+            print("submitEditPbl submitted")
+
+            # Update the database with the values submitted in the form
+            log.className = pblEditorFormDetails.className.data
+            log.academicYear = pblEditorFormDetails.academicYear.data
+            log.quarter = pblEditorFormDetails.quarter.data
+            log.schoolYear, log.semester = getSchoolYearAndSemester(
+                log.academicYear, log.quarter
+            )
+            log.pblNumber = log.quarter
+            log.pblName = pblEditorFormDetails.pblName.data
+            log.pblSponsor = pblEditorFormDetails.pblSponsor.data
+            log.pblSponsorPersonName = pblEditorFormDetails.pblSponsorPersonName.data
+            log.pblSponsorPhone = pblEditorFormDetails.pblSponsorPhone.data
+            log.pblSponsorEmail = pblEditorFormDetails.pblSponsorEmail.data
+            log.pblComments = pblEditorFormDetails.pblComments.data
+
+            db.session.commit()
+            return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
+
+    pblName = log.pblName
+    print("pblName =", pblName)
+    if log:
+        pblEditorFormDetails.log_id.data = log.id
+        pblEditorFormDetails.className.data = log.className
+        pblEditorFormDetails.schoolYear.data = log.schoolYear
+        pblEditorFormDetails.academicYear.data = log.academicYear
+        pblEditorFormDetails.semester.data = log.semester
+        pblEditorFormDetails.quarter.data = log.quarter
+        pblEditorFormDetails.pblName.data = log.pblName
+        pblEditorFormDetails.pblSponsor.data = log.pblSponsor
+        pblEditorFormDetails.pblSponsorPersonName.data = log.pblSponsorPersonName
+        pblEditorFormDetails.pblSponsorPhone.data = log.pblSponsorPhone
+        pblEditorFormDetails.pblSponsorEmail.data = log.pblSponsorEmail
+        pblEditorFormDetails.pblComments.data = log.pblComments
+        print(
+            "editPblDetails=",
+            pblEditorFormDetails.log_id.data,
+            pblEditorFormDetails.pblName.data,
+        )
+    return render_template(
+        "pblEditor.html",
+        title="PBL Editor",
+        pblEditorForm=pblEditorFormDetails,
+        pblName=pblName,
+    )
+
+
+@pblPlanner_bp.route("/stemiiipblplanner/<int:pbl_id>/newevent", methods=["POST"])
+@login_required
+def new_PblEvent(pbl_id):
+    pblEventEditorFormDetails = pblEventEditorForm()
+    pblLog = Pbls.query.get_or_404(pbl_id)
+    pblName = pblLog.pblName
+    pblEventEditorFormDetails.eventCategory.choices = getPblEventCategoryChoices()
+    pblEventEditorFormDetails.log_id.data = 0
+
+    printLogEntry("Running new_PblEvent()")
+
+    if "submitEditPblEvent" in request.form:
+        print("request.form", request.form)
+        if not pblEventEditorFormDetails.validate_on_submit():
+            print("Edit PBL Event Form errors")
+            printFormErrors(pblEventEditorFormDetails)
+        if pblEventEditorFormDetails.validate_on_submit():
+            print("submitEditPblEvent submitted")
+
+            # Update the database with the values submitted in the form
+            eventCategory = pblEventEditorFormDetails.eventCategory.data
+            confirmed = pblEventEditorFormDetails.confirmed.data
+            eventDate = pblEventEditorFormDetails.eventDate.data
+
+            # Format time values from string objects to time objects
+            startTime = datetime.strptime(
+                pblEventEditorFormDetails.startTime.data, "%H:%M"
+            ).time()
+            endTime = datetime.strptime(
+                pblEventEditorFormDetails.endTime.data, "%H:%M"
+            ).time()
+
+            eventLocation = pblEventEditorFormDetails.eventLocation.data
+            eventStreetAddress1 = pblEventEditorFormDetails.eventStreetAddress1.data
+            eventCity = pblEventEditorFormDetails.eventCity.data
+            eventState = pblEventEditorFormDetails.eventState.data
+            eventZip = pblEventEditorFormDetails.eventZip.data
+            eventComments = pblEventEditorFormDetails.eventComments.data
+            googleCalendarEventID = pblEventEditorFormDetails.googleCalendarEventID.data
+            pblEventLog = PblEvents(
+                pbl_id=pbl_id,
+                eventCategory=eventCategory,
+                confirmed=confirmed,
+                eventDate=eventDate,
+                startTime=startTime,
+                endTime=endTime,
+                eventLocation=eventLocation,
+                eventStreetAddress1=eventStreetAddress1,
+                eventCity=eventCity,
+                eventState=eventState,
+                eventZip=eventZip,
+                eventComments=eventComments,
+                googleCalendarEventID=googleCalendarEventID,
+            )
+            db.session.add(pblEventLog)
+            db.session.commit()
+            return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
+
+    return render_template(
+        "pblEventEditor.html",
+        title="New PBL Event Editor",
+        pblEventEditorForm=pblEventEditorFormDetails,
+        pblName=pblName,
+    )
+
+
+@pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/editpblevent", methods=["POST"])
 @login_required
 def edit_PblEvent(log_id):
     pblEventEditorFormDetails = pblEventEditorForm()
-    pblEventEditorFormDetails.className.choices = [("STEM III", "STEM III")]
-    pblEventEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
-    pblEventEditorFormDetails.semester.choices = getSemesterChoices()
-    pblEventEditorFormDetails.quarter.choices = getQuarterChoices()
     pblEventEditorFormDetails.eventCategory.choices = getPblEventCategoryChoices()
 
     log = PblEvents.query.get_or_404(log_id)
-    LogDetails = f"{(log_id)} {log.pblName} {log.eventCategory}"
+    LogDetails = f"{(log_id)} {log.Pbls.pblName} {log.eventCategory}"
     printLogEntry("Running edit_PblEvent(" + LogDetails + ")")
 
     if "submitEditPblEvent" in request.form:
@@ -110,11 +528,6 @@ def edit_PblEvent(log_id):
             print("submitEditPblEvent submitted")
 
             # Update the database with the values submitted in the form
-            log.className = pblEventEditorFormDetails.className.data
-            log.schoolYear = pblEventEditorFormDetails.schoolYear.data
-            log.semester = pblEventEditorFormDetails.semester.data
-            log.quarter = pblEventEditorFormDetails.quarter.data
-            log.pblName = pblEventEditorFormDetails.pblName.data
             log.eventCategory = pblEventEditorFormDetails.eventCategory.data
             log.confirmed = pblEventEditorFormDetails.confirmed.data
             log.eventDate = pblEventEditorFormDetails.eventDate.data
@@ -141,15 +554,10 @@ def edit_PblEvent(log_id):
             db.session.commit()
             return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
-    pblName = log.pblName
+    pblName = log.Pbls.pblName
     print("pblName =", pblName)
     if log:
         pblEventEditorFormDetails.log_id.data = log.id
-        pblEventEditorFormDetails.className.data = log.className
-        pblEventEditorFormDetails.schoolYear.data = log.schoolYear
-        pblEventEditorFormDetails.semester.data = log.semester
-        pblEventEditorFormDetails.quarter.data = log.quarter
-        pblEventEditorFormDetails.pblName.data = log.pblName
         pblEventEditorFormDetails.eventCategory.data = log.eventCategory
         pblEventEditorFormDetails.confirmed.data = log.confirmed
         pblEventEditorFormDetails.eventDate.data = log.eventDate
@@ -165,7 +573,6 @@ def edit_PblEvent(log_id):
         print(
             "editPblEventDetails=",
             pblEventEditorFormDetails.log_id.data,
-            pblEventEditorFormDetails.pblName.data,
             pblEventEditorFormDetails.eventCategory.data,
         )
     return render_template(
@@ -176,88 +583,23 @@ def edit_PblEvent(log_id):
     )
 
 
-@pblPlanner_bp.route("/stemiiipblplanner/new", methods=["POST"])
+@pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/deletepbl", methods=["POST"])
 @login_required
-def new_PblEvent():
-    pblEventEditorFormDetails = pblEventEditorForm()
-    pblEventEditorFormDetails.className.choices = [("STEM III", "STEM III")]
-    pblEventEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
-    pblEventEditorFormDetails.semester.choices = getSemesterChoices()
-    pblEventEditorFormDetails.quarter.choices = getQuarterChoices()
-    pblEventEditorFormDetails.eventCategory.choices = getPblEventCategoryChoices()
-    pblEventEditorFormDetails.log_id.data = 0
-
-    printLogEntry("Running new_PblEvent()")
-
-    if "submitEditPblEvent" in request.form:
-        print("request.form", request.form)
-        if not pblEventEditorFormDetails.validate_on_submit():
-            print("Edit PBL Event Form errors")
-            printFormErrors(pblEventEditorFormDetails)
-        if pblEventEditorFormDetails.validate_on_submit():
-            print("submitEditPblEvent submitted")
-
-            # Update the database with the values submitted in the form
-            className = pblEventEditorFormDetails.className.data
-            schoolYear = pblEventEditorFormDetails.schoolYear.data
-            semester = pblEventEditorFormDetails.semester.data
-            quarter = pblEventEditorFormDetails.quarter.data
-            pblName = pblEventEditorFormDetails.pblName.data
-            eventCategory = pblEventEditorFormDetails.eventCategory.data
-            confirmed = pblEventEditorFormDetails.confirmed.data
-            eventDate = pblEventEditorFormDetails.eventDate.data
-
-            # Format time values from string objects to time objects
-            startTime = datetime.strptime(
-                pblEventEditorFormDetails.startTime.data, "%H:%M"
-            ).time()
-            endTime = datetime.strptime(
-                pblEventEditorFormDetails.endTime.data, "%H:%M"
-            ).time()
-
-            eventLocation = pblEventEditorFormDetails.eventLocation.data
-            eventStreetAddress1 = pblEventEditorFormDetails.eventStreetAddress1.data
-            eventCity = pblEventEditorFormDetails.eventCity.data
-            eventState = pblEventEditorFormDetails.eventState.data
-            eventZip = pblEventEditorFormDetails.eventZip.data
-            eventComments = pblEventEditorFormDetails.eventComments.data
-            googleCalendarEventID = pblEventEditorFormDetails.googleCalendarEventID.data
-            pblEventLog = PblEvents(
-                className=className,
-                schoolYear=schoolYear,
-                semester=semester,
-                quarter=quarter,
-                pblName=pblName,
-                eventCategory=eventCategory,
-                confirmed=confirmed,
-                eventDate=eventDate,
-                startTime=startTime,
-                endTime=endTime,
-                eventLocation=eventLocation,
-                eventStreetAddress1=eventStreetAddress1,
-                eventCity=eventCity,
-                eventState=eventState,
-                eventZip=eventZip,
-                eventComments=eventComments,
-                googleCalendarEventID=googleCalendarEventID,
-            )
-            db.session.add(pblEventLog)
-            db.session.commit()
-            return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
-
-    return render_template(
-        "pblEventEditor.html",
-        title="New PBL Event Editor",
-        pblEventEditorForm=pblEventEditorFormDetails,
-        pblName=None,
-    )
+def delete_Pbl(log_id):
+    log = Pbls.query.get_or_404(log_id)
+    LogDetails = f"{(log_id)} {log.pblName}"
+    printLogEntry("Running delete_Pbl(" + LogDetails + ")")
+    db.session.delete(log)
+    db.session.commit()
+    flash("PBL has been deleted!", "success")
+    return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
 
 @pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/delete", methods=["POST"])
 @login_required
 def delete_PblEvent(log_id):
     log = PblEvents.query.get_or_404(log_id)
-    LogDetails = f"{(log_id)} {log.pblName} {log.eventCategory}"
+    LogDetails = f"{(log_id)} {log.Pbls.pblName} {log.eventCategory}"
     printLogEntry("Running delete_PblEvent(" + LogDetails + ")")
     db.session.delete(log)
     db.session.commit()

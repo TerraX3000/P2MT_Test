@@ -9,6 +9,7 @@ from P2MT_App.models import (
     adminSettings,
     apiKeys,
     PblEvents,
+    Pbls,
 )
 from P2MT_App import db
 from sqlalchemy import distinct
@@ -276,6 +277,17 @@ def getSchoolYearChoices():
     return schoolYearChoices
 
 
+def getAcademicYearChoices():
+    academicYearChoices = [
+        ("2020-2021", "2020-2021"),
+        ("2021-2022", "2021-2022"),
+        ("2022-2023", "2022-2023"),
+        ("2023-2024", "2023-2024"),
+        ("2024-2025", "2024-2025"),
+    ]
+    return academicYearChoices
+
+
 def getSemesterChoices():
     semesterChoices = [
         ("Fall", "Fall"),
@@ -286,20 +298,52 @@ def getSemesterChoices():
 
 def getQuarterChoices():
     quarterChoices = [
-        (1, 1),
-        (2, 2),
-        (3, 3),
-        (4, 4),
+        (1, "1st Quarter"),
+        (2, "2nd Quarter"),
+        (3, "3rd Quarter"),
+        (4, "4th Quarter"),
     ]
     return quarterChoices
 
 
+def getSchoolYearAndSemester(academicYear, quarter):
+    years = academicYear.split("-")
+    if quarter == 1:
+        schoolYear = years[0]
+        semester = "Fall"
+    elif quarter == 2:
+        schoolYear = years[0]
+        semester = "Fall"
+    elif quarter == 3:
+        schoolYear = years[1]
+        semester = "Spring"
+    elif quarter == 4:
+        schoolYear = years[1]
+        semester = "Spring"
+    else:
+        schoolYear = years[0]
+        semester = "Fall"
+    # print(academicYear, quarter, schoolYear, semester)
+    return schoolYear, semester
+
+
+def getPblOptionsTuple(quarter):
+    pblOptionsTuple = (
+        db.session.query(Pbls.id, Pbls.pblName)
+        .filter(Pbls.quarter == quarter)
+        .order_by(Pbls.pblName,)
+        .distinct()
+    )
+    # pblOptions = [item[0] for item in pblOptions]
+    # print(pblOptions)
+    return pblOptionsTuple
+
+
 def getPblOptions(quarter):
     pblOptions = (
-        db.session.query(PblEvents.pblName)
-        .filter(PblEvents.quarter == quarter)
-        .order_by(PblEvents.pblName,)
-        .distinct()
+        db.session.query(Pbls.pblName)
+        # .filter(Pbls.quarter == quarter)
+        .order_by(Pbls.pblName,).distinct()
     )
     pblOptions = [item[0] for item in pblOptions]
     # print(pblOptions)
@@ -393,7 +437,7 @@ def getGradeLevels():
 def getCurrentSchoolYear():
     printLogEntry("getCurrentSchoolYear() function called")
     schoolYear = date.today().year
-    print("Current schoolYear =", schoolYear)
+    # print("Current schoolYear =", schoolYear)
     return schoolYear
 
 
@@ -403,8 +447,69 @@ def getCurrentSemester():
         semester = "Spring"
     else:
         semester = "Fall"
-    print("Current month =", date.today().month, "and semester =", semester)
+    # print("Current month =", date.today().month, "and semester =", semester)
     return semester
+
+
+def getCurrentQuarter():
+    printLogEntry("getCurrentQuarter() function called")
+    # This function returns the current quarter based on nominal quarter start and end dates
+    # It should only be used to approximate the actual quarter since the start of the 2nd
+    # and 4th quarters are estimates
+    today = date.today()
+    if getCurrentSemester() == "Fall":
+        addYearForFall = 1
+    else:
+        addYearForFall = 0
+    q1StartDate = date(date.today().year, 6, 1)
+    q2StartDate = date(date.today().year, 10, 15)
+    q3StartDate = date(date.today().year + addYearForFall, 1, 1)
+    q4StartDate = date(date.today().year + addYearForFall, 3, 15)
+
+    if today > q1StartDate and today < q2StartDate:
+        currentQuarter = 1
+    elif today > q2StartDate and today < q3StartDate:
+        currentQuarter = 2
+    elif today > q3StartDate and today < q4StartDate:
+        currentQuarter = 3
+    elif today > q4StartDate and today < q1StartDate:
+        currentQuarter = 4
+    else:
+        # In case of logic error, set the default value to 1st quarter
+        print("Review getCurrentQuarter() for logic error for date = ", today)
+        currentQuarter = 1
+    # print("Current quarter =", currentQuarter)
+    return currentQuarter
+
+
+def getCurrentAcademicYear():
+    printLogEntry("getCurrentAcademicYear() function called")
+    schoolYear = date.today().year
+    if date.today().month < 6:
+        academicYear = f"{schoolYear-1}-{schoolYear}"
+    else:
+        academicYear = f"{schoolYear}-{schoolYear+1}"
+    # print("Current academicYear =", academicYear)
+    return academicYear
+
+
+def getClassYearOfGraduation(ClassGroup):
+    # Get year of graduation for class group for current school year and semester
+    schoolYear = getCurrentSchoolYear()
+    currentSemester = getCurrentSemester()
+    if currentSemester == "Fall":
+        addYearForCurrentSemester = 1
+    else:
+        addYearForCurrentSemester = 0
+    if ClassGroup == "Seniors":
+        yearOfGraduation = schoolYear + 0 + addYearForCurrentSemester
+    elif ClassGroup == "Juniors":
+        yearOfGraduation = schoolYear + 1 + addYearForCurrentSemester
+    elif ClassGroup == "Sophomores":
+        yearOfGraduation = schoolYear + 2 + addYearForCurrentSemester
+    elif ClassGroup == "Freshmen":
+        yearOfGraduation = schoolYear + 3 + addYearForCurrentSemester
+    return yearOfGraduation
 
 
 def getNextTmiDay():

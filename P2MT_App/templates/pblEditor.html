@@ -42,44 +42,34 @@
 
 <div class="w3-container">
     <form class="w3-container w3-padding-large" method="POST" action="" enctype="multipart/form-data">
-        {{ pblEventEditorForm.hidden_tag() }}
+        {{ pblEditorForm.hidden_tag() }}
         <fieldset class="w3-container w3-padding-large w3-hover-border-green">
             {% if pblName == None %}
-            <legend class="w3-xlarge">New PBL Event</legend>
-            <div class="w3-row-padding">
-                {{ macro_display_formfield(pblEventEditorForm.pblName, "w3-half") }}
-                {{ macro_display_formfield(pblEventEditorForm.eventCategory, "w3-quarter") }}
-            </div>
+            <legend class="w3-xlarge">New PBL</legend>
             {% else %}
-            <legend class="w3-xlarge">PBL Event for {{ pblName }} </legend>
-            <div class="w3-row-padding">
-                {{ macro_display_formfield(pblEventEditorForm.eventCategory, "w3-quarter") }}
-            </div>
+            <legend class="w3-xlarge">Edit PBL for {{ pblName }} </legend>
             {% endif %}
-
             <div class="w3-row-padding">
-                {{ macro_display_checkbox(pblEventEditorForm.confirmed, "w3-half") }}
+                {{ macro_display_formfield(pblEditorForm.className, "w3-quarter") }}
+                {{ macro_display_formfield(pblEditorForm.academicYear, "w3-quarter") }}
+                {{ macro_display_formfield(pblEditorForm.quarter, "w3-quarter") }}
+                {{ macro_display_formfield(pblEditorForm.pblName, "w3-half") }}
             </div>
             <div class="w3-row-padding">
-                {{ macro_display_formfield(pblEventEditorForm.eventDate, "w3-quarter") }}
-                {{ macro_display_formfield(pblEventEditorForm.startTime, "w3-quarter") }}
-                {{ macro_display_formfield(pblEventEditorForm.endTime, "w3-quarter") }}
+                {{ macro_display_formfield(pblEditorForm.pblSponsor, "w3-half") }}
+                {{ macro_display_formfield(pblEditorForm.pblSponsorPersonName, "w3-half") }}
             </div>
             <div class="w3-row-padding">
-                {{ macro_display_formfield(pblEventEditorForm.eventLocation, "w3-half") }}
+                {{ macro_display_formfield(pblEditorForm.pblSponsorPhone, "w3-half") }}
+                {{ macro_display_formfield(pblEditorForm.pblSponsorEmail, "w3-half") }}
             </div>
             <div class="w3-row-padding">
-                {{ macro_display_formfield(pblEventEditorForm.eventStreetAddress1, "w3-half") }}
-                {{ macro_display_formfield(pblEventEditorForm.eventCity, "w3-quarter") }}
-                {{ macro_display_formfield(pblEventEditorForm.eventState, "w3-quarter") }}
-                {{ macro_display_formfield(pblEventEditorForm.eventZip, "w3-quarter") }}
-                {{ macro_display_formfield(pblEventEditorForm.eventComments, "w3-half") }}
-                {{ macro_display_formfield(pblEventEditorForm.googleCalendarEventID, "w3-half") }}
+                {{ macro_display_formfield(pblEditorForm.pblComments, "w3-half") }}
             </div>
             <div class="w3-row w3-padding-large">
                 <a class="w3-btn w3-border-blue w3-large"
                     href="{{ url_for('pblPlanner_bp.displayStemIIIPblPlanner') }}">Cancel</a>
-                {{ pblEventEditorForm.submitEditPblEvent(class="w3-btn w3-blue w3-large") }}
+                {{ pblEditorForm.submitEditPbl(class="w3-btn w3-blue w3-large") }}
             </div>
         </fieldset>
     </form>
