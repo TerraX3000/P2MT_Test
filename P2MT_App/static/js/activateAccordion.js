@@ -9,7 +9,7 @@ function activateSimpleAccordion(data_id) {
     }
 }
 
-function activateAccordion(selectedRow, data_id) {
+function activateAccordion(selectedRow, data_id, selectedRowHeaderColor = "w3-deep-orange", selectedRowDataColor = "w3-amber") {
     // Display or hide detail rows associated with selector rows
     //
     // Use these examples to define rows:
@@ -32,8 +32,8 @@ function activateAccordion(selectedRow, data_id) {
     // console.log('selectedRow = ' + selectedRow)
     // console.log('Index Of ' + selectedRow.className.indexOf("w3-dark-grey"));
     if (selectedRow.getAttribute("data-rowType") == "selectorRow") {
-        if (selectedRow.className.indexOf("w3-deep-orange") == -1) {
-            selectedRow.className = "w3-deep-orange";
+        if (selectedRow.className.indexOf(selectedRowHeaderColor) == -1) {
+            selectedRow.className = selectedRowHeaderColor;
             selectedRow.style.fontWeight = "bold";
             icon = selectedRow.querySelector('i');
             icon.className = "fa fa-caret-down fa-fw";
@@ -69,7 +69,7 @@ function activateAccordion(selectedRow, data_id) {
         } else {
             if (x[i].style.visibility == "collapse") {
                 x[i].style.visibility = "visible";
-                x[i].className = 'w3-amber';
+                x[i].className = selectedRowDataColor;
                 // console.log('Setting data row to visible');
             } else {
                 x[i].style.visibility = "collapse";
