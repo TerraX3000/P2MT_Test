@@ -99,10 +99,27 @@ def sendPblEmails(
             pblTeamMember.Student.firstName,
             pblTeamMember.Student.lastName,
         )
+        # Get PBL team members to include in parameters:
+        pblTeamList = []
+        membersOfPblTeam = (
+            emailRecipientsBaseQuery.join(Student)
+            .filter(PblTeams.pblTeamNumber == pblTeamMember.pblTeamNumber)
+            .order_by(Student.lastName)
+        )
+        for member in membersOfPblTeam:
+            memberName = f"{member.Student.firstName} {member.Student.lastName}"
+            pblTeamList.append(memberName)
+
+        pblTeamParams = {
+            "pblTeamMembers": pblTeamList,
+            "pblTeamNumber": pblTeamMember.pblTeamNumber,
+        }
+
         if pblTeamMember.Pbls:
 
             pblName = pblTeamMember.Pbls.pblName
             pblParams = {
+                "pblId": pblTeamMember.pbl_id,
                 "pblName": pblTeamMember.Pbls.pblName,
                 "pblSponsor": pblTeamMember.Pbls.pblSponsor,
                 "pblSponsorPersonName": pblTeamMember.Pbls.pblSponsorPersonName,
@@ -144,13 +161,12 @@ def sendPblEmails(
             "chattStateANumber": pblTeamMember.chattStateANumber,
             "studentFirstName": pblTeamMember.Student.firstName,
             "studentLastName": pblTeamMember.Student.lastName,
-            "pblTeamNumber": pblTeamMember.pblTeamNumber,
             "academicYear": pblTeamMember.academicYear,
             "semester": pblTeamMember.semester,
             "quarter": pblTeamMember.quarter,
             "quarterOrdinal": getQuarterOrdinal(pblTeamMember.quarter),
         }
-        templateParams = {**basicParams, **pblParams, **eventParams}
+        templateParams = {**basicParams, **pblTeamParams, **pblParams, **eventParams}
         email_to = pblTeamMember.Student.email
         emailSubject, emailContent = renderEmailTemplate(
             template.emailSubject, template.templateContent, templateParams

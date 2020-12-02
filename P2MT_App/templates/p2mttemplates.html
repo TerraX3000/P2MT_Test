@@ -335,10 +335,18 @@
     <p> PBL-specific template variables: </p>
     <div class="w3-row">
       <div class="w3-third">
+        <p> {{ academicYear }} </p>
+        <p> {{ semester }} </p>
+        <p> {{ quarter }} </p>
+        <p> {{ quarterOrdinal }} </p>
         <p> {{ pblName }} </p>
         <p> {{ pblSponsor }} </p>
         <p> {{ pblSponsorPersonName }} </p>
         <p> {{ pblComments }} </p>
+        <p> {{ pblTeamNumber }} </p>
+        <p> {{ pblTeamMembers }} = list of team members</p>
+      </div>
+      <div class="w3-third">
         <p> {{ kickoffEventDate }} </p>
         <p> {{ kickoffStartTime }} </p>
         <p> {{ kickoffEndTime }} </p>
@@ -349,12 +357,7 @@
         <p> {{ kickoffEventZip }} </p>
         <p> {{ kickoffEventComments }} </p>
       </div>
-      <div class="w3-rest">
-        <p> {{ pblTeamNumber }} </p>
-        <p> {{ academicYear }} </p>
-        <p> {{ semester }} </p>
-        <p> {{ quarter }} </p>
-        <p> {{ quarterOrdinal }} </p>
+      <div class="w3-third">
         <p> {{ finalEventDate }}</p>
         <p> {{ finalStartTime }} </p>
         <p> {{ finalEndTime }} </p>

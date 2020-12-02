@@ -71,21 +71,28 @@ def update_Template(
 
 def renderEmailTemplate(emailSubject, templateContent, templateParams):
     # Try to render the template but provide a nice message if it fails to render
+    # Important to keep these try/except cases since users can easily create
+    # mistakes when creating email templates.  Without these try/except cases,
+    # users would be unable to fix the mistakes.
+    # Improve: provide the error details in the exception message so they user
+    # can identify the error
     # print(emailSubject, templateContent, templateParams)
-    # try:
-    jinja2Template_emailSubject = Template(emailSubject)
-    jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
-    # except:
-    # jinja2Rendered_emailSubject = "Rendering error.  Fix your template and try again."
-    # try:
-    jinja2Template_templateContent = Template(templateContent)
-    jinja2Rendered_templateContent = jinja2Template_templateContent.render(
-        templateParams
-    )
-    # except:
-    # jinja2Rendered_templateContent = (
-    #     "Rendering error.  Fix your template and try again."
-    # )
+    try:
+        jinja2Template_emailSubject = Template(emailSubject)
+        jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
+    except:
+        jinja2Rendered_emailSubject = (
+            "Rendering error.  Fix your template and try again."
+        )
+    try:
+        jinja2Template_templateContent = Template(templateContent)
+        jinja2Rendered_templateContent = jinja2Template_templateContent.render(
+            templateParams
+        )
+    except:
+        jinja2Rendered_templateContent = (
+            "Rendering error.  Fix your template and try again."
+        )
     # Uncomment these print statements if debugging rendering issues
     # print(jinja2Rendered_emailSubject)
     # print(jinja2Rendered_templateContent)
@@ -173,6 +180,8 @@ def preview_p2mtTemplate(emailSubject, templateContent):
         "quarter": 3,
         "quarterOrdinal": "3rd",
         "pblName": "Solar Power for Kids",
+        "pblId": 10,
+        "pblTeamMembers": ["Smarty Tester", "Testy Tester", "Betty Tester"],
         "pblSponsor": "EPB",
         "pblSponsorPersonName": "Thomas Edison",
         "pblComments": "These are PBL comments",
