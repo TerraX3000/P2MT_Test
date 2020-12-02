@@ -283,6 +283,14 @@
           <td>Attendance</td>
           <td>Level 1</td>
         </tr>
+        <tr>
+          <td>The email templates for sending PBL emails must include 'PBL' in their title</td>
+          <td>'PBL' in the template title</td>
+          <td>Must be True</td>
+          <td>N/A</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
       </tbody>
     </table>
     <br>
@@ -320,6 +328,40 @@
         <p> {{ learningLabDay }} </p>
         <p> {{ startTime }} </p>
         <p> {{ endTime }} </p>
+      </div>
+    </div>
+    <p> PBL-specific template variables: </p>
+    <div class="w3-row">
+      <div class="w3-third">
+        <p> {{ pblName }} </p>
+        <p> {{ pblSponsor }} </p>
+        <p> {{ pblSponsorPersonName }} </p>
+        <p> {{ pblComments }} </p>
+        <p> {{ kickoffEventDate }} </p>
+        <p> {{ kickoffStartTime }} </p>
+        <p> {{ kickoffEndTime }} </p>
+        <p> {{ kickoffEventLocation }} </p>
+        <p> {{ kickoffEventStreetAddress }} </p>
+        <p> {{ kickoffEventCity }} </p>
+        <p> {{ kickoffEventState }} </p>
+        <p> {{ kickoffEventZip }} </p>
+        <p> {{ kickoffEventComments }} </p>
+      </div>
+      <div class="w3-rest">
+        <p> {{ pblTeamNumber }} </p>
+        <p> {{ academicYear }} </p>
+        <p> {{ semester }} </p>
+        <p> {{ quarter }} </p>
+        <p> {{ quarterOrdinal }} </p>
+        <p> {{ finalEventDate }}</p>
+        <p> {{ finalStartTime }} </p>
+        <p> {{ finalEndTime }} </p>
+        <p> {{ finalEventLocation }} </p>
+        <p> {{ finalEventStreetAddress }}</p>
+        <p> {{ finalEventCity }} </p>
+        <p> {{ finalEventState }} </p>
+        <p> {{ finalEventZip }} </p>
+        <p> {{ finalEventComments }} </p>
       </div>
     </div>
     <br>

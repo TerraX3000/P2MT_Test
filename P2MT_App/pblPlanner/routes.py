@@ -13,6 +13,9 @@ from P2MT_App.main.referenceData import (
     getCurrentAcademicYear,
     getClassYearOfGraduation,
     getCurrentQuarter,
+    getPblEmailRecipientChoices,
+    getPblEmailTemplates,
+    getQuarterOrdinal,
 )
 from P2MT_App.main.utilityfunctions import printFormErrors, printLogEntry
 from P2MT_App.pblPlanner.forms import pblEventEditorForm, pblEditorForm
@@ -22,20 +25,27 @@ from P2MT_App.pblPlanner.pblPlanner import (
     downloadPblFieldTripInfo,
     downloadPblTeams,
 )
+from P2MT_App.pblPlanner.pblEmailer import sendPblEmails
+
+# Email Sending Modules
+from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
+from P2MT_App.googleAPI.googleMail import sendEmail
+
 from datetime import date, time
 from flask_login import current_user, login_required
 
 # STEM III Drag and Drop
-from P2MT_App.models import Student, PblEvents, PblTeams, Pbls
+from P2MT_App.models import Student, PblEvents, PblTeams, Pbls, p2mtTemplates
 import json
 from datetime import datetime
 
 pblPlanner_bp = Blueprint("pblPlanner_bp", __name__)
 
 
-@pblPlanner_bp.route("/stemiiipblplanner")
+@pblPlanner_bp.route("/stemiiipblplanner", methods=["GET", "POST"])
 @login_required
 def displayStemIIIPblPlanner():
+    printLogEntry("Running displayStemIIIPblPlanner()")
     pbls = Pbls.query.order_by(
         Pbls.schoolYear.desc(), Pbls.quarter.desc(), Pbls.pblName
     )
@@ -47,8 +57,42 @@ def displayStemIIIPblPlanner():
             Pbls.quarter.desc(), PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,
         )
     )
+
+    quarterOptions = getQuarterChoices()
+    currentQuarter = getCurrentQuarter()
+
+    if request.method == "GET" and request.args.get("selectedQuarter"):
+        quarter = request.args.get("selectedQuarter")
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    elif request.method == "POST":
+        quarter = request.form["selectedQuarter"]
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
+    else:
+        quarter = getCurrentQuarter()
+
+    pblKickoffEvents = (
+        PblEvents.query.join(Pbls)
+        .filter(PblEvents.eventCategory == "Kickoff", Pbls.quarter == quarter)
+        .order_by(PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,)
+    )
+
+    pblFinalEvents = (
+        PblEvents.query.join(Pbls)
+        .filter(PblEvents.eventCategory == "Final", Pbls.quarter == quarter)
+        .order_by(PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,)
+    )
+
     return render_template(
-        "pblplanner.html", title="STEM III PBL Planner", pbls=pbls, pblEvents=pblEvents,
+        "pblplanner.html",
+        title="STEM III PBL Planner",
+        pbls=pbls,
+        pblEvents=pblEvents,
+        quarterOptions=quarterOptions,
+        displayQuarter=quarter,
+        pblKickoffEvents=pblKickoffEvents,
+        pblFinalEvents=pblFinalEvents,
     )
 
 
@@ -128,21 +172,10 @@ def download_PblFieldTripInfo():
     return downloadPblFieldTripInfo(quarter)
 
 
-@pblPlanner_bp.route(
-    "/stemiiiteams", defaults={"selectedQuarter": None}, methods=["GET", "POST"]
-)
-@pblPlanner_bp.route("/stemiiiteams/<selectedQuarter>", methods=["GET", "POST"])
+@pblPlanner_bp.route("/stemiiiteams/", methods=["GET", "POST"])
 @login_required
-def displayStemIIITeams(selectedQuarter):
-    # This route uses multiple route decorators to handle different scenarios:
-    # Default: GET with no parameters will display PBL team based on computed current quarter
-    # POST with request.form handles case when user changes quarter using dropdown menu
-    # GET with selectedQuarter handles case when redirected from saving team in order to stay
-    # on previous page
+def displayStemIIITeams():
     printLogEntry("Running displayStemIIITeams()")
-    print("request.form=", request.form)
-    print("request.method=", request.method)
-    print("selectedQuarter", selectedQuarter)
     # Create list of students to include for PBL teams
     students = db.session.query(
         Student.firstName, Student.lastName, Student.chattStateANumber
@@ -186,8 +219,15 @@ def displayStemIIITeams(selectedQuarter):
                     student.lastName,
                     student.chattStateANumber,
                 )
-    if request.method == "GET" and selectedQuarter:
-        quarter = int(selectedQuarter)
+    # Check request.method for different scenarios:
+    # Default: GET with no parameters will display PBL team based on computed current quarter
+    # POST with request.form handles case when user changes quarter using dropdown menu
+    # GET with selectedQuarter handles case when redirected from saving team in order to stay
+    # on previous page
+    if request.method == "GET" and request.args.get("selectedQuarter"):
+        quarter = request.args.get("selectedQuarter")
+        print("selectedQuarter =", quarter)
+        quarter = int(quarter)
     elif request.method == "POST":
         selectedQuarter = request.form["selectedQuarter"]
         print("selectedQuarter =", selectedQuarter)
@@ -195,12 +235,14 @@ def displayStemIIITeams(selectedQuarter):
     else:
         quarter = getCurrentQuarter()
     pblTeams = (
-        PblTeams.query.join(Student)
+        PblTeams.query.outerjoin(Pbls)
+        .join(Student)
         .filter(
             PblTeams.className == className,
             PblTeams.academicYear == academicYear,
             PblTeams.quarter == quarter,
         )
+        .order_by(Pbls.pblName, PblTeams.pblTeamNumber, Student.lastName)
         .all()
     )
 
@@ -214,24 +256,50 @@ def displayStemIIITeams(selectedQuarter):
     pblOptions.insert(0, ("", "Choose PBL..."))
     pblOptions = tuple(pblOptions)
 
+    pblEmailRecipientChoices = getPblEmailRecipientChoices(
+        academicYear, quarter, className
+    )
+    pblEmailTemplates = getPblEmailTemplates()
+
     print(pblOptions)
     quarterOptions = getQuarterChoices()
     return render_template(
         "pblteams.html",
-        title="STEM III Team Builder",
+        title="STEM III Team Manager",
         students=students,
         teamNumbers=teamNumbers,
         pblOptions=pblOptions,
         pblTeams=pblTeams,
         quarterOptions=quarterOptions,
         displayQuarter=quarter,
+        pblEmailRecipientChoices=pblEmailRecipientChoices,
+        pblEmailTemplates=pblEmailTemplates,
+    )
+
+
+@pblPlanner_bp.route("/emailteams", methods=["GET", "POST"])
+@login_required
+def emailTeams():
+    printLogEntry("Running emailTeams()")
+    quarter = int(request.form["quarter"])
+    emailRecipients = int(request.form["emailRecipients"])
+    emailTemplate = int(request.form["emailTemplate"])
+    print("quarter =", quarter)
+    print("emailRecipients:", emailRecipients)
+    print("emailTemplate:", emailTemplate)
+    academicYear = getCurrentAcademicYear()
+    className = "STEM III"
+    sendPblEmails(className, academicYear, quarter, emailRecipients, emailTemplate)
+
+    return redirect(
+        url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)
     )
 
 
 @pblPlanner_bp.route("/saveteams", methods=["GET", "POST"])
 @login_required
 def saveTeams():
-    print("Running saveTeams()")
+    printLogEntry("Running saveTeams()")
     teamListjson = request.form["teamList"]
     teamList = json.loads(teamListjson)
     quarter = int(request.form["quarter"])
@@ -288,6 +356,7 @@ def saveTeams():
 @pblPlanner_bp.route("/stemiiipblplanner/newpbl", methods=["POST"])
 @login_required
 def new_Pbl():
+    printLogEntry("Running new_Pbl()")
     pblEditorFormDetails = pblEditorForm()
     pblEditorFormDetails.className.choices = [("STEM III", "STEM III")]
     pblEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
@@ -299,8 +368,6 @@ def new_Pbl():
     quarterChoices = tuple(quarterChoices)
     pblEditorFormDetails.quarter.choices = quarterChoices
     pblEditorFormDetails.log_id.data = 0
-
-    printLogEntry("Running new_PblEvent()")
 
     if "submitEditPbl" in request.form:
         print("request.form", request.form)
@@ -348,6 +415,8 @@ def new_Pbl():
                 confirmed=0,
                 startTime=time(hour=9, minute=30, second=0),
                 endTime=time(hour=10, minute=30, second=0),
+                eventCity="Chattanooga",
+                eventState="TN",
             )
             db.session.add(pblEventLog)
             db.session.commit()
@@ -357,6 +426,8 @@ def new_Pbl():
                 confirmed=0,
                 startTime=time(hour=9, minute=30, second=0),
                 endTime=time(hour=10, minute=30, second=0),
+                eventCity="Chattanooga",
+                eventState="TN",
             )
             db.session.add(pblEventLog)
             db.session.commit()
@@ -449,6 +520,7 @@ def new_PblEvent(pbl_id):
     pblEventEditorFormDetails = pblEventEditorForm()
     pblLog = Pbls.query.get_or_404(pbl_id)
     pblName = pblLog.pblName
+    event_quarter = pblLog.quarter
     pblEventEditorFormDetails.eventCategory.choices = getPblEventCategoryChoices()
     pblEventEditorFormDetails.log_id.data = 0
 
@@ -506,6 +578,7 @@ def new_PblEvent(pbl_id):
         title="New PBL Event Editor",
         pblEventEditorForm=pblEventEditorFormDetails,
         pblName=pblName,
+        event_quarter=event_quarter,
     )
 
 
@@ -517,6 +590,7 @@ def edit_PblEvent(log_id):
 
     log = PblEvents.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.Pbls.pblName} {log.eventCategory}"
+    event_quarter = log.Pbls.quarter
     printLogEntry("Running edit_PblEvent(" + LogDetails + ")")
 
     if "submitEditPblEvent" in request.form:
@@ -552,7 +626,12 @@ def edit_PblEvent(log_id):
                 pblEventEditorFormDetails.googleCalendarEventID.data
             )
             db.session.commit()
-            return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
+            return redirect(
+                url_for(
+                    "pblPlanner_bp.displayStemIIIPblPlanner",
+                    selectedQuarter=event_quarter,
+                )
+            )
 
     pblName = log.Pbls.pblName
     print("pblName =", pblName)
@@ -580,6 +659,7 @@ def edit_PblEvent(log_id):
         title="PBL Event Editor",
         pblEventEditorForm=pblEventEditorFormDetails,
         pblName=pblName,
+        event_quarter=event_quarter,
     )
 
 

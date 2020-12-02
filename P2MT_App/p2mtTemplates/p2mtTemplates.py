@@ -72,22 +72,20 @@ def update_Template(
 def renderEmailTemplate(emailSubject, templateContent, templateParams):
     # Try to render the template but provide a nice message if it fails to render
     # print(emailSubject, templateContent, templateParams)
-    try:
-        jinja2Template_emailSubject = Template(emailSubject)
-        jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
-    except:
-        jinja2Rendered_emailSubject = (
-            "Rendering error.  Fix your template and try again."
-        )
-    try:
-        jinja2Template_templateContent = Template(templateContent)
-        jinja2Rendered_templateContent = jinja2Template_templateContent.render(
-            templateParams
-        )
-    except:
-        jinja2Rendered_templateContent = (
-            "Rendering error.  Fix your template and try again."
-        )
+    # try:
+    jinja2Template_emailSubject = Template(emailSubject)
+    jinja2Rendered_emailSubject = jinja2Template_emailSubject.render(templateParams)
+    # except:
+    # jinja2Rendered_emailSubject = "Rendering error.  Fix your template and try again."
+    # try:
+    jinja2Template_templateContent = Template(templateContent)
+    jinja2Rendered_templateContent = jinja2Template_templateContent.render(
+        templateParams
+    )
+    # except:
+    # jinja2Rendered_templateContent = (
+    #     "Rendering error.  Fix your template and try again."
+    # )
     print(jinja2Rendered_emailSubject)
     print(jinja2Rendered_templateContent)
     return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
@@ -168,6 +166,33 @@ def preview_p2mtTemplate(emailSubject, templateContent):
                 "endTime": time(16, 30),
             },
         ],
+        "pblTeamNumber": 12,
+        "academicYear": "2020-2021",
+        "semester": "Spring",
+        "quarter": 3,
+        "quarterOrdinal": "3rd",
+        "pblName": "Solar Power for Kids",
+        "pblSponsor": "EPB",
+        "pblSponsorPersonName": "Thomas Edison",
+        "pblComments": "These are PBL comments",
+        "kickoffEventDate": date(2021, 1, 12),
+        "kickoffStartTime": time(10, 30, 0),
+        "kickoffEndTime": time(11, 30, 0),
+        "kickoffEventLocation": "EPB Warehouse",
+        "kickoffEventStreetAddress": "143 10th Street",
+        "kickoffEventCity": "Chattanooga",
+        "kickoffEventState": "TN",
+        "kickoffEventZip": "37406",
+        "kickoffEventComments": "Park next to building",
+        "finalEventDate": date(2021, 3, 17),
+        "finalStartTime": time(14, 0, 0),
+        "finalEndTime": time(15, 0, 0),
+        "finalEventLocation": "Edney Center",
+        "finalEventStreetAddress": "500 Market St",
+        "finalEventCity": "Chattanooga",
+        "finalEventState": "TN",
+        "finalEventZip": "37406",
+        "finalEventComments": "Meet on Floor 5",
     }
     jinja2Rendered_emailSubject, jinja2Rendered_templateContent = renderEmailTemplate(
         emailSubject, templateContent, templateParams

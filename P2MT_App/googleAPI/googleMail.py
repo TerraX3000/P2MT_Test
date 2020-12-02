@@ -139,7 +139,7 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
     message = create_message(
         email_sender, email_to, email_cc, email_bcc, emailSubject, emailContent
     )
-    print("message =", message)
+    # print("message =", message)
     service = service_account_login()
     print("service =", service)
     sent = send_message(service, "phase2team@students.hcde.org", message)

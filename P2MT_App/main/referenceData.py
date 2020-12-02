@@ -306,6 +306,20 @@ def getQuarterChoices():
     return quarterChoices
 
 
+def getQuarterOrdinal(quarter):
+    if quarter == 1:
+        quarterOrdinal = "1st"
+    elif quarter == 2:
+        quarterOrdinal = "2nd"
+    elif quarter == 3:
+        quarterOrdinal = "3rd"
+    elif quarter == 4:
+        quarterOrdinal = "4th"
+    else:
+        quarterOrdinal = "0th"
+    return quarterOrdinal
+
+
 def getSchoolYearAndSemester(academicYear, quarter):
     years = academicYear.split("-")
     if quarter == 1:
@@ -358,6 +372,39 @@ def getPblEventCategoryChoices():
         ("Sponsor Meeting", "Sponsor Meeting"),
     ]
     return pblEventCategoryChoices
+
+
+def getPblEmailRecipientChoices(academicYear, quarter, className):
+    pblEmailRecipientChoices = (
+        db.session.query(Pbls.id, Pbls.pblName)
+        .filter(
+            Pbls.className == className,
+            Pbls.academicYear == academicYear,
+            Pbls.quarter == quarter,
+        )
+        .order_by(Pbls.pblName,)
+        .distinct()
+    )
+    pblEmailRecipientChoices = list(pblEmailRecipientChoices)
+    pblEmailRecipientChoices.insert(0, ("-6", "Selected Students"))
+    pblEmailRecipientChoices.insert(0, ("-5", "Students Without a Team"))
+    pblEmailRecipientChoices.insert(0, ("-4", "Students With a Team"))
+    pblEmailRecipientChoices.insert(0, ("-3", "Students Without a PBL"))
+    pblEmailRecipientChoices.insert(0, ("-2", "Students With a PBL"))
+    pblEmailRecipientChoices.insert(0, ("-1", "All Students"))
+    pblEmailRecipientChoices.insert(0, ("0", "Select Recipients..."))
+    return tuple(pblEmailRecipientChoices)
+
+
+def getPblEmailTemplates():
+    pblEmailTemplatesTupleList = (
+        db.session.query(p2mtTemplates.id, p2mtTemplates.templateTitle)
+        .filter(p2mtTemplates.templateTitle.like("%PBL%"))
+        .order_by(p2mtTemplates.templateTitle,)
+        .all()
+    )
+    pblEmailTemplatesTupleList.insert(0, ("0", "Select Email Template..."))
+    return pblEmailTemplatesTupleList
 
 
 def getClassDayChoices():
@@ -435,14 +482,14 @@ def getGradeLevels():
 
 
 def getCurrentSchoolYear():
-    printLogEntry("getCurrentSchoolYear() function called")
+    # printLogEntry("getCurrentSchoolYear() function called")
     schoolYear = date.today().year
     # print("Current schoolYear =", schoolYear)
     return schoolYear
 
 
 def getCurrentSemester():
-    printLogEntry("getCurrentSemester() function called")
+    # printLogEntry("getCurrentSemester() function called")
     if date.today().month < 6:
         semester = "Spring"
     else:
@@ -452,7 +499,7 @@ def getCurrentSemester():
 
 
 def getCurrentQuarter():
-    printLogEntry("getCurrentQuarter() function called")
+    # printLogEntry("getCurrentQuarter() function called")
     # This function returns the current quarter based on nominal quarter start and end dates
     # It should only be used to approximate the actual quarter since the start of the 2nd
     # and 4th quarters are estimates
@@ -483,7 +530,7 @@ def getCurrentQuarter():
 
 
 def getCurrentAcademicYear():
-    printLogEntry("getCurrentAcademicYear() function called")
+    # printLogEntry("getCurrentAcademicYear() function called")
     schoolYear = date.today().year
     if date.today().month < 6:
         academicYear = f"{schoolYear-1}-{schoolYear}"
