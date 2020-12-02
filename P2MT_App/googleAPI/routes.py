@@ -4,7 +4,15 @@ import os
 import sqlite3
 
 # Third-party libraries
-from flask import Flask, url_for, redirect, render_template, redirect, Blueprint
+from flask import (
+    Flask,
+    url_for,
+    redirect,
+    render_template,
+    redirect,
+    Blueprint,
+    session,
+)
 from flask_login import (
     current_user,
     login_required,
@@ -29,6 +37,7 @@ def homepage():
         return render_template("login.html", title="Login", user=current_user)
     else:
         print("current_user.is_authenticated =", current_user.is_authenticated)
+        session["username"] = "Log In"
         return render_template("login.html", title="Login", user=None)
 
 
@@ -80,29 +89,29 @@ def auth():
                     printLogEntry("Unable to update Google profile pic or unique id")
                     pass
                 login_user(user)
+                session["username"] = f"{user.firstName} {user.lastName}"
 
     # if False:
     #     # Doesn't exist? Add it to the database.
     #     if not User.get(unique_id):
     #         User.create(unique_id, users_name, users_email, picture)
 
-    return redirect("/logintest")
+    return redirect("/logininfo")
 
 
-@googleAPI_bp.route("/logintest")
-def logintest():
+@googleAPI_bp.route("/logininfo")
+def logininfo():
     print("current_user =", current_user)
     if current_user.is_authenticated:
-        return render_template(
-            "logintest.html", title="Login Test Page", user=current_user
-        )
+        return render_template("logininfo.html", title="Login Page", user=current_user)
     else:
-        return render_template("logintest.html", title="Login Test Page", user=None)
+        return render_template("logininfo.html", title="Login Page", user=None)
 
 
 @googleAPI_bp.route("/logout")
 @login_required
 def logout():
+    session["username"] = "Logged Out"
     logout_user()
     return redirect("/")
 
