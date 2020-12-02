@@ -164,10 +164,8 @@
                 {% for template in pblEmailTemplates %}
                 <option value="{{template[0]}}">{{template[1]}}</option>
                 {% endfor %}
-            </select>
-            <input id="emailTeamsButton" type="submit" class="w3-button w3-quarter w3-green w3-margin"
+            </select><input id="emailTeamsButton" type="submit" class="w3-button w3-quarter w3-green w3-margin"
                 value="Email Teams">
-        </form>
     </div>
 
     <div class="w3-panel"></div>
@@ -181,6 +179,7 @@
                 <th>Team Number</th>
                 <th>Chatt State A Number</th>
                 <th>Email</th>
+                <th>Select</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>PBL Name</th>
@@ -194,6 +193,8 @@
                 <td>{{pblTeam.pblTeamNumber}}</td>
                 <td>{{pblTeam.chattStateANumber}}</td>
                 <td>{{pblTeam.Student.email}}</td>
+                <td><input type="checkbox" id="sendEmail_{{pblTeam.chattStateANumber}}" name="sendEmailCheckbox"
+                        class="w3-check" value="{{pblTeam.chattStateANumber}}"></td>
                 <td>{{pblTeam.Student.firstName}}</td>
                 <td>{{pblTeam.Student.lastName}}</td>
                 <td>{{ pblTeam.Pbls.pblName }}</td>
@@ -204,6 +205,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </form>
 
 </div>
 

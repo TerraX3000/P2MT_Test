@@ -284,12 +284,20 @@ def emailTeams():
     quarter = int(request.form["quarter"])
     emailRecipients = int(request.form["emailRecipients"])
     emailTemplate = int(request.form["emailTemplate"])
+    selectedEmailRecipients = request.form.getlist("sendEmailCheckbox")
     print("quarter =", quarter)
     print("emailRecipients:", emailRecipients)
     print("emailTemplate:", emailTemplate)
     academicYear = getCurrentAcademicYear()
     className = "STEM III"
-    sendPblEmails(className, academicYear, quarter, emailRecipients, emailTemplate)
+    sendPblEmails(
+        className,
+        academicYear,
+        quarter,
+        emailRecipients,
+        selectedEmailRecipients,
+        emailTemplate,
+    )
     flash("Emails sent!", "success")
 
     return redirect(
@@ -447,6 +455,7 @@ def new_Pbl():
 @pblPlanner_bp.route("/stemiiipblplanner/<int:log_id>/editpbl", methods=["POST"])
 @login_required
 def edit_Pbl(log_id):
+    printLogEntry("Running edit_Pbl()")
     pblEditorFormDetails = pblEditorForm()
     pblEditorFormDetails.className.choices = [("STEM III", "STEM III")]
     pblEditorFormDetails.schoolYear.choices = getSchoolYearChoices()
@@ -472,7 +481,15 @@ def edit_Pbl(log_id):
 
             # Update the database with the values submitted in the form
             log.className = pblEditorFormDetails.className.data
+            # Check whether the PBL academic year has changed
+            newAcademicYear = False
+            if log.academicYear != pblEditorFormDetails.academicYear.data:
+                newAcademicYear = True
             log.academicYear = pblEditorFormDetails.academicYear.data
+            # Check whether the PBL quarter has changed
+            newQuarter = False
+            if log.quarter != pblEditorFormDetails.quarter.data:
+                newQuarter = True
             log.quarter = pblEditorFormDetails.quarter.data
             log.schoolYear, log.semester = getSchoolYearAndSemester(
                 log.academicYear, log.quarter
@@ -484,7 +501,16 @@ def edit_Pbl(log_id):
             log.pblSponsorPhone = pblEditorFormDetails.pblSponsorPhone.data
             log.pblSponsorEmail = pblEditorFormDetails.pblSponsorEmail.data
             log.pblComments = pblEditorFormDetails.pblComments.data
-
+            # If the PBL year or quarter has been updated, check whether
+            # the change impacts any PBL teams and remove the PBL from
+            # impacted teams if necessary
+            if newAcademicYear or newQuarter:
+                impactedPblTeams = PblTeams.query.filter(PblTeams.pbl_id == log_id)
+                for pblTeam in impactedPblTeams:
+                    pblTeam.pbl_id = None
+                    print(
+                        f"PBL year or quarter has changed.  Removing PBL {log_id} from PBL Team {pblTeam.id}"
+                    )
             db.session.commit()
             return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
