@@ -386,12 +386,12 @@ def getPblEmailRecipientChoices(academicYear, quarter, className):
         .distinct()
     )
     pblEmailRecipientChoices = list(pblEmailRecipientChoices)
-    pblEmailRecipientChoices.insert(0, ("-6", "Selected Students"))
     pblEmailRecipientChoices.insert(0, ("-5", "Students Without a Team"))
     pblEmailRecipientChoices.insert(0, ("-4", "Students With a Team"))
     pblEmailRecipientChoices.insert(0, ("-3", "Students Without a PBL"))
     pblEmailRecipientChoices.insert(0, ("-2", "Students With a PBL"))
     pblEmailRecipientChoices.insert(0, ("-1", "All Students"))
+    pblEmailRecipientChoices.insert(0, ("-6", "Selected Students"))
     pblEmailRecipientChoices.insert(0, ("0", "Select Recipients..."))
     return tuple(pblEmailRecipientChoices)
 
