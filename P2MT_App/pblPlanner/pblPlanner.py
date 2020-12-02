@@ -136,6 +136,7 @@ def downloadPblTeams(quarter):
     )
     csvOutputFileRowCount = 0
     # Query the PblEvents with a join to include PBL and student information
+    # Note: outerjoin is necessary to retrieve records where PBL is not selected
     pblStudents = (
         db.session.query(PblTeams)
         .select_from(PblTeams)
