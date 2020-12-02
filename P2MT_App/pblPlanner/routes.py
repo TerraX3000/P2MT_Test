@@ -285,9 +285,9 @@ def emailTeams():
     emailRecipients = int(request.form["emailRecipients"])
     emailTemplate = int(request.form["emailTemplate"])
     selectedEmailRecipients = request.form.getlist("sendEmailCheckbox")
-    print("quarter =", quarter)
-    print("emailRecipients:", emailRecipients)
-    print("emailTemplate:", emailTemplate)
+    # print("quarter =", quarter)
+    # print("emailRecipients:", emailRecipients)
+    # print("emailTemplate:", emailTemplate)
     academicYear = getCurrentAcademicYear()
     className = "STEM III"
     sendPblEmails(

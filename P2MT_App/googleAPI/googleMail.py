@@ -56,7 +56,7 @@ def send_message(service, user_id, message):
   Returns:
     Sent Message.
   """
-    print("Running send_message()")
+    printLogEntry("Running send_message()")
     try:
         message = (
             service.users().messages().send(userId=user_id, body=message).execute()
@@ -134,7 +134,16 @@ def sendEmail(email_to, email_cc, emailSubject, emailContent):
         print("System Mode = Test. Sending email to", current_user.email)
         email_to = current_user.email
         email_cc = current_user.email
-    print(email_to, email_cc, email_bcc, emailSubject, emailContent)
+    print(
+        "Email Details - to:",
+        email_to,
+        "cc:",
+        email_cc,
+        "bcc:",
+        email_bcc,
+        "subject:",
+        emailSubject,
+    )
     email_sender = "phase2team@students.hcde.org"
     message = create_message(
         email_sender, email_to, email_cc, email_bcc, emailSubject, emailContent

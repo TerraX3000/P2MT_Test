@@ -94,7 +94,11 @@ def sendPblEmails(
     print("Email Template:", template.templateTitle)
 
     for pblTeamMember in pblEmailRecipients:
-        print(pblTeamMember.Student.firstName, pblTeamMember.Student.lastName)
+        print(
+            "Email recipient:",
+            pblTeamMember.Student.firstName,
+            pblTeamMember.Student.lastName,
+        )
         if pblTeamMember.Pbls:
 
             pblName = pblTeamMember.Pbls.pblName

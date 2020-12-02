@@ -86,8 +86,9 @@ def renderEmailTemplate(emailSubject, templateContent, templateParams):
     # jinja2Rendered_templateContent = (
     #     "Rendering error.  Fix your template and try again."
     # )
-    print(jinja2Rendered_emailSubject)
-    print(jinja2Rendered_templateContent)
+    # Uncomment these print statements if debugging rendering issues
+    # print(jinja2Rendered_emailSubject)
+    # print(jinja2Rendered_templateContent)
     return jinja2Rendered_emailSubject, jinja2Rendered_templateContent
 
 
