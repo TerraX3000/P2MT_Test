@@ -435,7 +435,7 @@ def new_Pbl():
             return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
     return render_template(
-        "pblEditor.html",
+        "pbleditor.html",
         title="New PBL Editor",
         pblEditorForm=pblEditorFormDetails,
         pblName=None,
@@ -507,7 +507,7 @@ def edit_Pbl(log_id):
             pblEditorFormDetails.pblName.data,
         )
     return render_template(
-        "pblEditor.html",
+        "pbleditor.html",
         title="PBL Editor",
         pblEditorForm=pblEditorFormDetails,
         pblName=pblName,
@@ -574,7 +574,7 @@ def new_PblEvent(pbl_id):
             return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
     return render_template(
-        "pblEventEditor.html",
+        "pbleventeditor.html",
         title="New PBL Event Editor",
         pblEventEditorForm=pblEventEditorFormDetails,
         pblName=pblName,
@@ -655,7 +655,7 @@ def edit_PblEvent(log_id):
             pblEventEditorFormDetails.eventCategory.data,
         )
     return render_template(
-        "pblEventEditor.html",
+        "pbleventeditor.html",
         title="PBL Event Editor",
         pblEventEditorForm=pblEventEditorFormDetails,
         pblName=pblName,
