@@ -366,8 +366,8 @@ def downloadPblFieldTripInfo(quarter):
             eventDate = pblEvent[0].eventDate
             startTime = pblEvent[0].startTime
             endTime = pblEvent[0].endTime
-            kickoff_eventDate = (eventDate.strftime("%Y-%m-%d"),)
-            kickoff_startTime = (startTime.strftime("%-I:%M %p"),)
+            kickoff_eventDate = eventDate.strftime("%Y-%m-%d")
+            kickoff_startTime = startTime.strftime("%-I:%M %p")
             kickoff_endTime = endTime.strftime("%-I:%M %p")
         else:
             kickoff_eventDate = ""
@@ -383,8 +383,8 @@ def downloadPblFieldTripInfo(quarter):
             eventDate = pblEvent[1].eventDate
             startTime = pblEvent[1].startTime
             endTime = pblEvent[1].endTime
-            final_eventDate = (eventDate.strftime("%Y-%m-%d"),)
-            final_startTime = (startTime.strftime("%-I:%M %p"),)
+            final_eventDate = eventDate.strftime("%Y-%m-%d")
+            final_startTime = startTime.strftime("%-I:%M %p")
             final_endTime = endTime.strftime("%-I:%M %p")
         else:
             final_eventDate = ""
