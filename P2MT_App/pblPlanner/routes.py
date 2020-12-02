@@ -290,6 +290,7 @@ def emailTeams():
     academicYear = getCurrentAcademicYear()
     className = "STEM III"
     sendPblEmails(className, academicYear, quarter, emailRecipients, emailTemplate)
+    flash("Emails sent!", "success")
 
     return redirect(
         url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)
@@ -348,6 +349,7 @@ def saveTeams():
                 )
                 db.session.add(pblTeam)
             db.session.commit()
+    flash("Teams have been saved!", "success")
     return redirect(
         url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)
     )
@@ -431,7 +433,7 @@ def new_Pbl():
             )
             db.session.add(pblEventLog)
             db.session.commit()
-
+            flash("New PBL created!", "success")
             return redirect(url_for("pblPlanner_bp.displayStemIIIPblPlanner"))
 
     return render_template(

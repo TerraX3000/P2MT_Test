@@ -24,6 +24,30 @@
     }
 </style> -->
 
+<!-- Macro to display flashed messaged -->
+{% macro macro_display_flashed_messages() %}
+<div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    {% if category=='success' %}
+    <div class="w3-panel w3-padding-24 w3-display-container w3-green">
+        <span onclick="this.parentElement.style.display='none'"
+            class="w3-button w3-display-left w3-margin-right w3-large">&times</span>
+        <b class="w3-display-middle w3-padding-large">{{ message }}</b>
+    </div>
+    {% elif category=='error' %}
+    <div class="w3-panel w3-padding-16 w3-display-container w3-red ">
+        <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">&times</span>
+        <b>{{ message }}</b>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+{% endmacro %}
+
 <body class="w3-light-grey">
 
     <!-- Top container -->
