@@ -78,7 +78,7 @@
             </div>
             <div class="w3-row w3-padding-large">
                 <a class="w3-btn w3-border-blue w3-large"
-                    href="{{ url_for('pblPlanner_bp.displayStemIIIPblPlanner') }}">Cancel</a>
+                    href="{{ url_for('pblPlanner_bp.displayStemIIIPblPlanner',selectedQuarter=event_quarter) }}">Cancel</a>
                 {{ pblEventEditorForm.submitEditPblEvent(class="w3-btn w3-blue w3-large") }}
             </div>
         </fieldset>
