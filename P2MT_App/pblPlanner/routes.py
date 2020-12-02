@@ -72,15 +72,25 @@ def displayStemIIIPblPlanner():
     else:
         quarter = getCurrentQuarter()
 
+    # Get list of kickoff and final PBL events for current year and selected quarter
+    academicYear = getCurrentAcademicYear()
     pblKickoffEvents = (
         PblEvents.query.join(Pbls)
-        .filter(PblEvents.eventCategory == "Kickoff", Pbls.quarter == quarter)
+        .filter(
+            PblEvents.eventCategory == "Kickoff",
+            Pbls.academicYear == academicYear,
+            Pbls.quarter == quarter,
+        )
         .order_by(PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,)
     )
 
     pblFinalEvents = (
         PblEvents.query.join(Pbls)
-        .filter(PblEvents.eventCategory == "Final", Pbls.quarter == quarter)
+        .filter(
+            PblEvents.eventCategory == "Final",
+            Pbls.academicYear == academicYear,
+            Pbls.quarter == quarter,
+        )
         .order_by(PblEvents.eventDate, PblEvents.startTime, Pbls.pblName,)
     )
 
