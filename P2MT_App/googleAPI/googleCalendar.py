@@ -109,6 +109,128 @@ def addCalendarEvent(
     return googleCalendarEventID
 
 
+def addSingleCalendarEvent(
+    googleCalendarID,
+    eventName,
+    location,
+    eventDate,
+    startTime,
+    endTime,
+    description,
+    attendees,
+):
+    printLogEntry("Running addSingleCalendarEvent()")
+    print("eventDate =", eventDate)
+
+    # Combine dates and times required for calendar event
+    startDateTime = datetime.datetime.combine(eventDate, startTime)
+    endDateTime = datetime.datetime.combine(eventDate, endTime)
+    attendeesList = []
+    for attendee in attendees:
+        attendeesList.append({"email": attendee})
+
+    event = {
+        "summary": eventName,
+        "location": location,
+        "description": description,
+        "start": {
+            "dateTime": startDateTime.isoformat(),
+            "timeZone": "America/New_York",
+        },
+        "end": {"dateTime": endDateTime.isoformat(), "timeZone": "America/New_York",},
+        # "recurrence": [
+        #     "RRULE:FREQ=WEEKLY;UNTIL="
+        #     + endRecurrence.isoformat().replace("-", "").replace(":", "")
+        #     + "Z"
+        #     + ";BYDAY="
+        #     + byDay,
+        # ],
+        "attendees": attendeesList,
+        # "reminders": {
+        #     "useDefault": False,
+        #     "overrides": [
+        #         {"method": "email", "minutes": 24 * 60},
+        #         {"method": "popup", "minutes": 10},
+        #     ],
+        # },
+    }
+    print("New calendar event details:", event)
+
+    # Add code to send event to Google Calendar API service object
+    # Return the googleCalendarEventID to be added to ClassSchedule table
+    service = service_account_calendar_login()
+    print("service =", service)
+    calendarEventDetails = (
+        service.events().insert(calendarId=googleCalendarID, body=event).execute()
+    )
+    googleCalendarEventID = calendarEventDetails["id"]
+    print("googleCalendarEventID =", googleCalendarEventID)
+    # googleCalendarEventID = "test"
+    return googleCalendarEventID
+
+
+def updateSingleCalendarEvent(
+    googleCalendarID,
+    googleCalendarEventID,
+    eventName,
+    location,
+    eventDate,
+    startTime,
+    endTime,
+    description,
+    attendees,
+):
+    printLogEntry("Running updateSingleCalendarEvent()")
+    print("eventDate =", eventDate)
+
+    # Combine dates and times required for calendar event
+    startDateTime = datetime.datetime.combine(eventDate, startTime)
+    endDateTime = datetime.datetime.combine(eventDate, endTime)
+    attendeesList = []
+    for attendee in attendees:
+        attendeesList.append({"email": attendee})
+
+    event = {
+        "summary": eventName,
+        "location": location,
+        "description": description,
+        "start": {
+            "dateTime": startDateTime.isoformat(),
+            "timeZone": "America/New_York",
+        },
+        "end": {"dateTime": endDateTime.isoformat(), "timeZone": "America/New_York",},
+        # "recurrence": [
+        #     "RRULE:FREQ=WEEKLY;UNTIL="
+        #     + endRecurrence.isoformat().replace("-", "").replace(":", "")
+        #     + "Z"
+        #     + ";BYDAY="
+        #     + byDay,
+        # ],
+        "attendees": attendeesList,
+        # "reminders": {
+        #     "useDefault": False,
+        #     "overrides": [
+        #         {"method": "email", "minutes": 24 * 60},
+        #         {"method": "popup", "minutes": 10},
+        #     ],
+        # },
+    }
+    print("Updated calendar event details:", event)
+
+    # Add code to send event to Google Calendar API service object
+    # Return the googleCalendarEventID to be added to ClassSchedule table
+    service = service_account_calendar_login()
+    print("service =", service)
+    calendarEventDetails = (
+        service.events()
+        .update(calendarId=googleCalendarID, eventId=googleCalendarEventID, body=event)
+        .execute()
+    )
+    googleCalendarEventID = calendarEventDetails["id"]
+    print("googleCalendarEventID =", googleCalendarEventID)
+    return googleCalendarEventID
+
+
 def deleteCalendarEvent(googleCalendarID, googleCalendarEventID):
     printLogEntry("Running deleteCalendarEvent()")
     print(

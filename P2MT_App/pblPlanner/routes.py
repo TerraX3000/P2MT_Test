@@ -26,6 +26,10 @@ from P2MT_App.pblPlanner.pblPlanner import (
     downloadPblTeams,
 )
 from P2MT_App.pblPlanner.pblEmailer import sendPblEmails
+from P2MT_App.pblPlanner.pblCalendar import (
+    addPblEventToCalendar,
+    deletePblEventFromCalendar,
+)
 
 # Email Sending Modules
 from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
@@ -591,7 +595,26 @@ def new_PblEvent(pbl_id):
             eventState = pblEventEditorFormDetails.eventState.data
             eventZip = pblEventEditorFormDetails.eventZip.data
             eventComments = pblEventEditorFormDetails.eventComments.data
-            googleCalendarEventID = pblEventEditorFormDetails.googleCalendarEventID.data
+            googleCalendarEventID = None
+
+            # Add event to GoogleCalendar if it has date and times
+            if eventDate and startTime and endTime:
+                googleCalendarEventID = addPblEventToCalendar(
+                    googleCalendarEventID,
+                    eventCategory,
+                    pblName,
+                    eventDate,
+                    eventLocation,
+                    eventStreetAddress1,
+                    eventCity,
+                    eventState,
+                    eventZip,
+                    startTime,
+                    endTime,
+                    pblLog.pblSponsorPersonName,
+                )
+                googleCalendarEventID = googleCalendarEventID
+
             pblEventLog = PblEvents(
                 pbl_id=pbl_id,
                 eventCategory=eventCategory,
@@ -660,9 +683,29 @@ def edit_PblEvent(log_id):
             log.eventState = pblEventEditorFormDetails.eventState.data
             log.eventZip = pblEventEditorFormDetails.eventZip.data
             log.eventComments = pblEventEditorFormDetails.eventComments.data
-            log.googleCalendarEventID = (
-                pblEventEditorFormDetails.googleCalendarEventID.data
-            )
+
+            # Add event to GoogleCalendar if it has date and times
+            if log.eventDate and startTime and endTime:
+                googleCalendarEventID = addPblEventToCalendar(
+                    log.googleCalendarEventID,
+                    log.eventCategory,
+                    log.Pbls.pblName,
+                    log.eventDate,
+                    log.eventLocation,
+                    log.eventStreetAddress1,
+                    log.eventCity,
+                    log.eventState,
+                    log.eventZip,
+                    startTime,
+                    endTime,
+                    log.Pbls.pblSponsorPersonName,
+                )
+                log.googleCalendarEventID = googleCalendarEventID
+            # If the eventDate has been cleared, delete the event from Google Calendar
+            if log.eventDate == None and log.googleCalendarEventID:
+                deletePblEventFromCalendar(log.googleCalendarEventID)
+                log.googleCalendarEventID = None
+
             db.session.commit()
             return redirect(
                 url_for(
@@ -686,7 +729,6 @@ def edit_PblEvent(log_id):
         pblEventEditorFormDetails.eventState.data = log.eventState
         pblEventEditorFormDetails.eventZip.data = log.eventZip
         pblEventEditorFormDetails.eventComments.data = log.eventComments
-        pblEventEditorFormDetails.googleCalendarEventID.data = log.googleCalendarEventID
         print(
             "editPblEventDetails=",
             pblEventEditorFormDetails.log_id.data,

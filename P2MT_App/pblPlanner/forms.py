@@ -68,5 +68,5 @@ class pblEventEditorForm(FlaskForm):
     eventState = StringField("State", default="TN", validators=[Optional()])
     eventZip = StringField("Zip", validators=[Optional()])
     eventComments = StringField("Comments", validators=[Optional()])
-    googleCalendarEventID = StringField("Google Calendar Event ID (Optional)")
+    # googleCalendarEventID = StringField("Google Calendar Event ID (Optional)")
     submitEditPblEvent = SubmitField("Save PBL Event")
