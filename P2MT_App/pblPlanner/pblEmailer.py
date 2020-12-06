@@ -1,20 +1,5 @@
 from P2MT_App import db
-from P2MT_App.main.referenceData import (
-    getSchoolYearChoices,
-    getSemesterChoices,
-    getQuarterChoices,
-    getPblEventCategoryChoices,
-    getPblOptions,
-    getPblOptionsTuple,
-    getAcademicYearChoices,
-    getSchoolYearAndSemester,
-    getCurrentAcademicYear,
-    getClassYearOfGraduation,
-    getCurrentQuarter,
-    getPblEmailRecipientChoices,
-    getPblEmailTemplates,
-    getQuarterOrdinal,
-)
+from P2MT_App.main.referenceData import getQuarterOrdinal
 from P2MT_App.main.utilityfunctions import printFormErrors, printLogEntry
 from P2MT_App.models import Student, PblEvents, PblTeams, Pbls, p2mtTemplates
 
@@ -24,13 +9,8 @@ from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
 from P2MT_App.googleAPI.googleMail import sendEmail
 
 
-def sendPblEmails(
-    className,
-    academicYear,
-    quarter,
-    emailRecipients,
-    selectedEmailRecipients,
-    emailTemplate,
+def getPblCommunicationsRecipients(
+    className, academicYear, quarter, emailRecipients, selectedEmailRecipients,
 ):
     # Email Recipient Codes (per referenceData.py)
     # ("-6", "Selected Students"))
@@ -40,7 +20,6 @@ def sendPblEmails(
     # ("-2", "Students With a PBL"))
     # ("-1", "All Students"))
     # ("0", "Select Recipients..."))
-
     emailRecipientsBaseQuery = PblTeams.query.outerjoin(Pbls).filter(
         PblTeams.className == className,
         PblTeams.academicYear == academicYear,
@@ -90,6 +69,21 @@ def sendPblEmails(
         # pbl = Pbls.query.get_or_404(emailRecipients)
         selectedPbl = Pbls.query.get_or_404(emailRecipients)
         print("Email Recipients: PBL Teams for ", selectedPbl.pblName)
+    return pblEmailRecipients
+
+
+def sendPblEmails(
+    className,
+    academicYear,
+    quarter,
+    emailRecipients,
+    selectedEmailRecipients,
+    emailTemplate,
+):
+
+    pblEmailRecipients = getPblCommunicationsRecipients(
+        className, academicYear, quarter, emailRecipients, selectedEmailRecipients,
+    )
     template = p2mtTemplates.query.get_or_404(emailTemplate)
     print("Email Template:", template.templateTitle)
 
@@ -102,7 +96,13 @@ def sendPblEmails(
         # Get PBL team members to include in parameters:
         pblTeamList = []
         membersOfPblTeam = (
-            emailRecipientsBaseQuery.join(Student)
+            PblTeams.query.outerjoin(Pbls)
+            .filter(
+                PblTeams.className == className,
+                PblTeams.academicYear == academicYear,
+                PblTeams.quarter == quarter,
+            )
+            .join(Student)
             .filter(PblTeams.pblTeamNumber == pblTeamMember.pblTeamNumber)
             .order_by(Student.lastName)
         )

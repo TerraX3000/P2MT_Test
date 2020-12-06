@@ -30,11 +30,7 @@ from P2MT_App.pblPlanner.pblCalendar import (
     addPblEventToCalendar,
     deletePblEventFromCalendar,
 )
-
-# Email Sending Modules
-from P2MT_App.p2mtTemplates.p2mtTemplates import renderEmailTemplate
-from P2MT_App.googleAPI.googleMail import sendEmail
-
+from P2MT_App.pblPlanner.pblAttendanceLog import updatePblEventCommentOnAttendanceLogs
 from datetime import date, time
 from flask_login import current_user, login_required
 
@@ -270,10 +266,11 @@ def displayStemIIITeams():
     pblOptions.insert(0, ("", "Choose PBL..."))
     pblOptions = tuple(pblOptions)
 
+    # Create choices for PBL Team Communications Center
     pblEmailRecipientChoices = getPblEmailRecipientChoices(
         academicYear, quarter, className
     )
-    pblEmailTemplates = getPblEmailTemplates()
+    pblCommunicationsActions = getPblEmailTemplates()
 
     print(pblOptions)
     quarterOptions = getQuarterChoices()
@@ -287,7 +284,7 @@ def displayStemIIITeams():
         quarterOptions=quarterOptions,
         displayQuarter=quarter,
         pblEmailRecipientChoices=pblEmailRecipientChoices,
-        pblEmailTemplates=pblEmailTemplates,
+        pblEmailTemplates=pblCommunicationsActions,
     )
 
 
@@ -297,22 +294,33 @@ def emailTeams():
     printLogEntry("Running emailTeams()")
     quarter = int(request.form["quarter"])
     emailRecipients = int(request.form["emailRecipients"])
-    emailTemplate = int(request.form["emailTemplate"])
+    pblCommunicationsActions = int(request.form["emailTemplate"])
     selectedEmailRecipients = request.form.getlist("sendEmailCheckbox")
     # print("quarter =", quarter)
     # print("emailRecipients:", emailRecipients)
     # print("emailTemplate:", emailTemplate)
     academicYear = getCurrentAcademicYear()
     className = "STEM III"
-    sendPblEmails(
-        className,
-        academicYear,
-        quarter,
-        emailRecipients,
-        selectedEmailRecipients,
-        emailTemplate,
-    )
-    flash("Emails sent!", "success")
+    if pblCommunicationsActions > 0:
+        sendPblEmails(
+            className,
+            academicYear,
+            quarter,
+            emailRecipients,
+            selectedEmailRecipients,
+            pblCommunicationsActions,
+        )
+        flash("Emails sent!", "success")
+    elif pblCommunicationsActions < 0:
+        updatePblEventCommentOnAttendanceLogs(
+            className,
+            academicYear,
+            quarter,
+            emailRecipients,
+            selectedEmailRecipients,
+            pblCommunicationsActions,
+        )
+        db.session.commit()
 
     return redirect(
         url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)

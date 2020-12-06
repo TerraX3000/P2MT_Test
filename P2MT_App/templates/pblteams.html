@@ -30,7 +30,7 @@
     <button id='button_pblTeamBuilder' class="w3-bar-item w3-button tablink w3-black"
         onclick="openTab(event, 'pblTeamBuilder', 'PblTeamManager')">PBL Team Builder</button>
     <button id='button_pblTeamEmailCenter' class="w3-bar-item w3-button tablink"
-        onclick="openTab(event, 'pblTeamEmailCenter', 'PblTeamManager')">PBL Team Email Center</button>
+        onclick="openTab(event, 'pblTeamEmailCenter', 'PblTeamManager')">PBL Team Communications Center</button>
 </div>
 
 {{ macro_display_flashed_messages() }}
@@ -162,10 +162,20 @@
             <select name="emailTemplate" id="emailTemplate" form="sendPblEmailForm"
                 class="w3-select w3-quarter w3-margin">
                 {% for template in pblEmailTemplates %}
-                <option value="{{template[0]}}">{{template[1]}}</option>
-                {% endfor %}
+                {% if template[0] == "-1" %}
+                <optgroup label="Attendance Log Actions">
+                    <option value="{{template[0]}}">{{template[1]}}</option>
+                    {% elif template[0] == "-2" %}
+                    <option value="{{template[0]}}">{{template[1]}}</option>
+                </optgroup>
+                <optgroup label="Email Actions">
+                    {% else %}
+                    <option value="{{template[0]}}">{{template[1]}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </optgroup>
             </select><input id="emailTeamsButton" type="submit" class="w3-button w3-quarter w3-green w3-margin"
-                value="Email Teams">
+                value="Submit Action">
     </div>
 
     <div class="w3-panel"></div>

@@ -392,7 +392,7 @@ def getPblEmailRecipientChoices(academicYear, quarter, className):
     pblEmailRecipientChoices.insert(0, ("-2", "Students With a PBL"))
     pblEmailRecipientChoices.insert(0, ("-1", "All Students"))
     pblEmailRecipientChoices.insert(0, ("-6", "Selected Students"))
-    pblEmailRecipientChoices.insert(0, ("0", "Select Recipients..."))
+    pblEmailRecipientChoices.insert(0, ("0", "Select Students..."))
     return tuple(pblEmailRecipientChoices)
 
 
@@ -403,7 +403,11 @@ def getPblEmailTemplates():
         .order_by(p2mtTemplates.templateTitle,)
         .all()
     )
-    pblEmailTemplatesTupleList.insert(0, ("0", "Select Email Template..."))
+    pblEmailTemplatesTupleList.insert(
+        0, ("-2", "Add Final Presentation Note to Attendance Logs")
+    )
+    pblEmailTemplatesTupleList.insert(0, ("-1", "Add Kickoff Note to Attendance Logs"))
+    pblEmailTemplatesTupleList.insert(0, ("0", "Select Action..."))
     return pblEmailTemplatesTupleList
 
 
