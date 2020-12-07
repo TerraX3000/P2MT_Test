@@ -432,7 +432,7 @@ def new_Pbl():
     pblEditorFormDetails.academicYear.default = getCurrentAcademicYear()
     pblEditorFormDetails.semester.choices = getSemesterChoices()
     quarterChoices = list(getQuarterChoices())
-    quarterChoices.insert(0, (0, "0"))
+    quarterChoices.insert(0, (0, "TBD"))
     quarterChoices = tuple(quarterChoices)
     pblEditorFormDetails.quarter.choices = quarterChoices
     pblEditorFormDetails.log_id.data = 0
@@ -520,7 +520,7 @@ def edit_Pbl(log_id):
     pblEditorFormDetails.academicYear.choices = getAcademicYearChoices()
     pblEditorFormDetails.semester.choices = getSemesterChoices()
     quarterChoices = list(getQuarterChoices())
-    quarterChoices.insert(0, (0, "0"))
+    quarterChoices.insert(0, (0, "TBD"))
     quarterChoices = tuple(quarterChoices)
     pblEditorFormDetails.quarter.choices = quarterChoices
     # pblEditorFormDetails.pblName.choices = getPblOptionsTuple(2)
