@@ -234,16 +234,29 @@ def displayStemIIITeams():
     # POST with request.form handles case when user changes quarter using dropdown menu
     # GET with selectedQuarter handles case when redirected from saving team in order to stay
     # on previous page
+    # The team event list uses eventCategory so it must be set to a default value if not included
     if request.method == "GET" and request.args.get("selectedQuarter"):
         quarter = request.args.get("selectedQuarter")
         print("selectedQuarter =", quarter)
         quarter = int(quarter)
+        if request.args.get("selectedEventCategory"):
+            eventCategory = request.args.get("selectedEventCategory")
+            print("selectedEventCategory =", selectedEventCategory)
+        else:
+            eventCategory = "Kickoff"
     elif request.method == "POST":
+        print(request.form)
         selectedQuarter = request.form["selectedQuarter"]
         print("selectedQuarter =", selectedQuarter)
         quarter = int(selectedQuarter)
+        try:
+            if request.form["selectedEventCategory"]:
+                eventCategory = request.form["selectedEventCategory"]
+        except:
+            eventCategory = "Kickoff"
     else:
         quarter = getCurrentQuarter()
+        eventCategory = "Kickoff"
     pblTeams = (
         PblTeams.query.outerjoin(Pbls)
         .join(Student)
@@ -274,6 +287,26 @@ def displayStemIIITeams():
 
     print(pblOptions)
     quarterOptions = getQuarterChoices()
+    eventCategoryChoices = getPblEventCategoryChoices()
+
+    # Get list of PBL students and event info to display for PBL Team Event List
+    pblTeamsAndEvents = (
+        db.session.query(PblTeams, PblEvents)
+        .select_from(PblTeams)
+        .outerjoin(Pbls)
+        .outerjoin(Pbls.PblEvents)
+        .join(Student)
+        .filter(Pbls.quarter == quarter, PblEvents.eventCategory == eventCategory)
+        .order_by(
+            Pbls.quarter,
+            PblEvents.eventDate,
+            PblEvents.startTime,
+            Pbls.pblName,
+            PblTeams.pblTeamNumber,
+            Student.lastName,
+        )
+    )
+
     return render_template(
         "pblteams.html",
         title="STEM III Team Manager",
@@ -285,6 +318,9 @@ def displayStemIIITeams():
         displayQuarter=quarter,
         pblEmailRecipientChoices=pblEmailRecipientChoices,
         pblEmailTemplates=pblCommunicationsActions,
+        eventCategoryChoices=eventCategoryChoices,
+        displayEventCategory=eventCategory,
+        pblTeamsAndEvents=pblTeamsAndEvents,
     )
 
 

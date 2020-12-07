@@ -31,6 +31,8 @@
         onclick="openTab(event, 'pblTeamBuilder', 'PblTeamManager')">PBL Team Builder</button>
     <button id='button_pblTeamEmailCenter' class="w3-bar-item w3-button tablink"
         onclick="openTab(event, 'pblTeamEmailCenter', 'PblTeamManager')">PBL Team Communications Center</button>
+    <button id='button_pblTeamEventList' class="w3-bar-item w3-button tablink"
+        onclick="openTab(event, 'pblTeamEventList', 'PblTeamManager')">PBL Team Event List</button>
 </div>
 
 {{ macro_display_flashed_messages() }}
@@ -219,123 +221,210 @@
 
 </div>
 
-<!-- Script used with css to create sticky header per example here-->
-<!-- https://www.w3schools.com/howto/howto_js_sticky_header.asp -->
-<!-- Note: set css padding-top=350px based on experimenting with scroll behavior -->
-<!-- The value of 350px is likely  due to the size of the student list-->
-<!-- The sticy header behavior requires using class=content and id=myStickyHeader -->
-<script>
-    window.onscroll = function () { myStickyFunction() };
-    var header = document.getElementById("Team 0");
-    var sticky = header.offsetTop;
-    // console.log('offsetTop = ' + header.offsetTop)
-    function myStickyFunction() {
-        // console.log('pageYOffset = ' + window.pageYOffset)
-        if (window.pageYOffset > sticky) {
-            header.classList.add("sticky");
-        } else {
-            header.classList.remove("sticky");
-        }
-    }
-</script>
+<div class="infoTab" id="pblTeamEventList" style="display:none;">
 
-<script>
-    // Set event listeners for quarter selection for Team Builder
-    var selectedQuarterDropdown = document.getElementById("selectedQuarter")
-    selectedQuarterDropdown.addEventListener("change", function () { submitUpdatedQuarter(event); });
-    // Set event listeners for quarter selection for Email Center
-    var selectedQuarterDropdownEmailCenter = document.getElementById("selectedQuarterEmailCenter")
-    selectedQuarterDropdownEmailCenter.addEventListener("change", function () { submitUpdatedQuarter(event); });
+    <div class="w3-container w3-row-padding">
+        <form id="selectQuarterFormTeamEventList" method="POST"
+            action="{{ url_for('pblPlanner_bp.displayStemIIITeams') }}" enctype="multipart/form-data"
+            class="w3-threequarter">
+            <!-- Add drop down menu to select quarter -->
+            <select name="selectedQuarter" id="selectedQuarterTeamEventList" form="selectQuarterFormTeamEventList"
+                class="w3-select w3-quarter w3-margin">
+                {% for quarter in quarterOptions %}
+                {% if quarter[0]|int == displayQuarter %}
+                <option value="{{quarter[0]}}" selected>{{quarter[1]}}</option>
+                {% else %}
+                <option value="{{quarter[0]}}">{{quarter[1]}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+            <select name="selectedEventCategory" id="selectedEventCategoryFormTeamEventList"
+                form="selectQuarterFormTeamEventList" class="w3-select w3-quarter w3-margin">
+                {% for eventCategory in eventCategoryChoices %}
+                {% if eventCategory[0] == displayEventCategory %}
+                <option value="{{eventCategory[0]}}" selected>{{eventCategory[1]}}</option>
+                {% else %}
+                <option value="{{eventCategory[0]}}">{{eventCategory[1]}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </form>
 
-    // Update filterUpdateFlag to indicate change to filter settings and submit form
-    function submitUpdatedQuarter(event) {
-        console.log('Change quarter downdrop menu detected!')
-        trigger_field = document.getElementById(event.target.id);
-        form = trigger_field.form;
-        form.submit();
-    }
-</script>
+        <div class="w3-panel"></div>
+        <div class="w3-container">
+            <h3 class="w3-center">PBL Team Event List</h3>
+        </div>
 
-<script>
-    // Create event listener to save team details in session variable on form submit
-    var saveTeamButton = document.querySelector("input[id=saveTeamButton]");
-    // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
-    saveTeamButton.addEventListener("click", function () { saveTeam(event); });
+        <table class="w3-table w3-bordered w3-striped w3-hoverable">
+            <thead>
+                <tr class="w3-blue">
+                    <th>Team Number</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>PBL Name</th>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Location</th>
+                    <!-- <th>Address</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Zip</th>
+                    <th>Comment</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for pblStudent in pblTeamsAndEvents %}
+                <tr>
+                    <td>{{pblStudent[0].pblTeamNumber}}</td>
+                    <td>{{pblStudent[0].Student.firstName}}</td>
+                    <td>{{pblStudent[0].Student.lastName}}</td>
+                    <td>{{ pblStudent[0].Pbls.pblName }}</td>
+                    {% if pblStudent[1].eventDate != None %}
+                    <td>{{ pblStudent[1].eventDate.strftime('%a %b %-d') }}</td>
+                    <td>{{ pblStudent[1].startTime.strftime('%-I:%M')}}</td>
+                    <td>{{ pblStudent[1].endTime.strftime('%-I:%M') }}</td>
+                    {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {% endif %}
 
-    function saveTeam(evt) {
-        evt.preventDefault();
-        // Save the current team members
-        teamDivs = document.querySelectorAll("div[id^=Team");
-        // console.log("Total teams count =" + teamDivs.length);
-        teamMembers = document.querySelectorAll("div[id^=A0");
-        // console.log("Total students =" + teamMembers.length);
-        // Initialize the JSON object to hold the properties and values
-        var object = {};
-        // Cycle through the selectfields
-        for (i = 0; i < teamDivs.length; i++) {
-            var teamMemberList = [];
-            teamMembers = teamDivs[i].querySelectorAll("div[id^=A");
-            for (j = 0; j < teamMembers.length; j++) {
-                // console.log('team = ' + teamDivs[i].id + ' teamMember = ' + teamMembers[j].id);
-                teamMemberList.push(teamMembers[j].id);
-            }
-            pblSelect = teamDivs[i].querySelector("select");
-            if (pblSelect != null) {
-                // console.log("pblSelect = " + pblSelect.id);
-                pblChoice = pblSelect.value;
+                    <!-- <td>{{ pblStudent[1].eventLocation }}</td>
+                    <td>{{ pblStudent[1].eventStreetAddress1 }}</td>
+                    <td>{{ pblStudent[1].eventCity }}</td>
+                    <td>{{ pblStudent[1].eventState }}</td>
+                    <td>{{ pblStudent[1].eventZip }}</td>
+                    <td>{{ pblStudent[1].eventComments }}</td> -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Script used with css to create sticky header per example here-->
+    <!-- https://www.w3schools.com/howto/howto_js_sticky_header.asp -->
+    <!-- Note: set css padding-top=350px based on experimenting with scroll behavior -->
+    <!-- The value of 350px is likely  due to the size of the student list-->
+    <!-- The sticy header behavior requires using class=content and id=myStickyHeader -->
+    <script>
+        window.onscroll = function () { myStickyFunction() };
+        var header = document.getElementById("Team 0");
+        var sticky = header.offsetTop;
+        // console.log('offsetTop = ' + header.offsetTop)
+        function myStickyFunction() {
+            // console.log('pageYOffset = ' + window.pageYOffset)
+            if (window.pageYOffset > sticky) {
+                header.classList.add("sticky");
             } else {
-                pblChoice = "";
+                header.classList.remove("sticky");
             }
-            team = teamDivs[i].id;
-            object[team] = { teamMemberList: teamMemberList, pblChoice: pblChoice };
         }
+    </script>
 
-        // Convert the JSON object to a string
-        myJSON = JSON.stringify(object);
-        // console.log('myJSON =' + myJSON);
-        // Save the JSON object to the session variable
-        sessionStorage.setItem("SavedTeams", myJSON);
-        trigger_field = document.getElementById(evt.target.id);
-        form = trigger_field.form;
-        document.getElementById("teamList").value = myJSON;
-        var quarter = document.getElementById("selectedQuarter").value;
-        // console.log('selected quarter = ' + quarter)
-        document.getElementById("quarter").value = quarter;
-        form.submit();
+    <script>
+        // Set event listeners for quarter selection for Team Builder
+        var selectedQuarterDropdown = document.getElementById("selectedQuarter")
+        selectedQuarterDropdown.addEventListener("change", function () { submitUpdatedQuarter(event); });
+        // Set event listeners for quarter selection for Communications Center
+        var selectedQuarterDropdownEmailCenter = document.getElementById("selectedQuarterEmailCenter")
+        selectedQuarterDropdownEmailCenter.addEventListener("change", function () { submitUpdatedQuarter(event); });
+        // Set event listeners for quarter selection for Team Event List
+        var selectedQuarterDropdownTeamEventList = document.getElementById("selectedQuarterTeamEventList")
+        selectedQuarterDropdownTeamEventList.addEventListener("change", function () { submitUpdatedQuarter(event); });
+        var selectedEventDropdownTeamEventList = document.getElementById("selectedEventCategoryFormTeamEventList")
+        selectedEventDropdownTeamEventList.addEventListener("change", function () { submitUpdatedQuarter(event); });
 
-    }
-</script>
-
-<script>
-    // Create event listener to save team details in session variable on form submit
-    var emailTeamsButton = document.querySelector("input[id=emailTeamsButton]");
-    // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
-    emailTeamsButton.addEventListener("click", function () { emailTeams(event); });
-
-    function emailTeams(evt) {
-        evt.preventDefault();
-        trigger_field = document.getElementById(evt.target.id);
-        form = trigger_field.form;
-        var quarter = document.getElementById("selectedQuarterEmailCenter").value;
-        document.getElementById("quarterEmailCenter").value = quarter;
-        form.submit();
-
-    }
-</script>
-
-<script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
-<!-- Reload page to last loaded tab -->
-<script type='text/javascript'>
-    document.addEventListener("DOMContentLoaded", function (event) {
-        selected_tab = 'PblTeamManager_selected_tab';
-        var selectedTab = sessionStorage.getItem(selected_tab);
-        if (selectedTab) {
-            document.getElementById("button_" + selectedTab).click();
-        } else {
-            document.getElementById("button_editTemplate").click();
+        // Update filterUpdateFlag to indicate change to filter settings and submit form
+        function submitUpdatedQuarter(event) {
+            // console.log('Change quarter downdrop menu detected!')
+            trigger_field = document.getElementById(event.target.id);
+            form = trigger_field.form;
+            form.submit();
         }
-    });
-</script>
+    </script>
+
+    <script>
+        // Create event listener to save team details in session variable on form submit
+        var saveTeamButton = document.querySelector("input[id=saveTeamButton]");
+        // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+        saveTeamButton.addEventListener("click", function () { saveTeam(event); });
+
+        function saveTeam(evt) {
+            evt.preventDefault();
+            // Save the current team members
+            teamDivs = document.querySelectorAll("div[id^=Team");
+            // console.log("Total teams count =" + teamDivs.length);
+            teamMembers = document.querySelectorAll("div[id^=A0");
+            // console.log("Total students =" + teamMembers.length);
+            // Initialize the JSON object to hold the properties and values
+            var object = {};
+            // Cycle through the selectfields
+            for (i = 0; i < teamDivs.length; i++) {
+                var teamMemberList = [];
+                teamMembers = teamDivs[i].querySelectorAll("div[id^=A");
+                for (j = 0; j < teamMembers.length; j++) {
+                    // console.log('team = ' + teamDivs[i].id + ' teamMember = ' + teamMembers[j].id);
+                    teamMemberList.push(teamMembers[j].id);
+                }
+                pblSelect = teamDivs[i].querySelector("select");
+                if (pblSelect != null) {
+                    // console.log("pblSelect = " + pblSelect.id);
+                    pblChoice = pblSelect.value;
+                } else {
+                    pblChoice = "";
+                }
+                team = teamDivs[i].id;
+                object[team] = { teamMemberList: teamMemberList, pblChoice: pblChoice };
+            }
+
+            // Convert the JSON object to a string
+            myJSON = JSON.stringify(object);
+            // console.log('myJSON =' + myJSON);
+            // Save the JSON object to the session variable
+            sessionStorage.setItem("SavedTeams", myJSON);
+            trigger_field = document.getElementById(evt.target.id);
+            form = trigger_field.form;
+            document.getElementById("teamList").value = myJSON;
+            var quarter = document.getElementById("selectedQuarter").value;
+            // console.log('selected quarter = ' + quarter)
+            document.getElementById("quarter").value = quarter;
+            form.submit();
+
+        }
+    </script>
+
+    <script>
+        // Create event listener to save team details in session variable on form submit
+        var emailTeamsButton = document.querySelector("input[id=emailTeamsButton]");
+        // var submitLearningLab = document.querySelector("input[id=addTimeAndDays5]");
+        emailTeamsButton.addEventListener("click", function () { emailTeams(event); });
+
+        function emailTeams(evt) {
+            evt.preventDefault();
+            trigger_field = document.getElementById(evt.target.id);
+            form = trigger_field.form;
+            var quarter = document.getElementById("selectedQuarterEmailCenter").value;
+            document.getElementById("quarterEmailCenter").value = quarter;
+            form.submit();
+
+        }
+    </script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename="js/pageTabs.js") }}"></script>
+    <!-- Reload page to last loaded tab -->
+    <script type='text/javascript'>
+        document.addEventListener("DOMContentLoaded", function (event) {
+            selected_tab = 'PblTeamManager_selected_tab';
+            var selectedTab = sessionStorage.getItem(selected_tab);
+            if (selectedTab) {
+                document.getElementById("button_" + selectedTab).click();
+            } else {
+                document.getElementById("button_editTemplate").click();
+            }
+        });
+    </script>
 
 
-{% endblock content %}
+    {% endblock content %}
