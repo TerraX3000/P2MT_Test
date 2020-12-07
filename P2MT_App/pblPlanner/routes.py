@@ -793,6 +793,14 @@ def delete_Pbl(log_id):
     log = Pbls.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.pblName}"
     printLogEntry("Running delete_Pbl(" + LogDetails + ")")
+    # Check whether there are any events associated with the PBL
+    events = PblEvents.query.filter(PblEvents.pbl_id == log.id)
+    for event in events:
+        # Delete any Google Calendar events associated with the event
+        if event.googleCalendarEventID:
+            deletePblEventFromCalendar(event.googleCalendarEventID)
+            print("Deleted PBL event from Google Calendar")
+            event.googleCalendarEventID = None
     db.session.delete(log)
     db.session.commit()
     flash("PBL has been deleted!", "success")
@@ -805,6 +813,11 @@ def delete_PblEvent(log_id):
     log = PblEvents.query.get_or_404(log_id)
     LogDetails = f"{(log_id)} {log.Pbls.pblName} {log.eventCategory}"
     printLogEntry("Running delete_PblEvent(" + LogDetails + ")")
+    # Delete any Google Calendar events associated with the event
+    if log.googleCalendarEventID:
+        deletePblEventFromCalendar(log.googleCalendarEventID)
+        print("Deleted PBL event from Google Calendar")
+        log.googleCalendarEventID = None
     db.session.delete(log)
     db.session.commit()
     flash("PBL Event has been deleted!", "success")
