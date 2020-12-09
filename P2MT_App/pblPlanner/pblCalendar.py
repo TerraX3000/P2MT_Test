@@ -35,7 +35,7 @@ def addPblEventToCalendar(
     if googleCalendarEventID:
         print("update calendar event")
     # Include email addresses for attendees if desired
-    attendees = []
+    attendees = ["Calendar_STEM@hcde.org"]
     # Add the event to the Google Calendar:
     #   If googleCalendarEventID exists, try updating the existing calendar event
     #   If the existing event cannot be found, add a new one
