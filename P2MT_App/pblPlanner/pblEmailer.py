@@ -1,4 +1,5 @@
 from P2MT_App import db
+from flask_login import current_user
 from P2MT_App.main.referenceData import getQuarterOrdinal
 from P2MT_App.main.utilityfunctions import printFormErrors, printLogEntry
 from P2MT_App.models import Student, PblEvents, PblTeams, Pbls, p2mtTemplates
