@@ -338,25 +338,32 @@ def emailTeams():
     academicYear = getCurrentAcademicYear()
     className = "STEM III"
     if pblCommunicationsActions > 0:
-        sendPblEmails(
-            className,
-            academicYear,
-            quarter,
-            emailRecipients,
-            selectedEmailRecipients,
-            pblCommunicationsActions,
-        )
-        flash("Emails sent!", "success")
+        try:
+            sendPblEmails(
+                className,
+                academicYear,
+                quarter,
+                emailRecipients,
+                selectedEmailRecipients,
+                pblCommunicationsActions,
+            )
+            flash("Emails sent!", "success")
+        except:
+            flash("Error sending email", "error")
     elif pblCommunicationsActions < 0:
-        updatePblEventCommentOnAttendanceLogs(
-            className,
-            academicYear,
-            quarter,
-            emailRecipients,
-            selectedEmailRecipients,
-            pblCommunicationsActions,
-        )
-        db.session.commit()
+        try:
+            updatePblEventCommentOnAttendanceLogs(
+                className,
+                academicYear,
+                quarter,
+                emailRecipients,
+                selectedEmailRecipients,
+                pblCommunicationsActions,
+            )
+            db.session.commit()
+            flash("Notes added to attendance logs!", "success")
+        except:
+            flash("Error adding note to attendance logs", "error")
 
     return redirect(
         url_for("pblPlanner_bp.displayStemIIITeams", selectedQuarter=quarter)
