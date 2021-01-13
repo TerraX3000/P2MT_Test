@@ -12,7 +12,7 @@
         {% endfor %}
     </div>
     {% else %}
-    {{ formfield(class="w3-select  w3-section") }}
+    {{ formfield(class="w3-select w3-section") }}
     {% endif %}
 </div>
 {% endmacro %}
@@ -75,11 +75,13 @@
         headings for Year, Group, and Subgroup. Students must be identified using this format:
         A12345678_LastName_FirstName
         where A12345678 represents the Chatt State A Number.</p>
+    <p>Important: Do not use the student CSV file from the FET output.</p>
     <p><i>Example: <a href="/static/fet_example_files/Example_FET_Student_Input_File.csv">FET Student Input File</a></i>
     </p>
     <p><strong>FET Class Teacher Input File</strong></p>
     <p>This file is used to populate the teacher name column. Create the csv file with two columns: <i>class</i> and
-        <i>teacher last name.</i> Download and update the example file.</p>
+        <i>teacher last name.</i> Download and update the example file.
+    </p>
     <p><i>Example: <a href="/static/fet_example_files/Example_FET_Class_Teacher_Input_File.csv">FET Class Teacher Input
                 File</a></i></p>
 
@@ -107,6 +109,10 @@
     <h4>Generate Schedule File</h4>
     <p>After inputting all required data and files, press <strong>Generate Schedule File</strong>.
         If there are no errors, the output files will be displayed on another screen.</p>
+    <p>Important: The output file may require manual adjustments. For
+        example, you may need to adjust class days or class times due to class
+        scheduling conflicts. These cases should be noted with a comment (e.g.,
+        Miss W, Late W, etc.)</p>
     <h4>Troubleshooting</h4>
     <p><strong>Errors When Running</strong></p>
     <p>If you receive errors when generating the schedule files, carefully review the file inputs.
